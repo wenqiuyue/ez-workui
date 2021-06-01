@@ -5,7 +5,7 @@
 	height: 100vh;
 	box-sizing: border-box;
 	padding-top: @body_title_height;
-	padding-left: @menu_place_width;
+	padding-left: @menu_sidebar_width;
 	background: @color_grey_bg;
 
 	.hp-content-child {
@@ -14,6 +14,7 @@
 		height: 100vh;
 		overflow: auto;
 		.content {
+			padding: 16px;
 			height: calc(100% - @body_title_height);
 			-webkit-overflow-scrolling: touch;
 

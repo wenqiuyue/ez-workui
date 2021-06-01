@@ -9,41 +9,114 @@ Router.prototype.replace = function replace(location) {
 };
 Vue.use(Router);
 
+const routes = [
+  // {
+  //   //首页设为登录页，如果含有token则自动跳转到home页面
+  //   path: "/",
+  //   component: () => import("./views/login/Login"),
+  // },
+  // {
+  //   path: "/resetpassword",
+  //   component: () => import("./views/resetpassword/resetpassword"),
+  // },
+
+  {
+    path: "/",
+    name: "main",
+    component: () => import("@/views/main"),
+    children: [{
+      path: "",
+      name: "",
+      props: {
+        menu: 0,
+      },
+      component: () => import("@/views/main/content"),
+      children: [
+        {
+          path: '/teamManagement',
+          name: '团队管理',
+          component: () => import('@/views/teamManagement'),
+          layout: true,
+          icon: 'hi-customer',
+        },
+        {
+          path: '/memberManagement',
+          name: '成员管理',
+          component: () => import('@/views/memberManagement'),
+          layout: true,
+          icon: 'hi-contract',
+        },
+        {
+          path: '/orderManagement',
+          name: '订单管理',
+          component: () => import('@/views/orderManagement'),
+          layout: true,
+          icon: 'hi-statistic',
+        },
+        {
+          path: '/teamOrderManagement',
+          name: '团队订单管理',
+          component: () => import('@/views/teamOrderManagement'),
+          layout: true,
+          icon: 'hi-attendance',
+        },
+        {
+          path: '/roleManagement',
+          name: '角色管理',
+          component: () => import('@/views/roleManagement'),
+          layout: true,
+          icon: 'hi-report',
+        },
+        {
+          path: '/userManagement',
+          name: '用户管理',
+          component: () => import('@/views/userManagement'),
+          layout: true,
+          icon: 'hi-achievement',
+        },
+        {
+          path: "/memberProccess",
+          name: "成员实况",
+          component: () => import("@/views/memberProccess"),
+          layout: true,
+          icon: 'hi-money-copy',
+        },
+      ],
+    }, ],
+  },
+]
+
+const _flat = data => {
+  const result = []
+
+  const _ = data => {
+    data.forEach(item => {
+      const {layout, children, ...props} = item
+
+      if(layout === true)
+        result.push({
+          layout,
+          ...props,
+        })
+
+      if(Array.isArray(children) && children.length >= 1)
+        _(children)
+    })
+  }
+
+  _(data)
+
+  return result
+}
+const layoutRoutes = _flat(routes)
+
+export {
+  routes,
+  layoutRoutes,
+}
+
 export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
-  routes: [
-    // {
-    //   //首页设为登录页，如果含有token则自动跳转到home页面
-    //   path: "/",
-    //   component: () => import("./views/login/Login"),
-    // },
-    // {
-    //   path: "/resetpassword",
-    //   component: () => import("./views/resetpassword/resetpassword"),
-    // },
-
-    {
-      path: "/",
-      name: "main",
-      component: () => import("../views/main"),
-      children: [
-        {
-          path: "",
-          name: "",
-          props: {
-            menu: 0,
-          },
-          component: () => import("../views/main/content"),
-          // children: [
-          //   {
-          //     path: "home",
-          //     name: "home",
-          //     component: () => import("./views/home"),
-          //   },
-          // ],
-        },
-      ],
-    },
-  ],
-});
+  routes,
+}, );

@@ -1,0 +1,60 @@
+.link-active {
+	color: #448ef5;
+}
+#dialogDetail {
+	/deep/.ctn {
+		border-top: 1px solid #eee;
+		padding-top: 0.5rem;
+	}
+
+	.records {
+		border-top: 1px solid #eee;
+		padding-top: 1rem;
+	}
+
+	.detail-tr {
+		margin-bottom: 1rem;
+		display: flex;
+		padding: 0.5rem;
+
+		.detail-td-title {
+			width: 8rem;
+			text-align: right;
+			margin-right: 0.5rem;
+			font-size: 1.6rem;
+			color: #9b9b9b;
+			flex: 0 0 8rem;
+		}
+
+		.detail-td-info {
+			flex: auto;
+			display: flex;
+			flex-wrap: wrap;
+			align-content: flex-start;
+			font-size: 1.4rem;
+			margin-top: 3px;
+
+			.tr {
+				display: flex;
+				.td-title {
+					margin-left: 2rem;
+					text-align: right;
+					margin-right: 0.5rem;
+					font-size: 1.6rem;
+					color: #9b9b9b;
+				}
+
+				.td-info {
+				}
+			}
+
+			.success {
+				color: #75d030;
+			}
+
+			.err {
+				color: #ed4b4b;
+			}
+		}
+	}
+}

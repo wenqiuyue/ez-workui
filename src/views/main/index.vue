@@ -19,365 +19,40 @@
           <!-- 菜单列表 -->
           <div>
             <div>
-              <!-- 快速笔记 -->
-              <a href="javascript:;" class="hiFont hi-note" @click="quickNote">
-                <span>快速笔记</span>
-              </a>
-
-              <!-- 我的简报 -->
               <router-link
-                to="/report"
-                class="hiFont hi-report"
+                v-for="{ path, name, icon } of layoutRoutes"
+                :key="path"
+                :to="path"
+                :class="['hiFont', icon]"
                 @click.native="hideMobileMenu"
               >
-                <span>我的简报</span>
+                <span>{{ name }}</span>
               </router-link>
 
-              <!-- 我的考核 -->
-              <router-link
-                to="/assessment"
-                class="hiFont hi-achievement"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的考核</span>
-              </router-link>
-              <!-- 我的提成 -->
-              <router-link
-                to="/commission"
-                class="hiFont hi-money-copy"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的提成</span>
-              </router-link>
-
-              <!-- 事务申请 -->
+              <!-- 进程管理 -->
               <router-link
                 to="/apply"
                 class="hiFont hi-apply"
                 @click.native="hideMobileMenu"
               >
-                <span>事务申请</span>
+                <span>进程管理</span>
               </router-link>
-              <!-- 事务申请 -->
+              <!-- 进程规则 -->
               <router-link
                 to="/assistant"
                 class="hiFont hi-user-add"
                 @click.native="hideMobileMenu"
               >
-                <span>申请介入</span>
+                <span>进程规则</span>
               </router-link>
-              <!-- 请假排班 -->
+              <!-- 成员数据 -->
               <router-link
                 to="/leave"
                 class="hiFont hi-apply"
                 @click.native="hideMobileMenu"
               >
-                <span>请假申请</span>
-              </router-link>
-
-              <!-- 我的客户 -->
-              <router-link
-                to="/myCustomer"
-                class="hiFont hi-customer"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的客户</span>
-              </router-link>
-
-              <!-- 我的合同 -->
-              <router-link
-                to="/contract"
-                class="hiFont hi-contract"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的合同</span>
-              </router-link>
-
-              <!-- 个人收支 -->
-              <router-link
-                to="/enterpriseBudget"
-                class="hiFont hi-statistic"
-                @click.native="hideMobileMenu"
-              >
-                <span>个人收支</span>
-              </router-link>
-
-              <!-- 我的考勤 -->
-              <router-link
-                to="/attendance"
-                class="hiFont hi-attendance"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的考勤</span>
-              </router-link>
-
-              <!-- 我的日程 -->
-              <router-link
-                to="/calendar"
-                class="hiFont hi-calendar"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的日程</span>
-              </router-link>
-
-              <!-- 我的会议 -->
-              <router-link
-                to="/meeting"
-                class="hiFont hi-meeting"
-                @click.native="hideMobileMenu"
-              >
-                <span>我的会议</span>
-              </router-link>
-
-              <!-- 我的处罚 -->
-
-              <!-- 通讯录 -->
-              <router-link
-                to="/directoreies"
-                class="hiFont hi-directory"
-                @click.native="hideMobileMenu"
-              >
-                <span>通讯录</span>
-              </router-link>
-            </div>
-          </div>
-        </div>
-
-        <!-- 企业 -->
-        <div id="sub-mgr" v-show="menuIndex == 4" class="hp-menu-borderd">
-          <!-- 标题 -->
-          <form>
-            <h3>企业管理</h3>
-          </form>
-
-          <!-- 菜单列表 -->
-          <div>
-            <div>
-              <!-- 成员简报 -->
-              <router-link
-                to="/reports"
-                class="hiFont hi-report"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员简报</span>
-              </router-link>
-
-              <!-- 成员考勤 -->
-              <router-link
-                to="/attendances"
-                class="hiFont hi-attendance"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员考勤</span>
-              </router-link>
-              <!-- 成员提成 -->
-              <router-link
-                to="/memberCommission"
-                class="hiFont hi-money-copy"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员提成</span>
-              </router-link>
-
-              <!-- 成员实况 -->
-              <router-link
-                to="/memberProccess"
-                class="hiFont hi-overtime"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员实况</span>
-              </router-link>
-
-              <!-- 成员周况 -->
-              <router-link
-                @click.native="hideMobileMenu"
-                to="/memberOverview"
-                class="hiFont hi-scheduling"
-              >
-                <span>成员周况</span>
-              </router-link>
-              <!-- 成员数据 -->
-              <router-link
-                @click.native="hideMobileMenu"
-                to="/memberdata"
-                class="hiFont hi-scheduling"
-              >
                 <span>成员数据</span>
               </router-link>
-              <!-- 成员任务 -->
-              <router-link
-                to="/memberTask"
-                class="hiFont hi-task"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员任务</span>
-              </router-link>
-
-              <!-- 成员考核 -->
-              <router-link
-                to="/memberAssessment"
-                class="hiFont hi-achievements"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员考核</span>
-              </router-link>
-
-              <!-- 成员日程 -->
-              <router-link
-                to="/calendars"
-                class="hiFont hi-calendar"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员日程</span>
-              </router-link>
-
-              <!-- 企业公告 -->
-              <router-link
-                to="/pclm"
-                class="hiFont hi-pclm"
-                @click.native="hideMobileMenu"
-              >
-                <span>企业公告</span>
-              </router-link>
-
-              <!-- 企业制度 -->
-              <router-link
-                to="/rule"
-                class="hiFont hi-rule"
-                @click.native="hideMobileMenu"
-              >
-                <span>企业制度</span>
-              </router-link>
-
-              <!-- 客户管理 -->
-              <router-link
-                @click.native="hideMobileMenu"
-                to="/memberCustomers"
-                class="hiFont hi-customer"
-              >
-                <span>客户管理</span>
-              </router-link>
-
-              <!-- 合同管理 -->
-              <router-link
-                @click.native="hideMobileMenu"
-                to="/contracts"
-                class="hiFont hi-contract"
-              >
-                <span>合同管理</span>
-              </router-link>
-
-              <!-- 成员收支 -->
-              <router-link
-                to="/memberBudget"
-                class="hiFont hi-statistic-pie"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员收支</span>
-              </router-link>
-
-              <!-- 成员会议 -->
-              <router-link
-                to="/meetings"
-                class="hiFont hi-meeting"
-                @click.native="hideMobileMenu"
-              >
-                <span>成员会议</span>
-              </router-link>
-
-              <!-- 成员处罚 -->
-
-              <!-- 企业报表 -->
-              <router-link
-                to="/staticForm"
-                class="hiFont hi-statistic-pie"
-                @click.native="hideMobileMenu"
-              >
-                <span>企业报表</span>
-              </router-link>
-              <!-- 项目标签统计 -->
-              <router-link
-                to="/labelStatic"
-                class="hiFont hi-statistic-pie"
-                @click.native="hideMobileMenu"
-              >
-                <span>标签统计</span>
-              </router-link>
-              <!-- 知识库 -->
-              <router-link
-                to="/knowledge"
-                class="hiFont hi-knowledge"
-                @click.native="hideMobileMenu"
-              >
-                <span>知识库</span>
-              </router-link>
-
-              <!-- 管理后台 -->
-              <router-link
-                to="/manager/member"
-                class="hiFont hi-setting"
-                @click.native="hideMobileMenu"
-              >
-                <span>管理后台</span>
-              </router-link>
-            </div>
-          </div>
-        </div>
-
-        <!-- 个人 -->
-        <div id="sub-profile" v-show="menuIndex == 5" class="hp-menu-borderd">
-          <!-- 标题 -->
-          <form>
-            <h3>个人信息</h3>
-          </form>
-
-          <!-- 菜单列表 -->
-          <div>
-            <div>
-              <!-- 首页 -->
-              <router-link
-                to="/home"
-                class="hiFont hi-home"
-                @click.native="hideMobileMenu"
-              >
-                <span>首页</span>
-              </router-link>
-              <!-- 个人信息 -->
-              <router-link
-                to="/profile"
-                class="hiFont hi-profile"
-                @click.native="hideMobileMenu"
-              >
-                <span>个人信息</span>
-              </router-link>
-
-              <!-- 更改密码 -->
-              <router-link
-                to="/updatePassword"
-                class="hiFont hi-password"
-                @click.native="hideMobileMenu"
-              >
-                <span>更改密码</span>
-              </router-link>
-
-              <!-- 成员投诉 -->
-              <router-link
-                to="/complaint"
-                class="hiFont hi-punish"
-                @click.native="hideMobileMenu"
-              >
-                <span>投诉</span>
-              </router-link>
-
-              <!-- 登出 -->
-              <a
-                href="javascript:;"
-                @click="exit"
-                class="hiFont hi-signout"
-                v-if="showExit"
-              >
-                <span>登出</span>
-              </a>
             </div>
           </div>
         </div>
@@ -389,27 +64,13 @@
 </template>
 
 <script>
-import xSocketLink from "@/assets/xSocketLink";
 import XModal from "@/components/XModal";
-// import Note from "@/views/note/note";
-// import AddPro from "@/views/pro/AddPro";
-// import QuickAdd from "@/views/task/quickAdd";
-// import QuickNews from "@/views/msg/QuickNews";
-// import Assessment from "@/views/assessment/Assessment";
-// import addTask from "@/views/task/addTask";
 import { mapState, mapActions, mapGetters } from "vuex";
-// import { Notification } from "element-ui";
-// import QRCode from 'qrcodejs2'
+import { layoutRoutes } from "@/router";
 
 export default {
   components: {
     XModal,
-    // Note,
-    // QuickAdd,
-    // AddPro,
-    // QuickNews,
-    // Assessment,
-    // addTask,
   },
   data() {
     el: "#main";
@@ -442,6 +103,7 @@ export default {
       auditListNum: null,
       urgent: {},
       isReward: false,
+      layoutRoutes,
     };
   },
   computed: {
@@ -567,12 +229,6 @@ export default {
           });
         }
       }
-    },
-    $route: {
-      deep: true,
-      handler(newVal, oldVal) {
-        console.log(newVal);
-      },
     },
   },
   methods: {
