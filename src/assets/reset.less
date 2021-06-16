@@ -416,3 +416,21 @@ input[type='number'] {
 		z-index: 1;
 	}
 }
+
+// 表格options中的删除按钮
+.el-button {
+    &--text {
+      &[data-danger] {
+        color: #f56c6c;
+        &:hover {
+          color: #f78989;
+        }
+        &:active {
+          color: #dd6161;
+        }
+      }
+	  &[data-danger-prev] {
+		  margin-right: 10px;
+	  }
+    }
+}

@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   // SocketUrl += "work.damaiking.com";
   // axios.BaseUrl = "https://work.damaiking.com/Api/";
   SocketUrl += "120.25.67.116:773";
-  axios.BaseUrl = "http://192.168.1.105:80";
+  axios.BaseUrl = "http://192.168.1.105";
   // axios.BaseUrl = "http://120.25.67.116:773";
   // SocketUrl += "192.168.0.169:8011";
   // axios.BaseUrl = "http://192.168.0.169:8011";

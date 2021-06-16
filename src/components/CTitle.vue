@@ -125,7 +125,7 @@ export default {
             dropValue3: [], // 选择时间范围
             
             oldSearchValue: '',
-            searchValue: ''
+            searchValue: this.TInfo.dropDown.searchInput.value ?? ''
         }
     },
     watch: {
