@@ -5,20 +5,35 @@
     height="510"
     phoneFull
     @beforeOpen="beforeOpen"
+    ref="location"
   >
     <transition slot="content">
-      <div v-loading="loading">
+      <div v-loading="loading" class="root">
+        <div class="top">
+          <el-input
+            placeholder="请输入成员名称"
+            prefix-icon="el-icon-search"
+            v-model="name"
+            @keydown.enter.native="queryData()"
+          />
+        </div>
         <el-checkbox-group
           v-model="checkedCities"
           @change="handleCheckedCitiesChange"
         >
           <el-checkbox
-            v-for="{ Name, UsId } of list"
-            :label="UsId"
+            v-for="{ Name, UsId, Picture, Name_Pinyin } of list"
+            :label="sb({ Name, UsId, Picture, Name_Pinyin })"
             :key="UsId"
-            >{{ Name }}</el-checkbox
           >
+            <el-avatar :src="Picture" :size="28">{{ Name[0] }}</el-avatar>
+            <span>{{ Name }}</span>
+          </el-checkbox>
         </el-checkbox-group>
+        <div class="btm">
+          <el-button type="info" @click="closeLocation(false)">取消</el-button>
+          <el-button type="primary" @click="confirmLocation">确认</el-button>
+        </div>
       </div>
     </transition>
     <template #LocationButton>
@@ -47,6 +62,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    position: {
+      type: Object,
+      default: null,
+    },
   },
   data: () => ({
     list: null,
@@ -55,22 +74,88 @@ export default {
     // 选中的成员
     checkedCities: [],
   }),
+  beforeDestroy() {
+    this.$refs.location.isShow(false);
+  },
   methods: {
     async beforeOpen() {
       if (this.list === null) await this.queryData();
     },
     async queryData() {
-      // this.loading = true;
-      // try {
-      //   const { res, data } = this.$http.post("/General/memberSelector.ashx", {
-      //     name: this.name,
-      //   });
+      this.loading = true;
+      try {
+        const { res, data } = await this.$http.post(
+          "/General/memberSelector.ashx",
+          {
+            name: this.name,
+          }
+        );
 
-      //   if (res === 0) this.list = data;
-      // } catch(e) {console.warn(e)}
-      // this.loading = false;
+        if (res === 0) this.list = data;
+      } catch (e) {
+        console.warn(e);
+      }
+      this.loading = false;
     },
     handleCheckedCitiesChange() {},
+    closeLocation() {
+      this.$refs.location.isShow(false);
+    },
+    confirmLocation() {
+      this.$refs.location.isShow(false);
+      this.$emit("confirm", this.checkedCities);
+    },
+    sb(data) {
+      return JSON.stringify(data);
+    },
   },
 };
 </script>
+
+
+<style lang="less" scoped>
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  >.top {
+    padding: 18px;
+    border-bottom: 1px solid #eee;
+  }
+  > .el-checkbox-group {
+    flex: 1;
+    overflow: auto;
+    width: 100%;
+    > .el-checkbox {
+      display: flex;
+      align-items: center;
+      margin: 16px 24px;
+      /deep/ .el-checkbox__label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+
+        > .el-avatar {
+          + span {
+            margin-left: 8px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 16px;
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+  > .btm {
+    padding: 26px 18px;
+    display: flex;
+    border-top: 1px solid #eee;
+
+    > button {
+      flex: 1;
+    }
+  }
+}
+</style>

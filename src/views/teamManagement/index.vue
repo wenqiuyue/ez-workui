@@ -133,29 +133,14 @@
                   }}</template>
                 </Statistic>
               </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>公司Id</template>
-                  <template #value>{{
-                    detailDialog.data.Teamdata.CompanyId | isEmpty
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>团队版本订单Id</template>
-                  <template #value v-if="isEdit">团队版本订单选择器</template>
-                  <template #value v-else>{{
-                    detailDialog.data.Teamdata.TeamOrderId | isEmpty
-                  }}</template>
-                </Statistic>
-              </el-col>
               <el-col :md="8">
                 <Statistic>
                   <template #title>团队名称</template>
                   <template #value v-if="isEdit">
                     <el-form-item>
-                      <el-input v-model="detailDialog.form.data.Teamdata.Name" />
+                      <el-input
+                        v-model="detailDialog.form.data.Teamdata.Name"
+                      />
                     </el-form-item>
                   </template>
                   <template #value v-else>{{
@@ -168,7 +153,9 @@
                   <template #title>团队描述</template>
                   <template #value v-if="isEdit">
                     <el-form-item>
-                      <el-input v-model="detailDialog.form.data.Teamdata.Describe" />
+                      <el-input
+                        v-model="detailDialog.form.data.Teamdata.Describe"
+                      />
                     </el-form-item>
                   </template>
                   <template #value v-else>{{
@@ -225,11 +212,10 @@
             <el-row :gutter="8">
               <el-col :md="8">
                 <Statistic>
-                  <template #title>公司Id</template>
-                  <template #value>{{
-                    !!detailDialog.data.Vsersion
-                      ? detailDialog.data.Vsersion.Id
-                      : "--"
+                  <template #title>团队版本订单Id</template>
+                  <template #value v-if="isEdit">团队版本订单选择器</template>
+                  <template #value v-else>{{
+                    detailDialog.data.Vsersion.Id | isEmpty
                   }}</template>
                 </Statistic>
               </el-col>
@@ -266,12 +252,33 @@
             </el-row>
           </div>
           <div class="detail-dialog-content">
-            <div class="detail-dialog-content-title" v-if="!isEdit">成员列表</div>
+            <div class="detail-dialog-content-title" v-if="!isEdit">
+              成员列表
+            </div>
             <Statistic v-if="isEdit">
               <template #title>成员列表</template>
               <template #value>
-                <MemberSelect @Confirm="e => console.log(e)" :arrays="detailDialog.form.data.Membersdata">
-                  <template #button><i class="el-icon-circle-plus-outline" /></template>
+                <MemberSelect
+                  @confirm="memberConfirm"
+                  :arrays="detailDialog.form.data.Membersdata"
+                >
+                  <template #button>
+                    <template v-if="detailDialog.form.data.Membersdata.length">
+                      <ul class="member-root">
+                        <li
+                          v-for="{ UsId, Name, Picture } of detailDialog.form
+                            .data.Membersdata"
+                          :key="UsId"
+                        >
+                          <el-avatar :src="Picture">{{ Name[0] }}</el-avatar>
+                          <div>{{ Name }}</div>
+                        </li>
+                      </ul>
+                    </template>
+                    <template v-else
+                      ><i class="el-icon-circle-plus-outline"
+                    /></template>
+                  </template>
                 </MemberSelect>
               </template>
             </Statistic>
@@ -313,7 +320,7 @@
 </template>
 
 <script>
-import _ from 'lodash'
+import _ from "lodash";
 
 export default {
   components: {
@@ -325,7 +332,7 @@ export default {
     Statistic: () => import("@/components/Statistic"),
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
-    MemberSelect: () => import('@/components/Selectors/MemberSelect'),
+    MemberSelect: () => import("@/components/Selectors/MemberSelect"),
   },
   data() {
     return {
@@ -390,7 +397,7 @@ export default {
       this.loading = false;
     },
     async handleAdd() {
-      this.isEdit = true
+      this.isEdit = true;
       this.detailDialog = {
         ...this.detailDialog,
         form: {
@@ -493,6 +500,9 @@ export default {
     async teamWinTmpSubmit() {
       console.log("teamWinTmpSubmit");
     },
+    memberConfirm(list) {
+      this.detailDialog.form.data.Membersdata = list.map((e) => JSON.parse(e));
+    },
   },
   computed: {
     queryParams() {
@@ -562,6 +572,33 @@ export default {
       margin-top: 24px;
       padding-top: 24px;
       border-top: 1px dashed #e4e4e4;
+    }
+  }
+
+  .member-root {
+    display: flex;
+    margin: -8px;
+    flex-wrap: wrap;
+
+    > li {
+      margin: 8px;
+      font-size: 14px;
+      width: 45px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      > .el-avatar {
+        margin-bottom: 8px;
+
+        + div {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          width: 100%;
+          text-align: center;
+        }
+      }
     }
   }
 }
