@@ -108,11 +108,14 @@
         v-model="isEdit"
         @topSubmit="teamWinTmpSubmit"
         @comfirmClick="teamWinTmpSubmit"
+        v-loading="detailDialog.form.loading"
       >
         <el-form
           class="detail-dialog-root"
           slot="form"
           :model="detailDialog.form.data"
+          :rules="detailDialog.form.rules"
+          ref="detailDialogForm"
         >
           <div class="detail-dialog-content">
             <div class="detail-dialog-content-title" v-if="!isEdit">团队</div>
@@ -137,9 +140,10 @@
                 <Statistic>
                   <template #title>团队名称</template>
                   <template #value v-if="isEdit">
-                    <el-form-item>
+                    <el-form-item prop="Teamdata.Name">
                       <el-input
                         v-model="detailDialog.form.data.Teamdata.Name"
+                        placeholder="请输入团队名称"
                       />
                     </el-form-item>
                   </template>
@@ -155,6 +159,7 @@
                     <el-form-item>
                       <el-input
                         v-model="detailDialog.form.data.Teamdata.Describe"
+                        placeholder="请输入团队描述"
                       />
                     </el-form-item>
                   </template>
@@ -179,6 +184,31 @@
                   }}</template>
                 </Statistic>
               </el-col>
+              <el-col :md="8">
+                <Statistic>
+                  <template #title>成员是否可以添加成员</template>
+                  <template #value v-if="isEdit">
+                    <el-form-item prop="Teamdata.IsAgree">
+                      <el-select v-model="detailDialog.form.data.Teamdata.IsAgree" placeholder="请选择">
+                        <el-option
+                          v-for="item of [1, 0]"
+                          :key="item"
+                          :label="getTeamIsAgreelabel(item)"
+                          :value="item"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </template>
+                  <template #value v-else>
+                    <i
+                      :class="
+                        detailDialog.data.Teamdata.IsAgree
+                          ? 'el-icon-circle-check'
+                          : 'el-icon-circle-close'
+                      "
+                  /></template>
+                </Statistic>
+              </el-col>
             </el-row>
           </div>
           <div class="detail-dialog-content">
@@ -187,11 +217,40 @@
               <el-col :md="8">
                 <Statistic>
                   <template #title>公司Id</template>
-                  <template #value v-if="isEdit">公司选择器</template>
+                  <template #value v-if="isEdit">
+                    <CompanySelect
+                      @confirm="companyConfirm"
+                      :defaultData="detailDialog.form.data.Company"
+                    >
+                      <template #button>
+                        <template
+                          v-if="
+                            !!detailDialog.form.data.Company &&
+                            !!detailDialog.form.data.Company.Name
+                          "
+                        >
+                          <ul class="member-root">
+                            <li>
+                              <el-avatar>{{
+                                detailDialog.form.data.Company.Name[0]
+                              }}</el-avatar>
+                              <el-tooltip
+                                :content="detailDialog.form.data.Company.Name"
+                                ><div>
+                                  {{ detailDialog.form.data.Company.Name }}
+                                </div></el-tooltip
+                              >
+                            </li>
+                          </ul>
+                        </template>
+                        <template v-else
+                          ><i class="el-icon-circle-plus-outline"
+                        /></template>
+                      </template>
+                    </CompanySelect>
+                  </template>
                   <template #value v-else>{{
-                    !!detailDialog.data.Company
-                      ? detailDialog.data.Company.Id
-                      : "--"
+                    $chain([detailDialog, "--"], "data", "Company", "Id")
                   }}</template>
                 </Statistic>
               </el-col>
@@ -199,53 +258,91 @@
                 <Statistic>
                   <template #title>公司名称</template>
                   <template #value>{{
-                    !!detailDialog.data.Company
-                      ? detailDialog.data.Company.Name
-                      : "--"
+                    $chain([detailDialog, "--"], "data", "Company", "Name")
                   }}</template>
                 </Statistic>
               </el-col>
             </el-row>
           </div>
-          <div class="detail-dialog-content" v-if="!isEdit">
-            <div class="detail-dialog-content-title">版本</div>
+          <div class="detail-dialog-content">
+            <div class="detail-dialog-content-title" v-if="!isEdit">版本</div>
             <el-row :gutter="8">
               <el-col :md="8">
                 <Statistic>
                   <template #title>团队版本订单Id</template>
-                  <template #value v-if="isEdit">团队版本订单选择器</template>
+                  <template #value v-if="isEdit">
+                    <VersionSelect
+                      @confirm="versionConfirm"
+                      :defaultData="detailDialog.form.data.Version"
+                    >
+                      <template #button>
+                        <template
+                          v-if="
+                            !!detailDialog.form.data.Version &&
+                            !!detailDialog.form.data.Version.Name
+                          "
+                        >
+                          <ul class="member-root">
+                            <li>
+                              <el-avatar>{{
+                                detailDialog.form.data.Version.Name[0]
+                              }}</el-avatar>
+                              <el-tooltip
+                                :content="detailDialog.form.data.Version.Name"
+                                ><div>
+                                  {{ detailDialog.form.data.Version.Name }}
+                                </div></el-tooltip
+                              >
+                            </li>
+                          </ul>
+                        </template>
+                        <template v-else
+                          ><i class="el-icon-circle-plus-outline"
+                        /></template>
+                      </template>
+                    </VersionSelect>
+                  </template>
                   <template #value v-else>{{
-                    detailDialog.data.Vsersion.Id | isEmpty
+                    $chain([detailDialog, "--"], "data", "Version", "Name")
                   }}</template>
                 </Statistic>
               </el-col>
-              <el-col :md="8">
+              <el-col :md="8" v-if="!isEdit">
                 <Statistic>
                   <template #title>版本名称</template>
                   <template #value>{{
-                    !!detailDialog.data.Vsersion
-                      ? detailDialog.data.Vsersion.VsersionName
-                      : "--"
+                    $chain(
+                      [detailDialog, "--"],
+                      "data",
+                      "Version",
+                      "VersionName"
+                    )
                   }}</template>
                 </Statistic>
               </el-col>
-              <el-col :md="8">
+              <el-col :md="8" v-if="!isEdit">
                 <Statistic>
                   <template #title>版本金额</template>
                   <template #value>{{
-                    !!detailDialog.data.Vsersion
-                      ? detailDialog.data.Vsersion.VersionPrice
-                      : "--"
+                    $chain(
+                      [detailDialog, "--"],
+                      "data",
+                      "Version",
+                      "VersionPrice"
+                    )
                   }}</template>
                 </Statistic>
               </el-col>
-              <el-col :md="8">
+              <el-col :md="8" v-if="!isEdit">
                 <Statistic>
                   <template #title>版本期限(天)</template>
                   <template #value>{{
-                    !!detailDialog.data.Vsersion
-                      ? detailDialog.data.Vsersion.VersionPeriod
-                      : "--"
+                    $chain(
+                      [detailDialog, "--"],
+                      "data",
+                      "Version",
+                      "VersionPeriod"
+                    )
                   }}</template>
                 </Statistic>
               </el-col>
@@ -255,33 +352,41 @@
             <div class="detail-dialog-content-title" v-if="!isEdit">
               成员列表
             </div>
-            <Statistic v-if="isEdit">
-              <template #title>成员列表</template>
-              <template #value>
-                <MemberSelect
-                  @confirm="memberConfirm"
-                  :arrays="detailDialog.form.data.Membersdata"
-                >
-                  <template #button>
-                    <template v-if="detailDialog.form.data.Membersdata.length">
-                      <ul class="member-root">
-                        <li
-                          v-for="{ UsId, Name, Picture } of detailDialog.form
-                            .data.Membersdata"
-                          :key="UsId"
+            <el-row :gutter="8" v-if="isEdit">
+              <el-col :md="8">
+                <Statistic>
+                  <template #title>成员列表</template>
+                  <template #value>
+                    <MemberSelect
+                      @confirm="memberConfirm"
+                      :defaultData="detailDialog.form.data.Membersdata"
+                    >
+                      <template #button>
+                        <template
+                          v-if="detailDialog.form.data.Membersdata.length"
                         >
-                          <el-avatar :src="Picture">{{ Name[0] }}</el-avatar>
-                          <div>{{ Name }}</div>
-                        </li>
-                      </ul>
-                    </template>
-                    <template v-else
-                      ><i class="el-icon-circle-plus-outline"
-                    /></template>
+                          <ul class="member-root">
+                            <li
+                              v-for="{ UsId, Name, Picture } of detailDialog
+                                .form.data.Membersdata"
+                              :key="UsId"
+                            >
+                              <el-avatar :src="Picture">{{
+                                Name[0]
+                              }}</el-avatar>
+                              <div>{{ Name }}</div>
+                            </li>
+                          </ul>
+                        </template>
+                        <template v-else
+                          ><i class="el-icon-circle-plus-outline"
+                        /></template>
+                      </template>
+                    </MemberSelect>
                   </template>
-                </MemberSelect>
-              </template>
-            </Statistic>
+                </Statistic>
+              </el-col>
+            </el-row>
             <el-table
               v-else
               :data="detailDialog.visible ? detailDialog.data.Membersdata : []"
@@ -333,6 +438,8 @@ export default {
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
     MemberSelect: () => import("@/components/Selectors/MemberSelect"),
+    CompanySelect: () => import("@/components/Selectors/CompanySelect"),
+    VersionSelect: () => import("@/components/Selectors/VersionSelect"),
   },
   data() {
     return {
@@ -362,6 +469,15 @@ export default {
         data: null,
         form: {
           data: null,
+          rules: {
+            "Teamdata.Name": [
+              { required: true, message: "请输入团队名称", trigger: "blur" },
+            ],
+            "Teamdata.IsAgree": [
+              { required: true, message: "请选择", trigger: "blur" },
+            ],
+          },
+          loading: false,
         },
         indexData: {
           type: "",
@@ -406,7 +522,7 @@ export default {
             Company: {},
             Membersdata: [],
             Teamdata: {},
-            Vsersion: null,
+            Vsersion: {},
           },
         },
         indexData: {
@@ -498,10 +614,54 @@ export default {
       // if (!this.isEdit) this.isEdit = true;
     },
     async teamWinTmpSubmit() {
-      console.log("teamWinTmpSubmit");
+      const _fetch = async () => {
+        this.detailDialog.form.loading = true;
+        try {
+          const isAdd = this.detailDialog.indexData.type === "Add";
+          const { res, data } = await this.$http.post(
+            "/Teams/SaveTeamManagement.ashx",
+            {
+              teamId: isAdd ? '' : this.detailDialog.form.data.Teamdata.Id,
+              companyId: this.detailDialog.form.data.Company?.Id,
+              teamorderId: this.detailDialog.form.data.Teamdata?.Id,
+              name: this.detailDialog.form.data.Teamdata.Name,
+              describe: this.detailDialog.form.data.Teamdata?.Describe,
+              teammembers: this.detailDialog.form.data.Membersdata?.map(
+                ({ UsId: MembersId, Name: MembersName }) => ({
+                  MembersId,
+                  MembersName,
+                })
+              ),
+              IsAgree: this.detailDialog.form.data.Teamdata.IsAgree,
+            }
+          );
+
+          if (res === 0) await this.queryData();
+        } catch {}
+         this.detailDialog.form.loading = false;
+      };
+      this.$refs.detailDialogForm.validate(async (valid) => {
+        if (valid) await _fetch();
+      });
     },
     memberConfirm(list) {
       this.detailDialog.form.data.Membersdata = list.map((e) => JSON.parse(e));
+    },
+    companyConfirm([data]) {
+      this.detailDialog.form.data.Company = JSON.parse(data);
+    },
+    versionConfirm([data]) {
+      this.detailDialog.form.data.Version = JSON.parse(data);
+    },
+    getTeamIsAgreelabel(label) {
+      switch(label) {
+        case 1:
+          return '允许'
+        case 0:
+          return '不允许'
+        default:
+          return '未知'
+      }
     },
   },
   computed: {

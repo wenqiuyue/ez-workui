@@ -104,7 +104,7 @@ export default {
       this.loading = true;
       try {
         const { res, data } = await this.$http.post(
-          "/General/GetCompanySelect.ashx",
+          "/Order/TeamVersion/GetVersions.ashx",
           {
             name: this.name,
           }

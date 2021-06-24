@@ -880,6 +880,15 @@ export default {
 			marginTop: 0,
 			bind: bind
 		});
+
+		Vue.prototype.$chain = ([obj, _default = ''], ...rest) => {
+            let tmp = obj;
+            for (let key in rest) {
+                const name = rest[key];
+                tmp = tmp?.[name];
+            }
+            return tmp ?? _default;
+        }
 		//------------- 全局扩展函数（END） ----------------------
 	}
 };

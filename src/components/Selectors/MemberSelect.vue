@@ -20,6 +20,7 @@
         <el-checkbox-group
           v-model="checkedCities"
           @change="handleCheckedCitiesChange"
+          v-if="multiple"
         >
           <el-checkbox
             v-for="{ Name, UsId, Picture, Name_Pinyin } of list"
@@ -30,8 +31,22 @@
             <span>{{ Name }}</span>
           </el-checkbox>
         </el-checkbox-group>
+        <el-radio-group
+          v-model="checkedCities"
+          @change="handleCheckedCitiesChange"
+          v-else
+        >
+          <el-radio
+            v-for="{ Name, UsId, Picture, Name_Pinyin } of list"
+            :label="sb({ Name, UsId, Picture, Name_Pinyin })"
+            :key="UsId"
+          >
+            <el-avatar :src="Picture" :size="28">{{ Name[0] }}</el-avatar>
+            <span>{{ Name }}</span>
+          </el-radio>
+        </el-radio-group>
         <div class="btm">
-          <el-button type="info" @click="closeLocation(false)">取消</el-button>
+          <el-button type="info" @click="closeLocation">取消</el-button>
           <el-button type="primary" @click="confirmLocation">确认</el-button>
         </div>
       </div>
@@ -66,6 +81,10 @@ export default {
       type: Object,
       default: null,
     },
+    multiple: {
+      type: Boolean,
+      default: true,
+    },
   },
   data: () => ({
     list: null,
@@ -92,9 +111,7 @@ export default {
         );
 
         if (res === 0) this.list = data;
-      } catch (e) {
-        console.warn(e);
-      }
+      } catch {}
       this.loading = false;
     },
     handleCheckedCitiesChange() {},
@@ -103,7 +120,10 @@ export default {
     },
     confirmLocation() {
       this.$refs.location.isShow(false);
-      this.$emit("confirm", this.checkedCities);
+      this.$emit(
+        "confirm",
+        this.multiple ? this.checkedCities : [this.checkedCities]
+      );
     },
     sb(data) {
       return JSON.stringify(data);
@@ -118,19 +138,22 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
-  >.top {
+  > .top {
     padding: 18px;
     border-bottom: 1px solid #eee;
   }
-  > .el-checkbox-group {
+  > .el-checkbox-group,
+  .el-radio-group {
     flex: 1;
     overflow: auto;
     width: 100%;
-    > .el-checkbox {
+    > .el-checkbox,
+    .el-radio {
       display: flex;
       align-items: center;
       margin: 16px 24px;
-      /deep/ .el-checkbox__label {
+      /deep/ .el-checkbox__label,
+      /deep/ .el-radio__label {
         display: flex;
         align-items: center;
         width: 100%;
