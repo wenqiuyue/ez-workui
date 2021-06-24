@@ -1,13 +1,13 @@
 <template>
-  <div id="UserManagement" v-loading="loading">
+  <div id="databaseManagement" v-loading="loading">
     <Header
-      title="用户管理"
-      titleEnglish="User Management"
+      title="数据库管理"
+      titleEnglish="Database Management"
       class="baseHeader"
     />
     <CContent>
       <template #search>
-        <CTitle :TInfo="titleInfo" @searchClick="searchClick" />
+        <el-button type="primary" size="medium">提交更新</el-button>
       </template>
       <template #main>
         <el-table
@@ -15,16 +15,25 @@
           :cell-style="cellStyle"
           :header-cell-style="cellStyle"
         >
-          <el-table-column label="成员姓名" prop="name"> </el-table-column>
-          <el-table-column label="加入时间" prop="date"> </el-table-column>
-          <el-table-column label="成员权限" prop="jurisdiction">
+          <el-table-column label="版本名称" prop="jurisdiction">
           </el-table-column>
-          <el-table-column label="团队数量" prop="num"> </el-table-column>
+          <el-table-column label="提交人" prop="name"> </el-table-column>
+          <el-table-column label="提交时间" prop="date"> </el-table-column>
+          <el-table-column label="已完成更新" prop="num">
+            <template slot-scope="scope"> 200人 </template>
+          </el-table-column>
+          <el-table-column label="未完成更新" prop="num"
+            ><template slot-scope="scope"> 200人 </template>
+          </el-table-column>
+          <el-table-column label="更新内容" prop="num" show-overflow-tooltip>
+            <template slot-scope="scope">
+              更新内容更新内容更新内容更新内容更新内容更新内容更新内容
+            </template>
+          </el-table-column>
           <el-table-column fixed="right" label="操作">
             <template slot-scope="scope">
               <c-btn>
                 <span @click="handleView(scope.row)">详情</span>
-                <span @click="handleDel(scope.row)">删除</span>
               </c-btn>
             </template>
           </el-table-column>
@@ -34,7 +43,7 @@
         <CPages v-model="pageData" @eventComfirm="handlePaginationChange" />
       </template>
     </CContent>
-    <UserInfo></UserInfo>
+    <DatabaseM></DatabaseM>
   </div>
 </template>
 
@@ -43,10 +52,9 @@ export default {
   components: {
     Header: () => import("@/components/Header"),
     CContent: () => import("@/components/CContent"),
-    CTitle: () => import("@/components/CTitle"),
     CPages: () => import("@/components/CPages"),
     CBtn: () => import("@/components/CBtn"),
-    UserInfo: () => import("./userInfo"),
+    DatabaseM: () => import("./databaseM"),
   },
   data: () => ({
     loading: false,
@@ -79,19 +87,6 @@ export default {
         num: "20",
       },
     ],
-    titleInfo: {
-      btnShow: [
-        { type: "addBtn", ishow: false, disabled: true },
-        { type: "startBtn", ishow: false, disabled: true },
-        { type: "closeBtn", ishow: false, disabled: true },
-        { type: "delBtn", ishow: false, disabled: true },
-      ],
-      dropDown: {
-        searchInput: {
-          placeholder: "请输入用户名称",
-        },
-      },
-    },
     pageData: {
       pageIndex: 1,
       pageSize: 10,
@@ -112,38 +107,15 @@ export default {
      * 查看
      */
     handleView(...a) {
-      this.$modal.show("userInfo");
+      this.$modal.show("databaseM");
       console.log(a);
-    },
-    /**
-     * 删除
-     */
-    handleDel(row) {
-      console.log(row);
-      this.$confirm("此操作将删除该用户, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!",
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
     },
   },
 };
 </script>
 
 <style lang="less" scoped>
-#UserManagement {
+#databaseManagement {
   height: 100%;
 }
 </style>

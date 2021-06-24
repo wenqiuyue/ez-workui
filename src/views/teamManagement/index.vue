@@ -189,7 +189,10 @@
                   <template #title>成员是否可以添加成员</template>
                   <template #value v-if="isEdit">
                     <el-form-item prop="Teamdata.IsAgree">
-                      <el-select v-model="detailDialog.form.data.Teamdata.IsAgree" placeholder="请选择">
+                      <el-select
+                        v-model="detailDialog.form.data.Teamdata.IsAgree"
+                        placeholder="请选择"
+                      >
                         <el-option
                           v-for="item of [1, 0]"
                           :key="item"
@@ -621,7 +624,7 @@ export default {
           const { res, data } = await this.$http.post(
             "/Teams/SaveTeamManagement.ashx",
             {
-              teamId: isAdd ? '' : this.detailDialog.form.data.Teamdata.Id,
+              teamId: isAdd ? "" : this.detailDialog.form.data.Teamdata.Id,
               companyId: this.detailDialog.form.data.Company?.Id,
               teamorderId: this.detailDialog.form.data.Teamdata?.Id,
               name: this.detailDialog.form.data.Teamdata.Name,
@@ -638,7 +641,7 @@ export default {
 
           if (res === 0) await this.queryData();
         } catch {}
-         this.detailDialog.form.loading = false;
+        this.detailDialog.form.loading = false;
       };
       this.$refs.detailDialogForm.validate(async (valid) => {
         if (valid) await _fetch();
@@ -654,13 +657,13 @@ export default {
       this.detailDialog.form.data.Version = JSON.parse(data);
     },
     getTeamIsAgreelabel(label) {
-      switch(label) {
+      switch (label) {
         case 1:
-          return '允许'
+          return "允许";
         case 0:
-          return '不允许'
+          return "不允许";
         default:
-          return '未知'
+          return "未知";
       }
     },
   },
