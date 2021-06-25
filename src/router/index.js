@@ -8,7 +8,7 @@ Router.prototype.replace = function replace(location) {
   return originalPush.call(this, location).catch((err) => err);
 };
 Vue.use(Router);
-
+//用户端在routes的index为0，管理端的index为1，其余页面请以此也在后面
 const routes = [
   // {
   //   //首页设为登录页，如果含有token则自动跳转到home页面
@@ -19,7 +19,37 @@ const routes = [
   //   path: "/resetpassword",
   //   component: () => import("./views/resetpassword/resetpassword"),
   // },
-
+  /**
+   * 用户端
+   */
+  {
+    path: "",
+    name: "",
+    component: () => import("@/userview/main"),
+    children: [
+      {
+        path: "",
+        name: "",
+        props: {
+          menu: 0,
+        },
+        redirect: "/teamManagement",
+        component: () => import("@/userview/main/content"),
+        children: [
+          {
+            path: "/teamManagement",
+            name: "团队管理",
+            component: () => import("@/userview/team-management"),
+            layout: true,
+            icon: "hi-customer",
+          },
+        ],
+      },
+    ],
+  },
+  /**
+   * 管理端
+   */
   {
     path: "/manager",
     name: "main",
@@ -31,6 +61,7 @@ const routes = [
         props: {
           menu: 0,
         },
+        redirect: "/manager/teamManagement",
         component: () => import("@/views/main/content"),
         children: [
           {
@@ -138,9 +169,9 @@ const _flat = (data) => {
 
   return result;
 };
-const layoutRoutes = _flat(routes);
-
-export { routes, layoutRoutes };
+const layoutRoutes = _flat([routes[1]]);
+const layoutRoutesUser = _flat([routes[0]]);
+export { routes, layoutRoutes, layoutRoutesUser };
 
 export default new Router({
   mode: "history",
