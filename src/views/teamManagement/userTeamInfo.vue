@@ -1,6 +1,6 @@
 <template>
-  <div class="userInfo">
-    <XModal name="userInfo" width="40%" height="70%">
+  <div class="userTeamInfo">
+    <XModal name="userTeamInfo" width="40%" height="77%">
       <CWinTmp :indexData="indexData" v-loading="loading">
         <div slot="form" class="info_content">
           <el-row>
@@ -70,10 +70,20 @@
                 2021-6-24 16:49
               </div></el-col
             >
-            <el-col :span="12"
+            <el-col :span="24"
               ><div class="info_list">
-                <span class="info_lable">团队数量：</span>
-                30
+                <span class="info_lable">可见成员：</span>
+                <div>
+                  <ul class="mem-imgs">
+                    <li v-for="(item, index) in 10" :key="index">
+                      <el-avatar
+                        size="medium"
+                        src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                      ></el-avatar>
+                      <p>文秋月</p>
+                    </li>
+                  </ul>
+                </div>
               </div></el-col
             >
           </el-row>
@@ -96,14 +106,14 @@ export default {
       indexData: {
         type: "",
         name: "成员详情",
-        xModalName: "userInfo",
+        xModalName: "userTeamInfo",
       },
     };
   },
 };
 </script>
 <style lang="less" scoped>
-.userInfo {
+.userTeamInfo {
   .info_content {
     .user_pic {
       display: flex;
@@ -125,6 +135,16 @@ export default {
       font-size: 14px;
       .info_lable {
         width: 100px;
+      }
+      .mem-imgs {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        align-items: center;
+        line-height: 20px;
+        li {
+          margin: 0 2.3rem 1rem 0;
+        }
       }
     }
   }

@@ -11,13 +11,9 @@ if (window.location.protocol === "https:") {
 }
 if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   //***** 测试 *****
-  // SocketUrl += "work.damaiking.com";
-  // axios.BaseUrl = "https://work.damaiking.com/Api/";
   SocketUrl += "120.25.67.116:773";
-  axios.BaseUrl = "http://192.168.1.105";
-  // axios.BaseUrl = "http://120.25.67.116:773";
-  // SocketUrl += "192.168.0.169:8011";
-  // axios.BaseUrl = "http://192.168.0.169:8011";
+  // axios.BaseUrl = "http://192.168.1.105";
+  axios.BaseUrl = "http://122.9.151.39:702";
 } else {
   //***** 线上 *****
   SocketUrl += window.location.hostname;
@@ -62,7 +58,7 @@ axios.interceptors.request.use(
     }
     if (config.url.charAt(config.url.length - 1) === "#") {
       let temp = pending;
-      pending.forEach(function(item, index) {
+      pending.forEach(function (item, index) {
         if (item.u === config.url || isGroup(config.url, item.u)) {
           item.f();
           temp.splice(index, 1);
@@ -70,7 +66,7 @@ axios.interceptors.request.use(
       });
       pending = temp;
     }
-    config.cancelToken = new cancelToken(function(c) {
+    config.cancelToken = new cancelToken(function (c) {
       pending.push({
         u: config.url,
         f: c,
@@ -106,7 +102,7 @@ axios.interceptors.response.use(
         title: "服务器错误",
         message: result.msg,
       });
-      return Promise.reject(null).catch(function() {});
+      return Promise.reject(null).catch(function () {});
     }
     if (result.res == 3) {
       return result;
@@ -133,7 +129,7 @@ axios.interceptors.response.use(
         title: "登录超时",
         message: "即将返回登录页面",
       });
-      pending.forEach(function(item, index) {
+      pending.forEach(function (item, index) {
         item.f();
       });
       pending = [];
@@ -153,7 +149,7 @@ axios.interceptors.response.use(
   }
 );
 export default {
-  install: function(Vue) {
+  install: function (Vue) {
     Vue.prototype.$http = axios;
     Vue.prototype.$mainUrl = window.location.protocol + "//" + location.host;
     Vue.prototype.$url = axios.BaseUrl;

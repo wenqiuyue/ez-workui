@@ -5,7 +5,8 @@
       titleEnglish="Team Management"
       class="baseHeader"
     />
-    <CContent>
+    <!-- 列表页 -->
+    <CContent v-if="!isInfoView">
       <template #search>
         <CTitle
           :TInfo="titleInfo"
@@ -14,10 +15,10 @@
         />
       </template>
       <template #main>
-        <el-table :data="tableData" stripe>
+        <el-table :data="tableData">
           <el-table-column
-            label="团队ID"
-            prop="Id"
+            label="团队名称"
+            prop="Name"
             show-overflow-tooltip
             align="center"
           />
@@ -28,40 +29,44 @@
             align="center"
           />
           <el-table-column
-            label="团队名称"
-            prop="Name"
+            label="创建时间"
+            prop="CreatTime"
+            show-overflow-tooltip
+            align="center"
+            ><template slot-scope="scope">
+              {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="管理员"
+            prop="AdminUserName"
             show-overflow-tooltip
             align="center"
           />
+          <el-table-column label="团队人数" prop="MemberCount" align="center"
+            ><template slot-scope="scope">
+              {{ scope.row.MemberCount }}人
+            </template></el-table-column
+          >
+          <el-table-column label="购买版本" align="center"
+            ><template slot-scope="scope">
+              {{ scope.row.Vsersion.Name }}人
+            </template></el-table-column
+          >
           <el-table-column
-            label="团队描述"
-            prop="Describe"
-            show-overflow-tooltip
-            align="center"
-          />
-          <el-table-column
-            label="所选团队版本过期时间"
+            label="到期时间"
             prop="ExpireTime"
             show-overflow-tooltip
             align="center"
           >
-            <template slot-scope="{ row: { ExpireTime } }">{{
-              typeof ExpireTime === "string"
-                ? ExpireTime.timeFormat("yyyy-MM-dd HH:s")
-                : null
-            }}</template>
-          </el-table-column>
-          <el-table-column
-            label="团队创建时间"
-            prop="CreatTime"
-            show-overflow-tooltip
-            align="center"
-          >
-            <template slot-scope="{ row: { CreatTime } }">{{
-              typeof CreatTime === "string"
-                ? CreatTime.timeFormat("yyyy-MM-dd HH:s")
-                : null
+            <template slot-scope="scope">{{
+              scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:s")
             }}</template></el-table-column
+          >
+          <el-table-column label="服务器信息" align="center"
+            ><template slot-scope="scope">
+              {{ scope.row.Vsersion.Name }}人
+            </template></el-table-column
           >
           <el-table-column
             fixed="right"
@@ -69,24 +74,11 @@
             width="120"
             align="center"
           >
-            <template slot-scope="{ row: { Id } }">
-              <el-button
-                type="text"
-                size="small"
-                @click="queryTeamManagementDetail(Id)"
-                data-danger-prev
-                >详情</el-button
-              >
-              <el-popconfirm
-                title="确定删除这条数据吗？"
-                @confirm="handleDeleteRow(Id)"
-              >
-                <template #reference>
-                  <el-button type="text" size="small" data-danger
-                    >删除</el-button
-                  >
-                </template>
-              </el-popconfirm>
+            <template slot-scope="scope">
+              <c-btn>
+                <span @click="queryTeamManagementDetail(scope.row)">详情</span>
+                <span @click="handleDeleteRow(scope.row)">禁用</span>
+              </c-btn>
             </template>
           </el-table-column>
         </el-table>
@@ -95,335 +87,8 @@
         <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
       </template>
     </CContent>
-    <XModal
-      name="teamDialog"
-      width="80%"
-      height="80%"
-      @beforeClose="teamXModalBeforeClose"
-    >
-      <CWinTmp
-        ref="teamWinTmp"
-        :indexData="detailDialog.indexData"
-        @editClick="teamWinTmpEditClick"
-        v-model="isEdit"
-        @topSubmit="teamWinTmpSubmit"
-        @comfirmClick="teamWinTmpSubmit"
-        v-loading="detailDialog.form.loading"
-      >
-        <el-form
-          class="detail-dialog-root"
-          slot="form"
-          :model="detailDialog.form.data"
-          :rules="detailDialog.form.rules"
-          ref="detailDialogForm"
-        >
-          <div class="detail-dialog-content">
-            <div class="detail-dialog-content-title" v-if="!isEdit">团队</div>
-            <el-row :gutter="8">
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>团队Id</template>
-                  <template #value>{{
-                    detailDialog.data.Teamdata.Id
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>创建人名称</template>
-                  <template #value>{{
-                    detailDialog.data.Teamdata.UserName
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>团队名称</template>
-                  <template #value v-if="isEdit">
-                    <el-form-item prop="Teamdata.Name">
-                      <el-input
-                        v-model="detailDialog.form.data.Teamdata.Name"
-                        placeholder="请输入团队名称"
-                      />
-                    </el-form-item>
-                  </template>
-                  <template #value v-else>{{
-                    detailDialog.data.Teamdata.Name
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>团队描述</template>
-                  <template #value v-if="isEdit">
-                    <el-form-item>
-                      <el-input
-                        v-model="detailDialog.form.data.Teamdata.Describe"
-                        placeholder="请输入团队描述"
-                      />
-                    </el-form-item>
-                  </template>
-                  <template #value v-else>{{
-                    detailDialog.data.Teamdata.Describe | isEmpty
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>过期时间</template>
-                  <template #value>{{
-                    detailDialog.data.Teamdata.ExpireTime | isEmptyByDateTime
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>团队创建时间</template>
-                  <template #value>{{
-                    detailDialog.data.Teamdata.CreatTime | isEmptyByDateTime
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>成员是否可以添加成员</template>
-                  <template #value v-if="isEdit">
-                    <el-form-item prop="Teamdata.IsAgree">
-                      <el-select
-                        v-model="detailDialog.form.data.Teamdata.IsAgree"
-                        placeholder="请选择"
-                      >
-                        <el-option
-                          v-for="item of [1, 0]"
-                          :key="item"
-                          :label="getTeamIsAgreelabel(item)"
-                          :value="item"
-                        />
-                      </el-select>
-                    </el-form-item>
-                  </template>
-                  <template #value v-else>
-                    <i
-                      :class="
-                        detailDialog.data.Teamdata.IsAgree
-                          ? 'el-icon-circle-check'
-                          : 'el-icon-circle-close'
-                      "
-                  /></template>
-                </Statistic>
-              </el-col>
-            </el-row>
-          </div>
-          <div class="detail-dialog-content">
-            <div class="detail-dialog-content-title" v-if="!isEdit">公司</div>
-            <el-row :gutter="8">
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>公司Id</template>
-                  <template #value v-if="isEdit">
-                    <CompanySelect
-                      @confirm="companyConfirm"
-                      :defaultData="detailDialog.form.data.Company"
-                    >
-                      <template #button>
-                        <template
-                          v-if="
-                            !!detailDialog.form.data.Company &&
-                            !!detailDialog.form.data.Company.Name
-                          "
-                        >
-                          <ul class="member-root">
-                            <li>
-                              <el-avatar>{{
-                                detailDialog.form.data.Company.Name[0]
-                              }}</el-avatar>
-                              <el-tooltip
-                                :content="detailDialog.form.data.Company.Name"
-                                ><div>
-                                  {{ detailDialog.form.data.Company.Name }}
-                                </div></el-tooltip
-                              >
-                            </li>
-                          </ul>
-                        </template>
-                        <template v-else
-                          ><i class="el-icon-circle-plus-outline"
-                        /></template>
-                      </template>
-                    </CompanySelect>
-                  </template>
-                  <template #value v-else>{{
-                    $chain([detailDialog, "--"], "data", "Company", "Id")
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>公司名称</template>
-                  <template #value>{{
-                    $chain([detailDialog, "--"], "data", "Company", "Name")
-                  }}</template>
-                </Statistic>
-              </el-col>
-            </el-row>
-          </div>
-          <div class="detail-dialog-content">
-            <div class="detail-dialog-content-title" v-if="!isEdit">版本</div>
-            <el-row :gutter="8">
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>团队版本订单Id</template>
-                  <template #value v-if="isEdit">
-                    <VersionSelect
-                      @confirm="versionConfirm"
-                      :defaultData="detailDialog.form.data.Version"
-                    >
-                      <template #button>
-                        <template
-                          v-if="
-                            !!detailDialog.form.data.Version &&
-                            !!detailDialog.form.data.Version.Name
-                          "
-                        >
-                          <ul class="member-root">
-                            <li>
-                              <el-avatar>{{
-                                detailDialog.form.data.Version.Name[0]
-                              }}</el-avatar>
-                              <el-tooltip
-                                :content="detailDialog.form.data.Version.Name"
-                                ><div>
-                                  {{ detailDialog.form.data.Version.Name }}
-                                </div></el-tooltip
-                              >
-                            </li>
-                          </ul>
-                        </template>
-                        <template v-else
-                          ><i class="el-icon-circle-plus-outline"
-                        /></template>
-                      </template>
-                    </VersionSelect>
-                  </template>
-                  <template #value v-else>{{
-                    $chain([detailDialog, "--"], "data", "Version", "Name")
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>版本名称</template>
-                  <template #value>{{
-                    $chain(
-                      [detailDialog, "--"],
-                      "data",
-                      "Version",
-                      "VersionName"
-                    )
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>版本金额</template>
-                  <template #value>{{
-                    $chain(
-                      [detailDialog, "--"],
-                      "data",
-                      "Version",
-                      "VersionPrice"
-                    )
-                  }}</template>
-                </Statistic>
-              </el-col>
-              <el-col :md="8" v-if="!isEdit">
-                <Statistic>
-                  <template #title>版本期限(天)</template>
-                  <template #value>{{
-                    $chain(
-                      [detailDialog, "--"],
-                      "data",
-                      "Version",
-                      "VersionPeriod"
-                    )
-                  }}</template>
-                </Statistic>
-              </el-col>
-            </el-row>
-          </div>
-          <div class="detail-dialog-content">
-            <div class="detail-dialog-content-title" v-if="!isEdit">
-              成员列表
-            </div>
-            <el-row :gutter="8" v-if="isEdit">
-              <el-col :md="8">
-                <Statistic>
-                  <template #title>成员列表</template>
-                  <template #value>
-                    <MemberSelect
-                      @confirm="memberConfirm"
-                      :defaultData="detailDialog.form.data.Membersdata"
-                    >
-                      <template #button>
-                        <template
-                          v-if="detailDialog.form.data.Membersdata.length"
-                        >
-                          <ul class="member-root">
-                            <li
-                              v-for="{ UsId, Name, Picture } of detailDialog
-                                .form.data.Membersdata"
-                              :key="UsId"
-                            >
-                              <el-avatar :src="Picture">{{
-                                Name[0]
-                              }}</el-avatar>
-                              <div>{{ Name }}</div>
-                            </li>
-                          </ul>
-                        </template>
-                        <template v-else
-                          ><i class="el-icon-circle-plus-outline"
-                        /></template>
-                      </template>
-                    </MemberSelect>
-                  </template>
-                </Statistic>
-              </el-col>
-            </el-row>
-            <el-table
-              v-else
-              :data="detailDialog.visible ? detailDialog.data.Membersdata : []"
-              stripe
-            >
-              <el-table-column
-                label="成员Id"
-                prop="Id"
-                show-overflow-tooltip
-                align="center"
-              />
-              <el-table-column
-                label="成员的用户Id"
-                prop="MembersId"
-                show-overflow-tooltip
-                align="center"
-              />
-              <el-table-column
-                label="成员名称"
-                prop="MembersName"
-                show-overflow-tooltip
-                align="center"
-              />
-              <el-table-column
-                label="成员电话"
-                prop="MembersPhone"
-                show-overflow-tooltip
-                align="center"
-              />
-            </el-table>
-          </div>
-        </el-form>
-      </CWinTmp>
-    </XModal>
+    <!-- 详情页 -->
+    <TeamInfo v-else @viewChange="viewChange"></TeamInfo>
   </div>
 </template>
 
@@ -437,20 +102,61 @@ export default {
     CTitle: () => import("@/components/CTitle"),
     CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
-    Statistic: () => import("@/components/Statistic"),
-    XModal: () => import("@/components/XModal"),
-    CWinTmp: () => import("@/components/CWinTmp"),
-    MemberSelect: () => import("@/components/Selectors/MemberSelect"),
-    CompanySelect: () => import("@/components/Selectors/CompanySelect"),
-    VersionSelect: () => import("@/components/Selectors/VersionSelect"),
+    TeamInfo: () => import("./teamInfo"),
   },
   data() {
     return {
+      isInfoView: false, //是否是详情页面
       loading: false,
-      tableData: [],
+      tableData: [
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+      ],
       titleInfo: {
         btnShow: [
-          { type: "addBtn", ishow: true },
+          { type: "addBtn", ishow: false, disabled: true },
           { type: "startBtn", ishow: false, disabled: true },
           { type: "closeBtn", ishow: false, disabled: true },
           { type: "delBtn", ishow: false, disabled: true },
@@ -467,233 +173,51 @@ export default {
         pageSize: 10,
         totalNum: 0,
       },
-      detailDialog: {
-        visible: false,
-        data: null,
-        form: {
-          data: null,
-          rules: {
-            "Teamdata.Name": [
-              { required: true, message: "请输入团队名称", trigger: "blur" },
-            ],
-            "Teamdata.IsAgree": [
-              { required: true, message: "请选择", trigger: "blur" },
-            ],
-          },
-          loading: false,
-        },
-        indexData: {
-          type: "",
-          name: "",
-          xModalName: "teamDialog",
-        },
-      },
-      isEdit: false,
     };
   },
-  created() {
-    const { pageIndex = 1, pageSize = 10, totalNum = 0 } = this.$route.query;
-    this.pageData = {
-      ...{
-        pageIndex: Number.parseInt(pageIndex),
-        pageSize: Number.parseInt(pageSize),
-        totalNum: Number.parseInt(totalNum),
-      },
-    };
-  },
+  created() {},
   methods: {
-    async queryData() {
-      this.loading = true;
-      try {
-        const { res, data: { data, total } = {} } = await this.$http.get(
-          `/Teams/TeamManagement.ashx${this.queryParams}`
-        );
-        if (res !== 0) return;
-
-        this.tableData = data;
-        this.pageData.totalNum = total;
-      } catch {}
-      this.loading = false;
+    /** 添加*/
+    handleAdd() {},
+    /**搜索 */
+    handleSearchByKeyWord() {},
+    /**
+     * 查看详情
+     */
+    queryTeamManagementDetail(val) {
+      this.isInfoView = true;
     },
-    async handleAdd() {
-      this.isEdit = true;
-      this.detailDialog = {
-        ...this.detailDialog,
-        form: {
-          ...this.detailDialog.form,
-          data: {
-            Company: {},
-            Membersdata: [],
-            Teamdata: {},
-            Vsersion: {},
-          },
-        },
-        indexData: {
-          ...this.detailDialog.indexData,
-          type: "Add",
-          name: "添加团队",
-        },
-      };
-      this.$modal.show("teamDialog");
-    },
-    async handlePaginationChange({ totalNum, ...data }) {
-      this.pageData.totalNum = totalNum;
-      this.$router.push({
-        query: {
-          ...this.$route.query,
-          ...data,
-        },
-      });
-    },
-    handleView(...a) {
-      console.log(a);
-    },
-    handleSearchByKeyWord(searchText) {
-      this.$router.push({
-        query: {
-          ...this.$route.query,
-          searchText,
-        },
-      });
-    },
-    async handleDeleteRow(teamId) {
-      this.loading = true;
-      try {
-        const { res, msg } = await this.$http.post("/Teams/DelTeam.ashx", {
-          teamId,
-        });
-        if (res === 0) {
+    /**
+     * 禁用
+     */
+    handleDeleteRow(val) {
+      this.$confirm("此操作将禁用该团队, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
           this.$message({
-            message: msg,
             type: "success",
+            message: "禁用成功!",
           });
-          await this.queryData();
-        }
-      } catch {}
-      this.loading = false;
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消禁用",
+          });
+        });
     },
-    async queryTeamManagementDetail(teamId) {
-      this.loading = true;
-      try {
-        const { res, data } = await this.$http.get(
-          "/Teams/TeamManagementDetail.ashx",
-          {
-            params: {
-              teamId,
-            },
-          }
-        );
-        if (res === 0) {
-          this.detailDialog = {
-            ...this.detailDialog,
-            data: _.cloneDeep(data),
-            form: {
-              ...this.detailDialog.form,
-              data,
-            },
-            indexData: {
-              ...this.detailDialog.indexData,
-              type: "Edit",
-              name: "编辑团队",
-            },
-          };
-          this.$modal.show("teamDialog");
-        }
-      } catch {}
-      this.loading = false;
-    },
-    teamXModalBeforeClose() {
-      this.isEdit = false;
-      this.detailDialog = {
-        ...this.detailDialog,
-        data: null,
-        form: {
-          data: null,
-        },
-      };
-    },
-    teamWinTmpEditClick() {
-      // console.log(this.detailDialog.data, this.detailDialog.form.data)
-      // if (!this.isEdit) this.isEdit = true;
-    },
-    async teamWinTmpSubmit() {
-      const _fetch = async () => {
-        this.detailDialog.form.loading = true;
-        try {
-          const isAdd = this.detailDialog.indexData.type === "Add";
-          const { res, data } = await this.$http.post(
-            "/Teams/SaveTeamManagement.ashx",
-            {
-              teamId: isAdd ? "" : this.detailDialog.form.data.Teamdata.Id,
-              companyId: this.detailDialog.form.data.Company?.Id,
-              teamorderId: this.detailDialog.form.data.Teamdata?.Id,
-              name: this.detailDialog.form.data.Teamdata.Name,
-              describe: this.detailDialog.form.data.Teamdata?.Describe,
-              teammembers: this.detailDialog.form.data.Membersdata?.map(
-                ({ UsId: MembersId, Name: MembersName }) => ({
-                  MembersId,
-                  MembersName,
-                })
-              ),
-              IsAgree: this.detailDialog.form.data.Teamdata.IsAgree,
-            }
-          );
-
-          if (res === 0) await this.queryData();
-        } catch {}
-        this.detailDialog.form.loading = false;
-      };
-      this.$refs.detailDialogForm.validate(async (valid) => {
-        if (valid) await _fetch();
-      });
-    },
-    memberConfirm(list) {
-      this.detailDialog.form.data.Membersdata = list.map((e) => JSON.parse(e));
-    },
-    companyConfirm([data]) {
-      this.detailDialog.form.data.Company = JSON.parse(data);
-    },
-    versionConfirm([data]) {
-      this.detailDialog.form.data.Version = JSON.parse(data);
-    },
-    getTeamIsAgreelabel(label) {
-      switch (label) {
-        case 1:
-          return "允许";
-        case 0:
-          return "不允许";
-        default:
-          return "未知";
-      }
-    },
-  },
-  computed: {
-    queryParams() {
-      const {
-        query: { searchText, pageIndex, pageSize },
-      } = this.$route;
-      return `?searchText=${searchText ?? ""}&pageIndex=${
-        pageIndex ?? 1
-      }&pageSize=${pageSize ?? 10}`;
-    },
-  },
-  watch: {
-    queryParams: {
-      deep: true,
-      immediate: true,
-      async handler(value, oldValue) {
-        await this.queryData();
-      },
-    },
-  },
-  filters: {
-    isEmpty(value, empty = "--") {
-      if (value === void 0 || value === null) return empty;
-      return value;
-    },
-    isEmptyByDateTime(value, empty = "--") {
-      if (value === void 0 || value === null) return empty;
-      return value.toString().timeFormat("yyyy年M月d日 HH:mm");
+    /**
+     * 分页
+     */
+    handlePaginationChange(val) {},
+    /**
+     * 返回列表页
+     */
+    viewChange() {
+      this.isInfoView = false;
     },
   },
 };
@@ -702,67 +226,5 @@ export default {
 <style lang="less" scoped>
 #teamManagement {
   height: 100%;
-
-  /deep/.detail-dialog-root {
-    > div {
-      display: flex;
-      flex-direction: column;
-
-      > .el-dialog__body {
-        flex: 1;
-        overflow: auto;
-        max-height: 65vh;
-      }
-    }
-  }
-
-  .detail-dialog-content {
-    &-title {
-      margin-bottom: 16px;
-      color: #000000d9;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    > .el-row {
-      margin: -8px 0;
-
-      > .el-col {
-        margin: 8px 0;
-      }
-    }
-
-    & + .detail-dialog-content {
-      margin-top: 24px;
-      padding-top: 24px;
-      border-top: 1px dashed #e4e4e4;
-    }
-  }
-
-  .member-root {
-    display: flex;
-    margin: -8px;
-    flex-wrap: wrap;
-
-    > li {
-      margin: 8px;
-      font-size: 14px;
-      width: 45px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      > .el-avatar {
-        margin-bottom: 8px;
-
-        + div {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          width: 100%;
-          text-align: center;
-        }
-      }
-    }
-  }
 }
 </style>
