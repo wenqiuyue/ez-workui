@@ -53,6 +53,8 @@ axios.interceptors.request.use(
     let token = Vue.prototype.$xStorage.getItem("token");
     config.baseURL = axios.BaseUrl; //根域名
     //config.timeout=10000 //网络超时
+    token =
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJVc2VyTmFtZSI6ImFkbWluIiwiSWQiOjEsIk5hbWUiOiLlrZnkuIDmpaAiLCJJYXQiOiIyMDIxLzYvMjIgMTc6NTk6MDMiLCJFeHAiOiIyMDIxLzYvMjkgMTc6NTk6MDMifQ.msenUE4jPtXrva8VT78fAuyq_RI_PxTRcUVec6FniWc";
     if (token) {
       config.headers.Authorization = token;
     }

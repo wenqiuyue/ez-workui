@@ -10,20 +10,11 @@ Router.prototype.replace = function replace(location) {
 Vue.use(Router);
 //用户端在routes的index为0，管理端的index为1，其余页面请以此也在后面
 const routes = [
-  // {
-  //   //首页设为登录页，如果含有token则自动跳转到home页面
-  //   path: "/",
-  //   component: () => import("./views/login/Login"),
-  // },
-  // {
-  //   path: "/resetpassword",
-  //   component: () => import("./views/resetpassword/resetpassword"),
-  // },
   /**
    * 用户端
    */
   {
-    path: "",
+    path: "/user",
     name: "",
     component: () => import("@/userview/main"),
     children: [
@@ -33,15 +24,43 @@ const routes = [
         props: {
           menu: 0,
         },
-        redirect: "/teamManagement",
+        // redirect: "/profile",
         component: () => import("@/userview/main/content"),
         children: [
+          {
+            path: "/profile",
+            name: "个人信息",
+            component: () => import("@/userview/profile"),
+            layout: true,
+            icon: "hi-profile",
+          },
+          {
+            path: "/dataAnalysis",
+            name: "数据分析",
+            component: () => import("@/userview/data-analysis"),
+            layout: true,
+            icon: "hi-statistic",
+          },
           {
             path: "/teamManagement",
             name: "团队管理",
             component: () => import("@/userview/team-management"),
             layout: true,
             icon: "hi-customer",
+          },
+          {
+            path: "/attendanceStatistics",
+            name: "考勤统计",
+            component: () => import("@/userview/attendance-statistics"),
+            layout: true,
+            icon: "hi-attendance",
+          },
+          {
+            path: "/ruleSetting",
+            name: "规则设置",
+            component: () => import("@/userview/rule-setting"),
+            layout: true,
+            icon: "hi-liuchengshezhi",
           },
         ],
       },
@@ -145,6 +164,15 @@ const routes = [
         ],
       },
     ],
+  },
+  {
+    //首页设为登录页，如果含有token则自动跳转到home页面
+    path: "",
+    component: () => import("@/userview/login"),
+  },
+  {
+    path: "/resetpassword",
+    component: () => import("@/userview/reset-password"),
   },
 ];
 

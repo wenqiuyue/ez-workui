@@ -2,14 +2,14 @@
   <div id="teamManagement" v-loading="loading">
     <Header title="团队管理" titleEnglish="Team Management" class="baseHeader">
       <div slot="btnGroup">
-        <el-dropdown trigger="click">
+        <el-dropdown trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
             更多操作<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>邀请他人进入</el-dropdown-item>
-            <el-dropdown-item>创建团队</el-dropdown-item>
-            <el-dropdown-item>加入团队</el-dropdown-item>
+            <el-dropdown-item command="1">邀请他人进入</el-dropdown-item>
+            <el-dropdown-item command="2">创建团队</el-dropdown-item>
+            <el-dropdown-item command="3">加入团队</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div></Header
@@ -98,6 +98,10 @@
     </CContent>
     <!-- 详情页 -->
     <TeamInfoUser v-else @viewChange="viewChange"></TeamInfoUser>
+    <!-- 创建团队 -->
+    <AddTeam></AddTeam>
+    <!-- 加入团队 -->
+    <JoinTeam></JoinTeam>
   </div>
 </template>
 
@@ -111,7 +115,9 @@ export default {
     CTitle: () => import("@/components/CTitle"),
     CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
-    TeamInfoUser: () => import("./teamInfoUser"),
+    TeamInfoUser: () => import("./teaminfo-user"),
+    AddTeam: () => import("./add-team"),
+    JoinTeam: () => import("./join-team"),
   },
   data() {
     return {
@@ -217,6 +223,17 @@ export default {
             message: "已取消禁用",
           });
         });
+    },
+    /**
+     * 右边顶部更多操作
+     * 1 邀请他人  2 创建团队  3 加入团队
+     */
+    handleCommand(val) {
+      if (val == 2) {
+        this.$modal.show("addTeam");
+      } else if (val == 3) {
+        this.$modal.show("joinTeam");
+      }
     },
     /**
      * 分页

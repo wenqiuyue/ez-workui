@@ -1,8 +1,8 @@
 @font-face {
   font-family: "hiFont"; /* Project id 1454976 */
-  src: url('iconfont.woff2?t=1621497276954') format('woff2'),
-       url('iconfont.woff?t=1621497276954') format('woff'),
-       url('iconfont.ttf?t=1621497276954') format('truetype');
+  src: url('iconfont.woff2?t=1624691295245') format('woff2'),
+       url('iconfont.woff?t=1624691295245') format('woff'),
+       url('iconfont.ttf?t=1624691295245') format('truetype');
 }
 
 .hiFont {
@@ -11,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.hi-tousujianyi:before {
+  content: "\e6cb";
 }
 
 .hi-tixing1:before {

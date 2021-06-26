@@ -1,5 +1,5 @@
 <template>
-  <div id="teamInfoUser" v-loading="loading">
+  <div id="teaminfo-user">
     <!-- 列表页 -->
     <div class="info_header">
       <div class="h_left">
@@ -25,8 +25,8 @@
         </el-button-group>
       </div>
     </div>
-    <UserList></UserList>
-    <!-- <userTeamInfo></userTeamInfo> -->
+    <UserList v-if="viewType == 2"></UserList>
+    <TeamInfo v-else></TeamInfo>
   </div>
 </template>
 
@@ -34,6 +34,7 @@
 export default {
   components: {
     UserList: () => import("./user-list"),
+    TeamInfo: () => import("./team-info"),
   },
   data() {
     return {
@@ -53,7 +54,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-#teamInfoUser {
+#teaminfo-user {
   height: 100%;
   .info_header {
     background: #ffffff;

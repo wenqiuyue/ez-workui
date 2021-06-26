@@ -6,6 +6,8 @@ import "element-ui/lib/theme-chalk/display.css";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
+import echarts from "echarts";
+import _ from "lodash";
 
 import "@/assets/HiFont/iconfont.js"; //字体图标
 import "@/assets/HiFont/iconfont.css"; //字体图标
@@ -18,7 +20,9 @@ Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.use(xVar);
 Vue.use(xUrl);
-Vue.use(VModal)
+Vue.use(VModal);
+
+Vue.prototype.$echarts = echarts;
 
 new Vue({
   router,

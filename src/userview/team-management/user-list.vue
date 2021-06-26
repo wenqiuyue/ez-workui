@@ -43,7 +43,7 @@
           <span v-else>{{ scope.row.MemberCount }}人</span>
         </template></el-table-column
       >
-      <el-table-column fixed="right" label="操作" width="120" align="center">
+      <el-table-column label="操作" width="120" align="center">
         <template slot-scope="scope">
           <c-btn>
             <span @click="handleUserDetail(scope.row)">详情</span>
@@ -54,6 +54,7 @@
     <div class="page">
       <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
     </div>
+    <UserInfo></UserInfo>
   </div>
 </template>
 <script>
@@ -61,7 +62,7 @@ export default {
   components: {
     CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
-    // userTeamInfo: () => import("./userTeamInfo"),
+    UserInfo: () => import("./user-info"),
   },
   data() {
     return {
@@ -73,6 +74,116 @@ export default {
           MType: 1,
           MemberCount: 20,
           Shape: 1,
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
+        },
+        {
+          Name: "团队名称",
+          UserName: "文秋月",
+          CreatTime: "2021-02-02 12:21",
+          AdminUserName: "文秋月",
+          MemberCount: 20,
+          Vsersion: {
+            Name: 20,
+          },
+          ExpireTime: "2021-02-02 12:21",
         },
         {
           Name: "团队名称",
@@ -120,7 +231,7 @@ export default {
      * 查看成员详情
      */
     handleUserDetail(val) {
-      this.$modal.show("userTeamInfo");
+      this.$modal.show("userInfo");
     },
     /**
      * 分页
@@ -132,6 +243,10 @@ export default {
 <style lang="less" scoped>
 .user-list {
   margin-top: 10px;
+  height: calc(100% - 50px);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
   .mem_count {
     cursor: pointer;
     &:hover {
@@ -150,6 +265,12 @@ export default {
       line-height: 28px;
       font-size: 13px;
       display: inline-block;
+    }
+  }
+  /deep/.el-table {
+    .el-table__body-wrapper {
+      height: calc(100% - 47px);
+      overflow-y: auto;
     }
   }
 }
