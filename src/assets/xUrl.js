@@ -12,8 +12,8 @@ if (window.location.protocol === "https:") {
 if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   //***** 测试 *****
   SocketUrl += "120.25.67.116:773";
-  // axios.BaseUrl = "http://192.168.1.105";
-  axios.BaseUrl = "http://122.9.151.39:702";
+  axios.BaseUrl = "http://192.168.0.225";
+  // axios.BaseUrl = "http://122.9.151.39:702";
 } else {
   //***** 线上 *****
   SocketUrl += window.location.hostname;
@@ -53,8 +53,8 @@ axios.interceptors.request.use(
     let token = Vue.prototype.$xStorage.getItem("token");
     config.baseURL = axios.BaseUrl; //根域名
     //config.timeout=10000 //网络超时
-    token =
-      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJVc2VyTmFtZSI6ImFkbWluIiwiSWQiOjEsIk5hbWUiOiLlrZnkuIDmpaAiLCJJYXQiOiIyMDIxLzYvMjIgMTc6NTk6MDMiLCJFeHAiOiIyMDIxLzYvMjkgMTc6NTk6MDMifQ.msenUE4jPtXrva8VT78fAuyq_RI_PxTRcUVec6FniWc";
+    // token =
+    //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJVc2VyTmFtZSI6ImFkbWluIiwiSWQiOjEsIk5hbWUiOiLlrZnkuIDmpaAiLCJJYXQiOiIyMDIxLzYvMjIgMTc6NTk6MDMiLCJFeHAiOiIyMDIxLzYvMjkgMTc6NTk6MDMifQ.msenUE4jPtXrva8VT78fAuyq_RI_PxTRcUVec6FniWc";
     if (token) {
       config.headers.Authorization = token;
     }

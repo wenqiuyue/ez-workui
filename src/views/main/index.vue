@@ -14,6 +14,18 @@
           <!-- 标题 -->
           <form>
             <h3>工作平台</h3>
+            <el-dropdown
+              style="text-align: right; margin: 2rem 1rem"
+              trigger="click"
+            >
+              <i
+                class="el-icon-s-tools"
+                style="font-size: 22px; cursor: pointer"
+              ></i>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>退出</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </form>
 
           <!-- 菜单列表 -->

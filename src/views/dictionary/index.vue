@@ -163,11 +163,7 @@ export default {
           };
         }
         this.$http
-          .post(
-            this.dic_url +
-              "/MGT/System/DataDictionary/DeleteDataDictionary.ashx",
-            param
-          )
+          .post(this.dic_url + "/Dictionary/DeleteDataDictionary.ashx", param)
           .then((res) => {
             if (res.res == 0) {
               this.$message({
@@ -202,13 +198,9 @@ export default {
       this.AddFather = false;
       this.editObj = {};
       this.$http
-        .post(
-          this.dic_url +
-            "/MGT/System/DataDictionary/NewGetDataDictionaryList.ashx",
-          {
-            name: this.searchValue,
-          }
-        )
+        .post(this.dic_url + "/Dictionary/NewGetDataDictionaryList.ashx", {
+          name: this.searchValue,
+        })
         .then((res) => {
           if (res.res == 0) {
             this.tableData = res.data;
@@ -231,16 +223,13 @@ export default {
         FID = "";
       }
       this.$http
-        .post(
-          this.dic_url + "/MGT/System/DataDictionary/AddDataDictionary.ashx",
-          {
-            key: this.editObj.Key,
-            value: this.editObj.Value,
-            FID,
-            icon,
-            Color,
-          }
-        )
+        .post(this.dic_url + "/Dictionary/AddDataDictionary.ashx", {
+          key: this.editObj.Key,
+          value: this.editObj.Value,
+          FID,
+          icon,
+          Color,
+        })
         .then((res) => {
           if (res.res == 0) {
             this.$message({
@@ -276,19 +265,16 @@ export default {
           return;
         }
         this.$http
-          .post(
-            this.dic_url + "/MGT/System/DataDictionary/AddDataDictionary.ashx",
-            {
-              //添加子级
-              key: this.editObj.Key,
-              value: this.editObj.Value,
-              FID: this.editObj.FDictionaryID,
-              icon: this.editObj.Icon,
-              Color: this.editObj.Color,
-              custom: this.editObj.Custom,
-              name: this.editObj.Name,
-            }
-          )
+          .post(this.dic_url + "/Dictionary/AddDataDictionary.ashx", {
+            //添加子级
+            key: this.editObj.Key,
+            value: this.editObj.Value,
+            FID: this.editObj.FDictionaryID,
+            icon: this.editObj.Icon,
+            Color: this.editObj.Color,
+            custom: this.editObj.Custom,
+            name: this.editObj.Name,
+          })
           .then((res) => {
             if (res.res == 0) {
               this.$message({
@@ -304,18 +290,14 @@ export default {
       if (!this.add && !this.editObj.DictionaryID) {
         //修改父级
         this.$http
-          .post(
-            this.dic_url +
-              "/MGT/System/DataDictionary/EditDataDictionaryList.ashx",
-            {
-              dictionaryID: this.editObj.FDictionaryID,
-              key: this.editObj.Key,
-              value: this.editObj.Value,
-              icon: this.editObj.Icon,
-              Color: this.editObj.Color,
-              custom: this.editObj.Custom,
-            }
-          )
+          .post(this.dic_url + "/Dictionary/EditDataDictionaryList.ashx", {
+            dictionaryID: this.editObj.FDictionaryID,
+            key: this.editObj.Key,
+            value: this.editObj.Value,
+            icon: this.editObj.Icon,
+            Color: this.editObj.Color,
+            custom: this.editObj.Custom,
+          })
           .then((res) => {
             if (res.res == 0) {
               this.$message({
@@ -330,20 +312,16 @@ export default {
       if (!this.add && this.editObj.DictionaryID) {
         //修改子级
         this.$http
-          .post(
-            this.dic_url +
-              "/MGT/System/DataDictionary/EditDataDictionaryList.ashx",
-            {
-              dictionaryID: this.editObj.DictionaryID,
-              fDictionaryID: this.editObj.FDictionaryID,
-              key: this.editObj.Key,
-              value: this.editObj.Value,
-              icon: this.editObj.Icon,
-              Color: this.editObj.Color,
-              custom: this.editObj.Custom,
-              name: this.editObj.Name,
-            }
-          )
+          .post(this.dic_url + "/Dictionary/EditDataDictionaryList.ashx", {
+            dictionaryID: this.editObj.DictionaryID,
+            fDictionaryID: this.editObj.FDictionaryID,
+            key: this.editObj.Key,
+            value: this.editObj.Value,
+            icon: this.editObj.Icon,
+            Color: this.editObj.Color,
+            custom: this.editObj.Custom,
+            name: this.editObj.Name,
+          })
           .then((res) => {
             if (res.res == 0) {
               this.$message({

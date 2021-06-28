@@ -1,18 +1,14 @@
 <template>
-  <div id="teamManagement" v-loading="loading">
+  <div id="teamManagement">
     <Header
       title="团队管理"
       titleEnglish="Team Management"
       class="baseHeader"
     />
     <!-- 列表页 -->
-    <CContent v-if="!isInfoView">
+    <CContent v-if="!isInfoView" v-loading="loading">
       <template #search>
-        <CTitle
-          :TInfo="titleInfo"
-          @addClick="handleAdd"
-          @searchClick="handleSearchByKeyWord"
-        />
+        <CTitle :TInfo="titleInfo" @searchClick="handleSearchByKeyWord" />
       </template>
       <template #main>
         <el-table :data="tableData">
@@ -34,7 +30,11 @@
             show-overflow-tooltip
             align="center"
             ><template slot-scope="scope">
-              {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+              {{
+                scope.row.CreatTime
+                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                  : ""
+              }}
             </template>
           </el-table-column>
           <el-table-column
@@ -42,7 +42,20 @@
             prop="AdminUserName"
             show-overflow-tooltip
             align="center"
-          />
+          >
+            <template slot-scope="scope">
+              <div
+                v-if="scope.row.AdminUserName && scope.row.AdminUserName.length"
+              >
+                <span
+                  v-for="(admin, index) in scope.row.AdminUserName"
+                  :key="index"
+                  >{{ index == 0 ? admin : `、${admin}` }}</span
+                >
+              </div>
+              <div v-else>无</div>
+            </template>
+          </el-table-column>
           <el-table-column label="团队人数" prop="MemberCount" align="center"
             ><template slot-scope="scope">
               {{ scope.row.MemberCount }}人
@@ -50,7 +63,12 @@
           >
           <el-table-column label="购买版本" align="center"
             ><template slot-scope="scope">
-              {{ scope.row.Vsersion.Name }}人
+              {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
+            </template></el-table-column
+          >
+          <el-table-column label="服务器" align="center"
+            ><template slot-scope="scope">
+              {{ scope.row.Vsersion ? scope.row.Vsersion.Capacity : "无" }}
             </template></el-table-column
           >
           <el-table-column
@@ -60,25 +78,38 @@
             align="center"
           >
             <template slot-scope="scope">{{
-              scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:s")
+              scope.row.ExpireTime
+                ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:ss")
+                : "--"
             }}</template></el-table-column
-          >
-          <el-table-column label="服务器信息" align="center"
-            ><template slot-scope="scope">
-              {{ scope.row.Vsersion.Name }}人
-            </template></el-table-column
           >
           <el-table-column
             fixed="right"
             label="操作"
-            width="120"
+            width="150"
             align="center"
           >
             <template slot-scope="scope">
-              <c-btn>
-                <span @click="queryTeamManagementDetail(scope.row)">详情</span>
-                <span @click="handleDeleteRow(scope.row)">禁用</span>
-              </c-btn>
+              <el-button
+                type="primary"
+                size="small"
+                @click="queryTeamManagementDetail(scope.row)"
+                >详情</el-button
+              >
+              <el-button
+                v-if="scope.row.Shape == 1"
+                type="danger"
+                size="small"
+                @click="handleDeleteRow(scope.row, 0)"
+                >禁用</el-button
+              >
+              <el-button
+                v-else-if="scope.row.Shape == 0"
+                type="success"
+                size="small"
+                @click="handleDeleteRow(scope.row, 1)"
+                >启用</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -88,7 +119,7 @@
       </template>
     </CContent>
     <!-- 详情页 -->
-    <TeamInfo v-else @viewChange="viewChange"></TeamInfo>
+    <TeamInfo v-else @viewChange="viewChange" :selRow="selRow"></TeamInfo>
   </div>
 </template>
 
@@ -100,60 +131,16 @@ export default {
     Header: () => import("@/components/Header"),
     CContent: () => import("@/components/CContent"),
     CTitle: () => import("@/components/CTitle"),
-    CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
     TeamInfo: () => import("./teamInfo"),
   },
   data() {
     return {
+      selRow: null, //选择的团队
+      searchVal: null, //搜索的内容
       isInfoView: false, //是否是详情页面
       loading: false,
-      tableData: [
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-      ],
+      tableData: [],
       titleInfo: {
         btnShow: [
           { type: "addBtn", ishow: false, disabled: true },
@@ -175,44 +162,82 @@ export default {
       },
     };
   },
-  created() {},
+  mounted() {
+    this.getTeamList();
+  },
   methods: {
-    /** 添加*/
-    handleAdd() {},
+    /**
+     * 获取团队列表
+     */
+    getTeamList() {
+      this.loading = true;
+      const data = {
+        searchText: this.searchVal,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+      };
+      this.$http
+        .post("/Management/TeamManagement/TeamList.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data.data;
+            this.pageData.totalNum = resp.data.total;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
     /**搜索 */
-    handleSearchByKeyWord() {},
+    handleSearchByKeyWord(val) {
+      this.searchVal = val;
+      this.getTeamList();
+    },
     /**
      * 查看详情
      */
     queryTeamManagementDetail(val) {
+      this.selRow = val;
       this.isInfoView = true;
     },
     /**
      * 禁用
      */
-    handleDeleteRow(val) {
-      this.$confirm("此操作将禁用该团队, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
+    handleDeleteRow(val, type) {
+      this.$confirm(
+        `此操作将${type == 0 ? "禁用" : "启用"}该团队, 是否继续?`,
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      )
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "禁用成功!",
-          });
+          this.$http
+            .get("/Teams/DelTeam.ashx", { ids: [val.Id], operation: type })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  type: "success",
+                  message: `${type == 0 ? "禁用" : "启用"}成功！`,
+                });
+                this.getTeamList();
+              }
+            });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消禁用",
+            message: `已取消${type == 0 ? "禁用" : "启用"}`,
           });
         });
     },
     /**
      * 分页
      */
-    handlePaginationChange(val) {},
+    handlePaginationChange(val) {
+      this.pageData = val;
+      this.getTeamList();
+    },
     /**
      * 返回列表页
      */

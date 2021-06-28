@@ -1,6 +1,12 @@
 <template>
   <div class="roleModal">
-    <XModal name="roleModal" width="40%" height="30%">
+    <XModal
+      name="roleModal"
+      width="40%"
+      height="30%"
+      @closed="closed"
+      @opened="opened"
+    >
       <CWinTmp
         :indexData="indexData"
         v-loading="loading"
@@ -38,6 +44,10 @@ export default {
       type: Boolean,
       default: null,
     },
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
@@ -53,16 +63,26 @@ export default {
       },
     };
   },
-  watch: {
-    isAdd() {
-      if (this.isAdd) {
-        this.indexData.name = "添加角色";
-      } else {
-        this.indexData.name = "编辑角色";
-      }
-    },
-  },
   methods: {
+    /**
+     * 弹窗打开回调
+     */
+    opened() {
+      this.$nextTick(() => {
+        if (this.isAdd) {
+          this.indexData.name = "添加角色";
+        } else {
+          this.indexData.name = "编辑角色";
+          this.formData.role = this.selRow.Name;
+        }
+      });
+    },
+    /**
+     * 弹窗关闭回调
+     */
+    closed() {
+      this.formData.role = null;
+    },
     /**
      * 提交
      */
@@ -70,12 +90,54 @@ export default {
       this.$refs.roleForm.validate((valid) => {
         if (valid) {
           this.$refs.cwt.toggleSubmit();
+          if (this.isAdd) {
+            this.addRole();
+          } else {
+            this.editRole();
+          }
         } else {
           return;
         }
       });
-
-      console.log("提交");
+    },
+    /**
+     * 确认添加
+     */
+    addRole() {
+      this.$http
+        .post("/Management/RoleManagement/AddRole.ashx", {
+          name: this.formData.role,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              message: resp.msg,
+              type: "success",
+            });
+            this.$modal.hide("roleModal");
+            this.$emit("success");
+          }
+        });
+    },
+    /**
+     * 确认编辑
+     */
+    editRole() {
+      this.$http
+        .post("/Management/RoleManagement/EditRole.ashx", {
+          name: this.formData.role,
+          id: this.selRow.Id,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              message: resp.msg,
+              type: "success",
+            });
+            this.$modal.hide("roleModal");
+            this.$emit("success");
+          }
+        });
     },
   },
 };

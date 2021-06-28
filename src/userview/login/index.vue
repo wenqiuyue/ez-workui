@@ -14,8 +14,7 @@
           <div id="loginForm" @keyup.enter="login" v-if="showLogin">
             <el-input
               v-model="input"
-              placeholder="请输入你的邮箱"
-              @change="inputchange()"
+              placeholder="请输入你的账户"
               :autofocus="true"
               suffix-icon="el-icon-user"
             ></el-input>
@@ -24,11 +23,29 @@
               v-model="password"
               show-password
             ></el-input>
-            <span class="v-forget" @click="showLogin = false">忘记密码</span>
+            <!-- <el-select v-model="teamValue" filterable placeholder="请选择团队">
+              <el-option
+                v-for="item in teamoptions"
+                :key="item.Id"
+                :label="item.Name"
+                :value="item.Id"
+              >
+              </el-option>
+            </el-select> -->
+            <el-autocomplete
+              v-model="teamValue"
+              :fetch-suggestions="querySearchAsync"
+              placeholder="请选择团队"
+            ></el-autocomplete>
+            <div class="v-forget" @click="showLogin = false">忘记密码</div>
             <div class="hp-btn">
               <el-button class="v-button" @click="login" :loading="loading"
                 >登录</el-button
               >
+            </div>
+            <div class="register">
+              <span>还没有账号？</span>
+              <span @click="handleRegister">立即注册</span>
             </div>
           </div>
           <!-- 忘记密码 -->
@@ -76,9 +93,11 @@
 export default {
   data() {
     return {
+      teamoptions: [], //团队选项
       loading: false,
       input: "",
       password: "",
+      teamValue: null, //选择的团队
       ruleForm: {
         Email: "",
       },
@@ -101,6 +120,20 @@ export default {
     };
   },
   methods: {
+    /**
+     * 点击立即注册
+     */
+    handleRegister() {},
+    /**
+     * 获取团队
+     */
+    // getTeams() {
+    //   this.$http.get("/Teams/GetAllTeams.ashx").then((resp) => {
+    //     if (resp.res == 0) {
+    //       this.teamoptions = resp.data;
+    //     }
+    //   });
+    // },
     onConfirm(ruleForm) {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
@@ -132,12 +165,13 @@ export default {
           acc: this.input,
           pwd: this.password,
           info: null,
+          teamId: this.teamValue,
         };
         if (window.hasOwnProperty("plus")) {
           params.info = JSON.stringify(window.plus.push.getClientInfo());
         }
         this.$http
-          .post("/Login.ashx", params)
+          .post("/UserLogin.ashx", params)
           .then((req) => {
             //判断返回的数据进行不同操作 以下默认为验证通过跳转到主页
             this.loading = false;
@@ -146,7 +180,13 @@ export default {
                 message: "登陆成功",
                 type: "success",
               });
+              console.log(req);
               this.$xStorage.setItem("token", req.data.token, req.data.exp);
+              this.$xStorage.setItem(
+                "user-role",
+                req.data.RoleName,
+                req.data.exp
+              );
               const query = window.location.search.substr(1).split("&");
               for (let item of query) {
                 if (item.indexOf("callback") >= 0) {
@@ -154,9 +194,11 @@ export default {
                   return;
                 }
               }
-              this.$router.push({
-                path: "/home",
-              });
+              if (req.data.RoleName == "管理员") {
+                this.$router.push({
+                  path: "/manager",
+                });
+              }
             }
           })
           .catch((err) => {
@@ -164,12 +206,27 @@ export default {
           });
       }
     },
-    inputchange() {
-      let bool = /^([0-9A-Za-z\-_\.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g;
-      if (bool.test(this.input)) {
-        //验证邮箱格式
+    querySearchAsync(queryString, cb) {
+      if (!queryString) {
+        cb([]);
+      } else {
+        this.$http
+          .get("/Teams/GetAllTeams.ashx", {
+            params: { searchText: queryString },
+          })
+          .then((resp) => {
+            if (resp.res == 0) {
+              cb(resp.data);
+            }
+          });
       }
     },
+    // inputchange() {
+    //   let bool = /^([0-9A-Za-z\-_\.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g;
+    //   if (bool.test(this.input)) {
+    //     //验证邮箱格式
+    //   }
+    // },
   },
 };
 </script>
@@ -262,11 +319,15 @@ export default {
         line-height: 5rem;
       }
     }
+    /deep/.el-select,
+    .el-autocomplete {
+      display: block;
+    }
   }
 }
 
 .v-button {
-  margin-top: 5rem;
+  margin-top: 3rem;
   background: linear-gradient(
     90deg,
     rgba(97, 193, 254, 1) 0%,
@@ -302,7 +363,17 @@ export default {
     color: #448ef5;
   }
 }
-
+.register {
+  margin-top: 1.6rem;
+  font-size: 14px;
+  span:first-child {
+    color: #909399;
+  }
+  span:last-child {
+    color: #409eff;
+    cursor: pointer;
+  }
+}
 .modalinput {
   h3 {
     font-size: 1.6rem;

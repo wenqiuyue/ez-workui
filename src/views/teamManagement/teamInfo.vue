@@ -1,7 +1,7 @@
 <template>
-  <div id="teamInfo" v-loading="loading">
+  <div id="teamInfo">
     <!-- 列表页 -->
-    <CContent>
+    <CContent v-if="selRow">
       <template #search>
         <div class="info_header">
           <div class="h_left">
@@ -9,12 +9,12 @@
               ><i class="el-icon-d-arrow-left"></i>团队详情</span
             >
             <el-divider direction="vertical"></el-divider>
-            <span>XXX团队</span>
+            <span>{{ selRow.Name }}</span>
           </div>
         </div>
       </template>
       <template #main>
-        <el-table :data="tableData">
+        <el-table :data="tableData" v-loading="loading">
           <el-table-column label="成员姓名" prop="Name" align="center" />
           <el-table-column
             label="加入时间"
@@ -22,7 +22,11 @@
             show-overflow-tooltip
             align="center"
             ><template slot-scope="scope">
-              {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+              {{
+                scope.row.CreatTime
+                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                  : ""
+              }}
             </template>
           </el-table-column>
           <el-table-column label="角色" prop="MType" align="center"
@@ -31,7 +35,9 @@
             </template></el-table-column
           >
           <el-table-column label="状态" prop="Shape" align="center"
-            ><template slot-scope="scope"> 正常 </template></el-table-column
+            ><template slot-scope="scope">
+              {{ $D.ITEM("g_status", scope.row.Shape).name }}
+            </template></el-table-column
           >
           <el-table-column label="可查看成员" prop="MemberCount" align="center"
             ><template slot-scope="scope">
@@ -39,27 +45,30 @@
                 trigger="hover"
                 placement="top"
                 width="350"
-                v-if="true"
+                v-if="scope.row.VisibleUser.length"
               >
                 <div slot="reference">
-                  <p class="mem_count">{{ scope.row.MemberCount }}人</p>
+                  <p class="mem_count">{{ scope.row.VisibleUser.length }}人</p>
                 </div>
                 <ul class="member-style">
-                  <li v-for="(item, index) in 8" :key="index">
-                    <img
-                      src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                      alt=""
-                    />
-                    <span>陈一帆</span>
+                  <li
+                    v-for="(item, index) in scope.row.VisibleUser"
+                    :key="index"
+                  >
+                    <img :src="item.Picture" alt="" />
+                    <span>{{ item.Name }}</span>
                     <i
                       :style="
-                        (index + 1) % 3 == 0 || index == 7 ? 'display:none' : ''
+                        (index + 1) % 3 == 0 ||
+                        index == scope.row.VisibleUser.length - 1
+                          ? 'display:none'
+                          : ''
                       "
                     ></i>
                   </li>
                 </ul>
               </el-popover>
-              <span v-else>{{ scope.row.MemberCount }}人</span>
+              <span v-else>{{ scope.row.VisibleUser.length }}人</span>
             </template></el-table-column
           >
           <el-table-column
@@ -69,18 +78,18 @@
             align="center"
           >
             <template slot-scope="scope">
-              <c-btn>
-                <span @click="handleUserDetail(scope.row)">详情</span>
-              </c-btn>
+              <el-button
+                type="primary"
+                size="small"
+                @click="handleUserDetail(scope.row)"
+                >详情</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
       </template>
-      <template #pages>
-        <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
-      </template>
     </CContent>
-    <userTeamInfo></userTeamInfo>
+    <userTeamInfo :selUser="selUser"></userTeamInfo>
   </div>
 </template>
 
@@ -88,74 +97,50 @@
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
-    CBtn: () => import("@/components/CBtn"),
-    CPages: () => import("@/components/CPages"),
     userTeamInfo: () => import("./userTeamInfo"),
+  },
+  props: {
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
+      selUser: null,
       loading: false,
-      tableData: [
-        {
-          Name: "团队名称",
-          CreatTime: "2021-02-02 12:21",
-          MType: 1,
-          MemberCount: 20,
-          Shape: 1,
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-      ],
-      pageData: {
-        pageIndex: 1,
-        pageSize: 10,
-        totalNum: 0,
-      },
+      tableData: [],
     };
   },
-  created() {},
+  mounted() {
+    this.$nextTick(() => {
+      this.getTeamList();
+    });
+  },
   methods: {
+    /**
+     * 获取团队成员列表
+     */
+    getTeamList() {
+      this.loading = true;
+      this.$http
+        .post("/Teams/TeamManagementDetail.ashx", { teamId: this.selRow.Id })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data.Membersdata;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
     /**
      * 查看成员详情
      */
     handleUserDetail(val) {
+      this.selUser = val;
       this.$modal.show("userTeamInfo");
     },
-    /**
-     * 分页
-     */
-    handlePaginationChange(val) {},
   },
 };
 </script>

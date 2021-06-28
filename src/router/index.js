@@ -8,13 +8,18 @@ Router.prototype.replace = function replace(location) {
   return originalPush.call(this, location).catch((err) => err);
 };
 Vue.use(Router);
-//用户端在routes的index为0，管理端的index为1，其余页面请以此也在后面
+//用户端在routes的index为1，管理端的index为2，其余页面请以此也在后面
 const routes = [
+  {
+    //首页设为登录页，如果含有token则自动跳转到home页面
+    path: "",
+    component: () => import("@/userview/login"),
+  },
   /**
    * 用户端
    */
   {
-    path: "/user",
+    path: "",
     name: "",
     component: () => import("@/userview/main"),
     children: [
@@ -24,7 +29,7 @@ const routes = [
         props: {
           menu: 0,
         },
-        // redirect: "/profile",
+        redirect: "/profile",
         component: () => import("@/userview/main/content"),
         children: [
           {
@@ -165,11 +170,7 @@ const routes = [
       },
     ],
   },
-  {
-    //首页设为登录页，如果含有token则自动跳转到home页面
-    path: "",
-    component: () => import("@/userview/login"),
-  },
+
   {
     path: "/resetpassword",
     component: () => import("@/userview/reset-password"),
@@ -197,8 +198,8 @@ const _flat = (data) => {
 
   return result;
 };
-const layoutRoutes = _flat([routes[1]]);
-const layoutRoutesUser = _flat([routes[0]]);
+const layoutRoutes = _flat([routes[2]]);
+const layoutRoutesUser = _flat([routes[1]]);
 export { routes, layoutRoutes, layoutRoutesUser };
 
 export default new Router({

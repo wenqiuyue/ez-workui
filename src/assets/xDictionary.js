@@ -6,8 +6,7 @@ import axios from "axios";
  * 时间：2019-12-13
  */
 const dic_url =
-  process.env.VUE_APP_DIC +
-  "/MGT/System/DataDictionary/NewGetDataDictionaryList.ashx";
+  process.env.VUE_APP_DIC + "/Dictionary/NewGetDataDictionaryList.ashx";
 export default class xDictionary {
   constructor() {
     this.dic = [];

@@ -1,79 +1,79 @@
 <template>
   <div class="userInfo">
-    <XModal name="userInfo" width="40%" height="70%">
+    <XModal name="userInfo" width="40%" height="70%" @opened="opened">
       <CWinTmp :indexData="indexData" v-loading="loading">
-        <div slot="form" class="info_content">
+        <div slot="form" class="info_content" v-if="userInfo">
           <el-row>
             <el-col :span="24"
               ><div class="user_pic">
-                <el-avatar
-                  src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                ></el-avatar>
-                <span class="name">文秋月</span>
+                <el-avatar :src="$url + userInfo.Picture"></el-avatar>
+                <span class="name">{{ userInfo.Name }}</span>
               </div></el-col
             >
 
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">用户账户：</span>
-                文秋月
+                {{ userInfo.UseName }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">用户昵称：</span>
-                文秋月
+                {{ userInfo.Name ? userInfo.Name : "无" }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">用户密码：</span>
-                123123
+                {{ userInfo.Pwd }}
               </div></el-col
             ><el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">性别：</span>
-                女
+                {{ userInfo.Sex == 1 ? "男" : "女" }}
               </div></el-col
             ><el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
-                管理员
-              </div></el-col
-            >
-            <el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">用户属性：</span>
-                属性
+                {{ userInfo.RoleName }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">邮箱：</span>
-                1402472721@qq.com
+                {{ userInfo.addres }}
               </div></el-col
             ><el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">联系方式：</span>
-                15802120322
+                {{ userInfo.Phone ? userInfo.Phone : "无" }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">注册时间：</span>
-                2021-6-24 16:49
+                {{
+                  userInfo.SignTime
+                    ? userInfo.SignTime.timeFormat("yyyy-MM-dd HH:mm")
+                    : ""
+                }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">上次登录：</span>
-                2021-6-24 16:49
+                {{
+                  userInfo.LastClientOnline
+                    ? userInfo.LastClientOnline.timeFormat("yyyy-MM-dd HH:mm")
+                    : "无"
+                }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">团队数量：</span>
-                30
+                {{ userInfo.TeamCount }}
               </div></el-col
             >
           </el-row>
@@ -88,17 +88,40 @@ export default {
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
   },
+  props: {
+    selRow: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
       loading: false,
-      visible: false,
-      data: null,
       indexData: {
         type: "",
         name: "成员详情",
         xModalName: "userInfo",
       },
+      userInfo: null,
     };
+  },
+  methods: {
+    /**
+     * 弹窗打开回调
+     */
+    opened() {
+      this.$nextTick(() => {
+        this.loading = true;
+        this.$http
+          .get("/Management/UserManagement/GetUserDetail.ashx", {
+            params: { usId: this.selRow.UsId },
+          })
+          .then((resp) => {
+            this.userInfo = resp.data;
+          })
+          .finally(() => (this.loading = false));
+      });
+    },
   },
 };
 </script>
