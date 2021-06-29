@@ -1,11 +1,11 @@
 <template>
-  <div id="editionManager" v-loading="loading">
+  <div id="editionManager">
     <Header
       title="版本管理"
       titleEnglish="Version  Management"
       class="baseHeader"
     />
-    <CContent>
+    <CContent v-loading="loading">
       <template #search>
         <CTitle
           :TInfo="titleInfo"
@@ -19,40 +19,57 @@
           :cell-style="cellStyle"
           :header-cell-style="cellStyle"
         >
-          <el-table-column label="版本名称" prop="role" />
-          <el-table-column label="创建时间" prop="date" sortable />
-          <el-table-column label="时长" prop="time" sortable>
-            <template slot-scope="scope"> {{ scope.row.time }}年 </template>
+          <el-table-column label="版本名称" prop="Name" />
+
+          <el-table-column label="时长" prop="Period" sortable>
+            <template slot-scope="scope"> {{ scope.row.Period }}天 </template>
           </el-table-column>
-          <el-table-column label="可加入人数" prop="num" sortable>
-            <template slot-scope="scope"> {{ scope.row.num }}人 </template>
+          <el-table-column label="可加入人数" prop="Capacity" sortable>
+            <template slot-scope="scope">
+              {{ scope.row.Capacity ? scope.row.Capacity : 0 }}人
+            </template>
           </el-table-column>
-          <el-table-column label="存储空间" prop="save" sortable
-            ><template slot-scope="scope">
-              {{ scope.row.save }}G
-            </template></el-table-column
-          >
-          <el-table-column label="服务器地址" prop="m6"
-            ><template slot-scope="scope">
-              {{ scope.row.m6 }}
-            </template></el-table-column
-          >
-          <el-table-column label="购买人数" prop="m7" sortable
+          <!-- <el-table-column label="购买人数" prop="m7" sortable
             ><template slot-scope="scope">
               {{ scope.row.m7 }}人
             </template></el-table-column
-          >
-          <el-table-column label="价格" prop="m8" sortable
+          > -->
+          <el-table-column label="价格" prop="Price" sortable
             ><template slot-scope="scope">
-              {{ scope.row.m8 }}元
+              {{ scope.row.Price }}元
             </template></el-table-column
           >
+          <el-table-column label="创建时间" prop="CreatTime" sortable
+            ><template slot-scope="scope">
+              {{
+                scope.row.CreatTime
+                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                  : "--"
+              }}
+            </template>
+          </el-table-column>
           <el-table-column fixed="right" label="操作">
             <template slot-scope="scope">
-              <c-btn>
-                <span @click="handleView(scope.row)">编辑</span>
-                <span @click="handleDel(scope.row)">删除</span>
-              </c-btn>
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleView(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                v-if="scope.row.IsSoldOut == 1"
+                type="danger"
+                size="mini"
+                @click="handleDel(scope.row, 0)"
+                >下架</el-button
+              >
+              <el-button
+                v-else-if="scope.row.IsSoldOut == 0"
+                type="success"
+                size="mini"
+                @click="handleDel(scope.row, 1)"
+                >上架</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -81,6 +98,7 @@ export default {
     VersionModal: () => import("./versionModal"),
   },
   data: () => ({
+    searchtext: null, //搜索的内容
     editObj: {},
     loading: false,
     cellStyle: {
@@ -91,48 +109,7 @@ export default {
       name: "",
       departmentCode: "",
     },
-    tableData: [
-      {
-        date: "2016-05-03",
-        role: "管理员",
-        time: 2,
-        num: 100,
-        save: 500,
-        m6: "192.168.1.20",
-        m7: 128,
-        m8: 999,
-      },
-      {
-        date: "2016-05-03",
-        role: "用户",
-        time: 1,
-        num: 100,
-        save: 520,
-        m6: "192.168.1.20",
-        m7: 128,
-        m8: 999,
-      },
-      {
-        date: "2016-05-03",
-        role: "用户",
-        time: 2,
-        num: 100,
-        save: 500,
-        m6: "192.168.1.20",
-        m7: 128,
-        m8: 919,
-      },
-      {
-        date: "2016-05-04",
-        role: "超级管理员",
-        time: 23,
-        num: 200,
-        save: 500,
-        m6: "192.168.1.20",
-        m7: 128,
-        m8: 999,
-      },
-    ],
+    tableData: [],
     titleInfo: {
       btnShow: [
         { type: "addBtn", ishow: true },
@@ -153,17 +130,35 @@ export default {
     },
     isAdd: true, //是否是添加类型
   }),
+  mounted() {
+    this.getDataList();
+  },
   methods: {
     /**
      * 获取列表数据
      */
-    getDataList() {},
+    getDataList() {
+      this.loading = true;
+      const data = {
+        searchtext: this.searchtext,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+      };
+      this.$http
+        .get("/Management/VersionManagement/VersionList.ashx", { params: data })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data.Data;
+            this.pageData.totalNum = resp.data.TotalCount;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
     // 打开窗口
-    openWin(ty, code, obj) {
+    openWin(ty, obj) {
       this.indexData = {
         type: ty === "ad" ? "Add" : "Edit",
         name: ty === "ad" ? "添加版本" : "编辑版本",
-        vacationCode: code,
         xModalName: "versionModal",
       };
       if (ty == "ed") {
@@ -182,29 +177,48 @@ export default {
     handleAdd() {
       this.openWin("ad");
     },
-    async handlePaginationChange(...a) {
-      console.log(a);
+    /**
+     * 分页
+     */
+    handlePaginationChange(a) {
+      this.pageData = a;
+      this.getDataList();
     },
     /**
-     * 删除
+     * 上架和下架
      */
-    handleDel(row) {
-      console.log(row);
-      this.$confirm("此操作将删除该版本, 是否继续?", "提示", {
+    handleDel(row, type) {
+      let name = null;
+      if (type == 0) {
+        name = "下架";
+      } else {
+        name = "上架";
+      }
+      this.$confirm(`此操作将${name}该版本, 是否继续?`, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!",
-          });
+          this.$http
+            .post("/Management/VersionManagement/SoldOutVersion.ashx", {
+              ids: [row.Id],
+              issoldout: type,
+            })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  type: "success",
+                  message: `${name}成功!`,
+                });
+                this.getDataList();
+              }
+            });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除",
+            message: `已取消${name}`,
           });
         });
     },
@@ -212,13 +226,14 @@ export default {
      * 搜索
      */
     searchClick(val) {
-      console.log(val);
+      this.searchtext = val;
+      this.getDataList();
     },
     /**
      * 编辑
      */
     handleView(row) {
-      this.openWin("ed", row.Id, row);
+      this.openWin("ed", row);
     },
   },
 };

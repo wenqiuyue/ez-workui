@@ -123,7 +123,9 @@ export default {
     /**
      * 点击立即注册
      */
-    handleRegister() {},
+    handleRegister() {
+      this.$router.push("/register");
+    },
     /**
      * 获取团队
      */
@@ -216,7 +218,12 @@ export default {
           })
           .then((resp) => {
             if (resp.res == 0) {
-              cb(resp.data);
+              const data = resp.data.map((m) => {
+                return {
+                  value: m.Name,
+                };
+              });
+              cb(data);
             }
           });
       }

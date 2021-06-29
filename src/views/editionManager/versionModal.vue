@@ -1,5 +1,5 @@
 <template>
-  <XModal name="versionModal" :width="'35%'" height="70%">
+  <XModal name="versionModal" :width="'35%'" height="50%">
     <c-win-tmp
       ref="winTmp"
       v-loading="loading"
@@ -27,29 +27,33 @@
                 :style="{ width: comWidth }"
                 clearable
               ></el-input>
-              <div v-else class="state-see">版本名称</div>
+              <div v-else class="state-see">{{ formData.name }}</div>
             </el-form-item>
           </el-col>
           <el-col :sm="24" :md="24">
-            <el-form-item label="时长：" prop="name" style="width: 100%">
+            <el-form-item label="时长：" prop="period" style="width: 100%">
               <el-input
                 type="number"
-                v-model="formData.name"
+                v-model="formData.period"
                 placeholder="请填写时长"
                 v-if="editState"
                 :style="{ width: comWidth }"
                 clearable
               >
-                <template slot="append">年</template></el-input
+                <template slot="append">天</template></el-input
               >
-              <div v-else class="state-see">2年</div>
+              <div v-else class="state-see">{{ formData.period }}天</div>
             </el-form-item>
           </el-col>
           <el-col :sm="24" :md="24">
-            <el-form-item label="可加入人数：" prop="name" style="width: 100%">
+            <el-form-item
+              label="可加入人数："
+              prop="capacity"
+              style="width: 100%"
+            >
               <el-input
                 type="number"
-                v-model="formData.name"
+                v-model="formData.capacity"
                 placeholder="请填写可加入人数"
                 v-if="editState"
                 :style="{ width: comWidth }"
@@ -57,58 +61,14 @@
               >
                 <template slot="append">人</template></el-input
               >
-              <div v-else class="state-see">20人</div>
+              <div v-else class="state-see">{{ formData.capacity }}人</div>
             </el-form-item>
           </el-col>
           <el-col :sm="24" :md="24">
-            <el-form-item label="存储空间：" prop="name" style="width: 100%">
+            <el-form-item label="价格：" prop="price" style="width: 100%">
               <el-input
                 type="number"
-                v-model="formData.name"
-                placeholder="请填写存储空间"
-                v-if="editState"
-                :style="{ width: comWidth }"
-                clearable
-              >
-                <template slot="append">G</template></el-input
-              >
-              <div v-else class="state-see">20G</div>
-            </el-form-item>
-          </el-col>
-          <el-col :sm="24" :md="24">
-            <el-form-item label="服务器地址：" prop="name" style="width: 100%">
-              <el-input
-                type="number"
-                v-model="formData.name"
-                placeholder="请填写服务器地址"
-                v-if="editState"
-                :style="{ width: comWidth }"
-                clearable
-              >
-              </el-input>
-              <div v-else class="state-see">192.168.1.1</div>
-            </el-form-item>
-          </el-col>
-          <el-col :sm="24" :md="24">
-            <el-form-item label="购买人数：" prop="name" style="width: 100%">
-              <el-input
-                type="number"
-                v-model="formData.name"
-                placeholder="请填写购买人数"
-                v-if="editState"
-                :style="{ width: comWidth }"
-                clearable
-              >
-                <template slot="append">人</template></el-input
-              >
-              <div v-else class="state-see">20人</div>
-            </el-form-item>
-          </el-col>
-          <el-col :sm="24" :md="24">
-            <el-form-item label="价格：" prop="name" style="width: 100%">
-              <el-input
-                type="number"
-                v-model="formData.name"
+                v-model="formData.price"
                 placeholder="请填写价格："
                 v-if="editState"
                 :style="{ width: comWidth }"
@@ -116,7 +76,22 @@
               >
                 <template slot="append">元</template></el-input
               >
-              <div v-else class="state-see">20元</div>
+              <div v-else class="state-see">{{ formData.price }}元</div>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="24" :md="24" v-if="!editState">
+            <el-form-item
+              label="创建时间："
+              prop="creatTime"
+              style="width: 100%"
+            >
+              <div class="state-see">
+                {{
+                  formData.creatTime
+                    ? formData.creatTime.timeFormat("yyyy-MM-dd HH:ss")
+                    : "--"
+                }}
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -139,13 +114,38 @@ export default {
       comWidth: "95%",
       formData: {
         id: "", // 编辑窗口才用ID
-        name: "", // 名称
+        name: null, // 名称
+        price: null, //金额
+        period: null, //期限
+        capacity: null, //可加入人数
+        creatTime: null,
       },
       Rules: {
         name: [
           {
             required: true,
-            message: "输入名称",
+            message: "请输入版本名称",
+            trigger: "blur",
+          },
+        ],
+        price: [
+          {
+            required: true,
+            message: "请输入金额",
+            trigger: "blur",
+          },
+        ],
+        period: [
+          {
+            required: true,
+            message: "请输入期限",
+            trigger: "blur",
+          },
+        ],
+        capacity: [
+          {
+            required: true,
+            message: "请输入可加入人数",
             trigger: "blur",
           },
         ],
@@ -161,6 +161,11 @@ export default {
       this.editState = this.indexData.type === "Add" ? true : false;
       if (this.editObj.Id) {
         this.formData.id = this.editObj.Id;
+        this.formData.name = this.editObj.Name;
+        this.formData.price = this.editObj.Price;
+        this.formData.period = this.editObj.Period;
+        this.formData.capacity = this.editObj.Capacity;
+        this.formData.creatTime = this.editObj.CreatTime;
       } else {
         Object.assign(this.$data.formData, this.$options.data().formData);
       }
@@ -182,49 +187,39 @@ export default {
           var params = null;
           var url = "";
           var tipTxt = "";
-          if (!this.indexData.vacationCode) {
+          if (this.indexData.name == "添加版本") {
             // this.formData.id
             params = {
               name: this.formData.name,
-              stime: this.formData.stime,
-              etime:
-                this.formData.changeType === 1
-                  ? this.formData.stime
-                  : this.formData.etime,
-              // type: this.formData.type,
+              price: this.formData.price,
+              period: this.formData.period,
+              capacity: this.formData.capacity,
             };
-            url = "/MGT/Personnel/Holiday/AddHoliday.ashx";
+            url = "/Management/VersionManagement/AddVersion.ashx";
             tipTxt = "添加";
           } else {
             params = {
-              hid: this.formData.id,
+              id: this.formData.id,
               name: this.formData.name,
-              stime: this.formData.stime,
-              etime:
-                this.formData.changeType === 1
-                  ? this.formData.stime
-                  : this.formData.etime,
-              // type: this.formData.type,
+              price: this.formData.price,
+              period: this.formData.period,
+              capacity: this.formData.capacity,
             };
-            url = "/MGT/Personnel/Holiday/EditHoliday.ashx";
+            url = "/Management/VersionManagement/EditVersion.ashx";
             tipTxt = "编辑";
           }
-          console.log(params);
           this.$http
-            .get(url, {
-              params: params,
-            })
+            .post(url, params)
             .then((result) => {
               if (result.res == 0) {
                 this.$message({
-                  message: `${tipTxt}节假成功`,
+                  message: `${tipTxt}版本成功`,
                   type: "success",
                 });
                 this.submiting();
                 this.$modal.hide("versionModal");
                 this.$emit("eventComfirm");
               } else {
-                console.log(result);
                 this.submiting();
               }
             })

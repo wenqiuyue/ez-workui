@@ -170,10 +170,15 @@ const routes = [
       },
     ],
   },
-
+  // 忘记密码
   {
     path: "/resetpassword",
     component: () => import("@/userview/reset-password"),
+  },
+  // 注册
+  {
+    path: "/register",
+    component: () => import("@/userview/register"),
   },
 ];
 

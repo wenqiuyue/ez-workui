@@ -7,9 +7,6 @@
         slot="search"
         :TInfo="titleInfo"
         @addClick="addClick"
-        @startClick="stateClick(1)"
-        @closeClick="stateClick(0)"
-        @delClick="delClick"
         @searchClick="searchClick"
       >
       </c-title>
@@ -19,7 +16,6 @@
         :data="tableData"
         ref="multipleTable"
         style="width: 100%"
-        @selection-change="handleSelectionChange"
         :cell-style="cellStyle"
         :header-cell-style="cellStyle"
       >
@@ -32,7 +28,6 @@
             />
           </div>
         </template>
-        <el-table-column type="selection" width="55" fixed></el-table-column>
         <el-table-column
           min-width="100"
           label="进程组名称"
@@ -47,9 +42,14 @@
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top" width="350">
+            <el-popover
+              trigger="hover"
+              placement="top"
+              width="350"
+              v-if="scope.row.UserData.length"
+            >
               <div slot="reference" class="name-wrapper">
-                <p style="cursor: pointer">{{ scope.row.UserData.length }}</p>
+                <p style="cursor: pointer">{{ scope.row.UserData.length }}人</p>
               </div>
               <ul class="member-style">
                 <li v-for="(item, index) in scope.row.UserData" :key="index">
@@ -67,27 +67,18 @@
                 </li>
               </ul>
             </el-popover>
+            <span v-else>{{ scope.row.UserData.length }}人</span>
           </template>
         </el-table-column>
-        <!--      <el-table-column min-width="150" label="标签状态" :show-overflow-tooltip="true">
-                <template slot-scope="scope">
-                    <span slot="reference" class='row-state'>
-                        <i v-if="scope.row.Tag.Shape === 1" 
-                            @click="stateToggle(scope.row, 0)" class="el-icon-check">
-                        </i>
-                        <i v-if="scope.row.Tag.Shape === 0" 
-                            @click="stateToggle(scope.row, 1)" class="el-icon-close">
-                        </i>
-                    </span>
-                </template>
-            </el-table-column> -->
         <el-table-column label="操作" min-width="110">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <c-btn>
-              <span @click="handleEdit(scope.$index, scope.row)">详情</span>
-              <span @click="handleDelt(scope.$index, scope.row)">删除</span>
-            </c-btn>
+            <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
+              >详情</el-button
+            >
+            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
+              >删除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -95,7 +86,7 @@
       <c-pages
         slot="pages"
         v-model="pageData"
-        @childEvent="getDataList"
+        @changeEvent="handlePaginationChange"
       ></c-pages>
     </c-content>
 
@@ -111,7 +102,6 @@ export default {
   components: {
     CContent: () => import("@/components/CContent"),
     CTitle: () => import("@/components/CTitle"),
-    CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
     LabelW: () => import("./proGroupW"),
   },
@@ -131,7 +121,7 @@ export default {
           { type: "addBtn", ishow: true },
           { type: "startBtn", ishow: false, disabled: true },
           { type: "closeBtn", ishow: false, disabled: true },
-          { type: "delBtn", ishow: true, disabled: true },
+          { type: "delBtn", ishow: false, disabled: true },
         ],
         // 控制右侧：下拉细节 搜索框
         dropDown: {
@@ -159,72 +149,8 @@ export default {
     this.getDataList();
   },
   methods: {
-    // toggleSelection(rows) {
-    //     if (rows) {
-    //         rows.forEach(row => {
-    //             this.$refs.multipleTable.toggleRowSelection(row)
-    //         })
-    //     } else {
-    //         this.$refs.multipleTable.clearSelection()
-    //     }
-    // },
-    handleSelectionChange(val) {
-      if (String(val) !== "") {
-        // 引用类型破坏数组
-        this.titleInfo.btnShow.map((item) => (item.disabled = false));
-      } else {
-        this.titleInfo.btnShow.map((item) => (item.disabled = true));
-      }
-      this.multipleSelection = val;
-    },
-
-    // 切换状态
-    stateToggle(row, type) {
-      let txt = "";
-      switch (type) {
-        case 1:
-          txt = "启用";
-          break;
-        case 0:
-          txt = "禁用";
-          break;
-        case -1:
-          txt = "隐藏"; // 删除呗
-          break;
-      }
-      this.$confirm("设置此标签的状态为" + txt + "?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = {
-            id: [row.ID],
-          };
-          this.comToggleState(params);
-        })
-        .catch(() => {});
-    },
-    stateClick(type) {
-      let params = {
-        ids: this.multipleSelection.map((item) => item.ID),
-        sta: type,
-      };
-      this.comToggleState(params);
-    },
-    comToggleState(params) {
-      console.log(params);
-      this.$http
-        .post("/MGT/Task/TaskTag/StaTaskTag.ashx", params)
-        .then((result) => {
-          if (result.res == 0) {
-            this.getDataList();
-          }
-        });
-    },
-
     // 删除某一行
-    handleDelt(ind, row) {
+    handleDelt(row) {
       this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -238,19 +164,16 @@ export default {
         })
         .catch(() => {});
     },
-    // 删多行
-    delClick() {
-      let params = {
-        id: this.multipleSelection.map((item) => item.ID),
-      };
-      this.comDelete(params);
-    },
     comDelete(params) {
-      console.log(params);
       this.$http
-        .post("/MGT/System/ProgressGroup/DelProgressGroup.ashx", params)
+        .post("/ProgressGroup/DelProgressGroup.ashx", params)
         .then((result) => {
           if (result.res == 0) {
+            this.$message({
+              showClose: true,
+              message: "删除成功！",
+              type: "success",
+            });
             this.getDataList();
           }
         });
@@ -261,7 +184,7 @@ export default {
       this.openWin("ad");
     },
     // 编辑
-    handleEdit(i, row) {
+    handleEdit(row) {
       this.openWin("ed", row.ID, row.Name);
     },
     // 打开窗口
@@ -285,7 +208,7 @@ export default {
       this.pageData.pageIndex = 1;
       this.getDataList();
     },
-    // 分页
+    // 获取列表
     getDataList() {
       let params = {
         name: this.searchKW,
@@ -294,15 +217,22 @@ export default {
       };
       this.loading = true;
       this.$http
-        .post("/MGT/System/ProgressGroup/QueryProgressGroupList.ashx", params)
+        .get("/Management/ProgressManagement/ProgressGroupAllList.ashx", {
+          params: params,
+        })
         .then((result) => {
           if (result.res == 0) {
-            console.log(result);
             this.tableData = result.data.Data;
             this.pageData.totalNum = result.data.TotalCount;
             this.loading = false;
           }
         });
+    },
+    /**
+     * 分页
+     */
+    handlePaginationChange(val) {
+      this.pageData = val;
     },
   },
 };

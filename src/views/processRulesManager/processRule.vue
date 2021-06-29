@@ -11,7 +11,7 @@
         >添 加</el-button
       >
     </Tab>
-    <c-content v-loading="loading">
+    <c-content v-loading="loading" style="height: calc(100% - 3.6rem)">
       <!-- 主体表格部分 -->
       <el-table
         slot="main"
@@ -50,13 +50,14 @@
         >
           <template slot-scope="scope">
             <div
-              v-if="
-                scope.row.ProgressGroupIds && scope.row.ProgressGroupIds.length
-              "
+              v-if="scope.row.PreocessGroup && scope.row.PreocessGroup.length"
             >
-              <span v-for="(item, index) in scope.row.ProgressGroupIds">
-                {{ filterGroup(item) }}
-                <i v-if="index !== scope.row.ProgressGroupIds.length - 1">，</i>
+              <span
+                v-for="(item, index) in scope.row.PreocessGroup"
+                :key="index"
+              >
+                {{ item.Name }}
+                <i v-if="index !== scope.row.PreocessGroup.length - 1">，</i>
               </span>
             </div>
 
@@ -68,12 +69,12 @@
             <el-popover
               placement="top-start"
               trigger="hover"
-              v-if="scope.row.UInfo && scope.row.UInfo.length > 0"
+              v-if="scope.row.UserData && scope.row.UserData.length > 0"
               width="300"
             >
               <div style="display: flex; flex-wrap: wrap">
                 <p
-                  v-for="(item, index) in scope.row.UInfo"
+                  v-for="(item, index) in scope.row.UserData"
                   :key="index"
                   style="
                     margin-right: 1rem;
@@ -87,13 +88,13 @@
               </div>
               <p slot="reference" style="cursor: pointer">
                 <span
-                  v-for="(name, index) in scope.row.UInfo.filter(
+                  v-for="(name, index) in scope.row.UserData.filter(
                     (m, index) => index < 1
                   )"
                   :key="index"
                   >{{ name.Name }} </span
-                ><i v-if="scope.row.UInfo.length > 1"
-                  >等{{ scope.row.UInfo.length }}人</i
+                ><i v-if="scope.row.UserData.length > 1"
+                  >等{{ scope.row.UserData.length }}人</i
                 >
               </p>
             </el-popover>
@@ -109,12 +110,15 @@
             <el-popover
               placement="top-start"
               trigger="hover"
-              v-if="scope.row.ProgressNames.length"
+              v-if="scope.row.ProgressNames && scope.row.ProgressNames.length"
             >
-              <p v-for="(item, index) in scope.row.ProgressNames">{{ item }}</p>
+              <p v-for="(item, index) in scope.row.ProgressNames" :key="index">
+                {{ item }}
+              </p>
               <p slot="reference" style="cursor: pointer">
                 <span
                   v-for="(name, index) in scope.row.ProgressNames"
+                  :key="index"
                   v-if="index < 1"
                   >{{ name }} </span
                 ><i v-if="scope.row.ProgressNames.length > 1"
@@ -131,12 +135,15 @@
               placement="top"
               minwidth="100"
               trigger="hover"
-              v-if="scope.row.FormNames.length"
+              v-if="scope.row.FormNames && scope.row.FormNames.length"
             >
-              <p v-for="(item, index) in scope.row.FormNames">{{ item }}</p>
+              <p v-for="(item, index) in scope.row.FormNames" :key="index">
+                {{ item }}
+              </p>
               <p slot="reference" style="cursor: pointer">
                 <span
                   v-for="(name, index) in scope.row.FormNames"
+                  :key="index"
                   v-if="index < 1"
                   >{{ name }} </span
                 ><i v-if="scope.row.FormNames.length > 1"
@@ -153,7 +160,7 @@
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <div v-if="scope.row.FormNames.length">
+            <div v-if="scope.row.FormNames && scope.row.FormNames.length">
               <p>匹配：{{ scope.row.MarkInCheck }}</p>
               <p>否则：{{ scope.row.MarkOutCheck }}</p>
             </div>
@@ -165,13 +172,21 @@
         <el-table-column label="操作" min-width="110">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <c-btn>
-              <span @click="handleEdit(scope.$index, scope.row)">详情</span>
-              <span @click="handleDelt(scope.$index, scope.row)">删除</span>
-            </c-btn>
+            <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
+              >详情</el-button
+            >
+            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
+              >删除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页组件 -->
+      <c-pages
+        slot="pages"
+        v-model="pageData"
+        @childEvent="getDataList"
+      ></c-pages>
     </c-content>
     <ProRuleW
       :operationName="operationName"
@@ -186,8 +201,8 @@
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
-    CBtn: () => import("@/components/CBtn"),
     Tab: () => import("@/components/TabUtil"),
+    CPages: () => import("@/components/CPages"),
     ProRuleW: () => import("./proRuleW"),
   },
   data() {
@@ -197,9 +212,8 @@ export default {
       pageData: {
         pageIndex: 1,
         pageSize: 10,
-        totalNum: 100,
+        totalNum: 0,
       },
-      proxy: "",
       // CX Title组件
       titleInfo: {
         // 控制左侧：按钮组四个
@@ -245,12 +259,6 @@ export default {
         mk2: "未知",
         id: "",
       },
-      user: [],
-      processOptions: [],
-      resultData: {
-        CSRules: [],
-        MKRules: [],
-      },
       activeItem: "进程组",
       cellStyle: {
         textAlign: "center",
@@ -262,29 +270,12 @@ export default {
   watch: {},
   filters: {},
   methods: {
-    filterGroup(val) {
-      let str = "";
-      this.processOptions.forEach((item) => {
-        if (item.ID == val) {
-          str = item.Name;
-        }
-      });
-      return str;
-    },
     getTab(item) {
       this.activeItem = item.join();
       this.getDataList();
     },
-    async GetProgressGroup() {
-      const resp = await this.$http.get(
-        "/MGT/Personnel/User/GetProgressGroupSelected.ashx"
-      );
-      if (resp.res == 0) {
-        this.processOptions = resp.data;
-      }
-    },
     // 删除某一行
-    handleDelt(ind, row) {
+    handleDelt(row) {
       this.$confirm("此操作将删除此规则, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -292,42 +283,31 @@ export default {
       })
         .then(() => {
           this.$http
-            .get(this.proxy + "/Api/mgr.ashx?type=DeleteRule", {
-              params: {
-                id: row.Id,
-              },
-            })
+            .post("/ProcessRules/DelProcessRules.ashx", { id: [row.ID] })
             .then((res) => {
               if (res.res == 0) {
+                this.$message({
+                  showClose: true,
+                  message: "删除成功！",
+                  type: "success",
+                });
                 this.getDataList();
               }
             });
         })
         .catch(() => {});
     },
-
-    comDelete(params) {
-      this.$http
-        .post("/MGT/System/Func/DelFunc.ashx", params)
-        .then((result) => {
-          if (result.res == 0) {
-            this.getDataList();
-          }
-        });
-    },
-
     // 新增
     addClick() {
       this.operationName = 1;
       this.id = "";
       Object.assign(this.$data.formParams, this.$options.data().formParams);
       this.formParams.t = this.activeItem;
-      this.user = [];
       this.$modal.show("ruleXmodal");
     },
     // 编辑
-    handleEdit(i, row) {
-      this.id = row.Id;
+    handleEdit(row) {
+      this.id = row.ID;
       // this.$refs.detail.id=row.Id
       this.operationName = 2;
       if (this.id) {
@@ -337,12 +317,21 @@ export default {
     // 获取表单数据
     getDataList() {
       this.loading = true;
-      this.$http.post("/MGT/System/Progress/RuleList.ashx").then((result) => {
-        if (result.res == 0) {
-          this.resultData = result.data;
-          this.loading = false;
-          if (this.activeItem == "进程组") {
-            this.resultData.csRules.forEach((item) => {
+      const data = {
+        type: this.activeItem == "进程组" ? 1 : 2,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+      };
+      this.$http
+        .get("/Management/ProgressManagement/ProcessRuleAllList.ashx", {
+          params: data,
+        })
+        .then((result) => {
+          if (result.res == 0) {
+            this.tableData = result.data.Data;
+            this.pageData.totalNum = result.data.TotalCount;
+            this.loading = false;
+            this.tableData.forEach((item) => {
               if (item.MarkInCheck == "上班") {
                 item.MarkInCheck = "工作";
               }
@@ -350,33 +339,13 @@ export default {
                 item.MarkOutCheck = "工作";
               }
             });
-            this.tableData = this.resultData.csRules;
-          } else {
-            this.resultData.mkRules.forEach((item) => {
-              if (item.MarkInCheck == "上班") {
-                item.MarkInCheck = "工作";
-              }
-              if (item.MarkOutCheck == "上班") {
-                item.MarkOutCheck = "工作";
-              }
-            });
-            this.tableData = this.resultData.mkRules;
+            console.log(this.tableData);
           }
-        }
-      });
+        });
     },
   },
-  created() {
-    this.GetProgressGroup();
-    if (process.env.NODE_ENV === "development") {
-      this.proxy = "http://localhost:8081/Api";
-      // this.proxy = location.origin;
-    } else {
-      this.proxy = location.origin;
-    }
-    setTimeout(() => {
-      this.getDataList();
-    }, 100);
+  mounted() {
+    this.getDataList();
   },
 };
 </script>

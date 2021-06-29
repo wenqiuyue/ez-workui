@@ -8,11 +8,10 @@
 			showActive 【是否显示选中人 默认true】
 			showActiveImg【是否显示选中人的头像 默认true】
 			showActiveName【是否显示选中人的名字 默认true】
-	        arrays【默认勾选的人，传用户对象数组 如: [{UId:1,UName:xxx,Picture:xxx},] 用户的三个属性分别为 图片:Picture 名字:UName用户ID:UId    】
+	        arrays【默认勾选的人，传用户对象数组 如: [{UsId:1,Name:xxx,Picture:xxx},] 用户的三个属性分别为 图片:Picture 名字:Name用户ID:UsId    】
 			options【自定义弹出位置对象，基于窗口，对象的属性有offTop,offLeft,offRight,offBottom 】
 			selRange 【可选人范围 见数据字典（sel_member_range） 默认全部 】
 			selRangeStatu 【可选人的状态 见数据字典（sel_member_status） 默认仅可用的 】
-			allCheckbox 【开启全体成员选项 默认 fasle 】
 			openAt 【开启@功能 默认 fasle 】
 			showLength 【显示人数 默认 全部 】
 	@Return: 选中的成员对象数组                           this.$emit('Confirm', this.result);
@@ -44,8 +43,8 @@
               avatar_medium: size === 'medium',
             }"
           >
-            <img v-if="showActiveImg" :src="$url + item.Picture" />
-            <p v-if="showActiveName" :title="item.UName">{{ item.UName }}</p>
+            <img v-if="showActiveImg" :src="img(null)" />
+            <p v-if="showActiveName" :title="item.Name">{{ item.Name }}</p>
           </li>
           <p v-if="showLength != null && showLength < result.length">
             等{{ result.length }}人
@@ -68,25 +67,7 @@
         <div class="mem-select">
           <div class="mem-title">
             <ul>
-              <li
-                v-if="eid != null"
-                :class="{ 'mem-active': isActive == 0 }"
-                @click="getData(project, 0)"
-              >
-                项目内
-              </li>
-              <li
-                :class="{ 'mem-active': isActive == 1 }"
-                @click="getData(position, 1)"
-              >
-                部门
-              </li>
-              <li
-                :class="{ 'mem-active': isActive == 2 }"
-                @click="getData(department, 2)"
-              >
-                职位
-              </li>
+              <li class="mem-active">成员选择</li>
             </ul>
           </div>
           <div class="mem-search">
@@ -123,62 +104,16 @@
                       }}</em>
                     </el-checkbox>
                   </el-collapse-item>
-                  <el-collapse-item name="@" v-if="allCheckbox">
-                    <div slot="title" class="item-title">
-                      <p>全体成员</p>
-                      <span></span>
-                    </div>
-                    <el-checkbox :label="-1" class="item-data item-data-ait">
-                      <em>全体成员</em>
-                    </el-checkbox>
-                    <el-checkbox
-                      v-if="$route.params.eid"
-                      :label="-2"
-                      class="item-data item-data-ait"
-                    >
-                      <em>项目全体成员</em>
-                    </el-checkbox>
-                    <el-checkbox
-                      v-if="isTask()"
-                      :label="-3"
-                      class="item-data item-data-ait"
-                    >
-                      <em>任务全体成员</em>
-                    </el-checkbox>
-                  </el-collapse-item>
-                  <el-collapse-item
-                    v-for="(group, index) in pageData"
-                    :name="index"
-                    :key="index"
+                  <el-checkbox
+                    :label="item.UsId"
+                    class="item-data"
+                    v-for="item in pageData"
+                    :key="item.UsId"
                   >
-                    <div slot="title" class="item-title">
-                      <div v-if="isSelection">
-                        <label @click.stop="selectGroup(index)">
-                          <input
-                            class="position_checkbox"
-                            type="checkbox"
-                            :id="isActive + '' + index"
-                            @click.stop
-                          />
-                          <span class="position_checkbox_span"></span>
-                        </label>
-                        <p>{{ group.Name }} ({{ group.UserTotal }})</p>
-                      </div>
-                      <p v-else>{{ group.Name }} ({{ group.UserTotal }})</p>
-                      <span></span>
-                    </div>
-                    <el-checkbox
-                      :label="item.UId"
-                      class="item-data"
-                      v-for="item in group.UsersData"
-                      :key="item.UId"
-                    >
-                      <img :src="img(item.Picture)" />
-                      <em :title="item.UName">{{ item.UName }}</em>
-                      <p v-if="item.PositionName == null">未知</p>
-                      <p v-else>{{ item.PositionName }}</p>
-                    </el-checkbox>
-                  </el-collapse-item>
+                    <img :src="img(null)" />
+                    <em :title="item.Name">{{ item.Name }}</em>
+                    <span></span>
+                  </el-checkbox>
                   <div
                     class="tip_text"
                     v-if="pageData == null || pageData.length == 0"
@@ -188,27 +123,16 @@
                 </el-collapse>
                 <!-- 搜索的数据 -->
                 <el-collapse v-model="showCollapse" v-show="isSearch">
-                  <el-collapse-item
-                    v-for="group in searchData"
-                    :name="group.Id"
-                    :key="group.Id"
+                  <el-checkbox
+                    :label="item.UsId"
+                    class="item-data"
+                    v-for="item in searchData"
+                    :key="item.UsId"
                   >
-                    <div slot="title" class="item-title">
-                      <p>{{ group.Name }}({{ group.UserTotal }})</p>
-                      <span></span>
-                    </div>
-                    <el-checkbox
-                      :label="item.UId"
-                      class="item-data"
-                      v-for="item in group.UsersData"
-                      :key="item.UId"
-                    >
-                      <img :src="img(item.Picture)" />
-                      <em>{{ item.UName }}</em>
-                      <p v-if="item.PositionName == null">未知</p>
-                      <p v-else>{{ item.PositionName }}</p>
-                    </el-checkbox>
-                  </el-collapse-item>
+                    <img :src="img(null)" />
+                    <em>{{ item.Name }}</em>
+                    <span></span>
+                  </el-checkbox>
                   <div class="tip_text" v-if="isSearching">搜索中...</div>
                   <div class="tip_text" v-if="searchData.length == 0">
                     未搜索到数据
@@ -326,11 +250,6 @@ export default {
       type: Number,
       default: 1,
     },
-    //开启全体选项
-    allCheckbox: {
-      type: Boolean,
-      default: false,
-    },
     //@功能
     openAt: {
       type: Boolean,
@@ -351,7 +270,6 @@ export default {
 
   data() {
     return {
-      isActive: null, //当前选中菜单
       reverse: false, //反选
       all: false, //全选
       checkedCities: [], //选中的成员
@@ -366,7 +284,6 @@ export default {
       searchData: [], //搜索的数据
       showCollapse: [], //取消手风琴
       result: [], //返回数据
-      countuser: [], //总的人员数据
       defalutId: null, //默认展开的选项
       ShowObj: [], //需要显示的人员长度
     };
@@ -374,7 +291,7 @@ export default {
   methods: {
     //部门全选
     selectGroup(index) {
-      let flag = document.getElementById(`${this.isActive}${index}`).checked;
+      let flag = null;
       if (!flag) {
         this.pageData[index].UsersData.forEach((group) => {
           if (this.checkedCities.indexOf(group.UId) == -1) {
@@ -424,72 +341,21 @@ export default {
       }
     },
     getData(pageData, type) {
-      this.isActive = type;
       this.defalutId = 0;
       if (pageData == null) {
         this.loading = true;
         this.$http
           .get("/General/memberSelector.ashx", {
             params: {
-              type: this.isActive,
-              eid: this.eid,
-              sel: this.selRange,
-              sta: this.selRangeStatu,
+              name: this.searchText,
             },
           })
           .then((resp) => {
             if (resp.res == 0) {
-              //去除没有人员的部门
-              _.remove(resp.data, function (item) {
-                return item.UserTotal == 0;
-              });
               this.pageData = resp.data;
               this.loading = false;
-              if (type == 0) {
-                this.project = resp.data;
-              } else if (type == 1) {
-                this.position = resp.data;
-              } else if (type == 2) {
-                this.department = resp.data;
-              }
-              for (let item of resp.data) {
-                item.UsersData.forEach((user) => {
-                  //部门ID和名字
-                  user["DName"] = item.Name;
-                  user["DId"] = item.Id;
-                  this.countuser.push(user);
-                });
-              }
-              this.countuser.push({
-                UId: 0,
-                Picture: "/assets/i/user.jpg",
-                UName: this.defaultName,
-              });
-              this.countuser.push({
-                UId: -1,
-                Picture: "/assets/i/user.jpg",
-                UName: "全体成员",
-              });
-              this.countuser.push({
-                UId: -2,
-                Picture: "/assets/i/user.jpg",
-                UName: "项目全体成员",
-              });
-              this.countuser.push({
-                UId: -3,
-                Picture: "/assets/i/user.jpg",
-                UName: "任务全体成员",
-              });
             }
           });
-      } else {
-        if (type == 0) {
-          this.pageData = this.project;
-        } else if (type == 1) {
-          this.pageData = this.position;
-        } else if (type == 2) {
-          this.pageData = this.department;
-        }
       }
       this.$refs.scroll.scrollTop = 0;
       this.isSearch = false;
@@ -502,21 +368,21 @@ export default {
       var temp = [];
       if (this.isSelection) {
         for (let i = 0; i < this.checkedCities.length; i++) {
-          for (let j = 0; j < this.countuser.length; j++) {
+          for (let j = 0; j < this.pageData.length; j++) {
             if (
-              this.checkedCities[i] == this.countuser[j].UId &&
+              this.checkedCities[i] == this.pageData[j].UsId &&
               temp.indexOf(this.checkedCities[i]) === -1
             ) {
               temp.push(this.checkedCities[i]);
-              this.result.push(this.countuser[j]);
+              this.result.push(this.pageData[j]);
               break;
             }
           }
         }
       } else {
-        for (let j = 0; j < this.countuser.length; j++) {
-          if (this.checkedCities[0] == this.countuser[j].UId) {
-            this.result.push(this.countuser[j]);
+        for (let j = 0; j < this.pageData.length; j++) {
+          if (this.checkedCities[0] == this.pageData[j].UsId) {
+            this.result.push(this.pageData[j]);
             break;
           }
         }
@@ -531,16 +397,15 @@ export default {
       if (picture) {
         return this.$url + picture;
       }
-      return "../../assets/img/user.png";
+      // return "../../assets/img/user.png";
+      return "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
     },
     //反选
     reversechange(val) {
       this.all = false;
       let arr = [];
       for (let i = 0; i < this.pageData.length; i++) {
-        for (let j = 0; j < this.pageData[i].UsersData.length; j++) {
-          arr.push(this.pageData[i].UsersData[j].UId);
-        }
+        arr.push(this.pageData[i].UsId);
       }
       for (let a = 0; a < this.checkedCities.length; a++) {
         for (let r = 0; r < arr.length; r++) {
@@ -556,23 +421,12 @@ export default {
       this.reverse = false;
       if (val) {
         for (let i = 0; i < this.pageData.length; i++) {
-          for (let j = 0; j < this.pageData[i].UsersData.length; j++) {
-            if (
-              this.checkedCities.indexOf(this.pageData[i].UsersData[j].UId) ===
-              -1
-            ) {
-              this.checkedCities.push(this.pageData[i].UsersData[j].UId);
-            }
-          }
-          if (this.pageData[i].UserTotal > 0) {
-            document.getElementById(`${this.isActive}${i}`).checked = true;
+          if (this.checkedCities.indexOf(this.pageData[i].UsId) === -1) {
+            this.checkedCities.push(this.pageData[i].UsId);
           }
         }
       } else {
         this.checkedCities = [];
-        for (let i = 0; i < this.pageData.length; i++) {
-          document.getElementById(`${this.isActive}${i}`).checked = false;
-        }
       }
     },
     //删除
@@ -600,20 +454,16 @@ export default {
         this.isSearching = true;
         this.pageData.map((parent) => {
           let userData = [];
-          parent.UsersData.map((child) => {
-            if (
-              child.UName.indexOf(text) != -1 ||
-              this.$checkPinyin(text, child.UPinYin)
-            ) {
-              userData.push(child);
-            }
-          });
+          if (
+            parent.Name.indexOf(text) != -1 ||
+            this.$checkPinyin(text, parent.Name_Pinyin)
+          ) {
+            userData.push(parent);
+          }
           if (userData.length > 0) {
             let result = Object.assign({}, parent);
-            result.UsersData = userData;
-            result.UserTotal = userData.length;
             this.searchData.push(result);
-            this.showCollapse.push(result.Id);
+            // this.showCollapse.push(result.Id);
           }
         });
         this.isSearching = false;
@@ -634,16 +484,16 @@ export default {
       if (!this.isSelection) {
         if (this.checkedCities.length == 0) {
           this.arrays.forEach((item) => {
-            if (item != null && this.checkedCities.indexOf(item.UId) == -1) {
-              this.checkedCities.push(item.UId);
+            if (item != null && this.checkedCities.indexOf(item.UsId) == -1) {
+              this.checkedCities.push(item.UsId);
               this.result.push(item);
             }
           });
         }
       } else {
         this.arrays.forEach((item) => {
-          if (item != null && this.checkedCities.indexOf(item.UId) == -1) {
-            this.checkedCities.push(item.UId);
+          if (item != null && this.checkedCities.indexOf(item.UsId) == -1) {
+            this.checkedCities.push(item.UsId);
             this.result.push(item);
           }
         });

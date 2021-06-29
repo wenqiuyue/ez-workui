@@ -24,6 +24,33 @@ Vue.use(VModal);
 
 Vue.prototype.$echarts = echarts;
 
+/**
+ * 全局前置守卫
+ */
+router.beforeEach((to, from, next) => {
+  let token = Vue.prototype.$xStorage.getItem("token");
+  let role = Vue.prototype.$xStorage.getItem("user-role");
+  if (token && role) {
+    if (to.path == "/") {
+      if (role == "管理员") {
+        next({ path: "/manager" });
+      } else {
+        next({ path: "/profile" });
+      }
+    } else {
+      next();
+    }
+  } else if (
+    to.path != "/" &&
+    to.path != "/resetpassword" &&
+    to.path != "/register"
+  ) {
+    next({ path: "/" });
+  } else {
+    next();
+  }
+});
+
 new Vue({
   router,
   store,

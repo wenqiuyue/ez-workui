@@ -17,13 +17,14 @@
             <el-dropdown
               style="text-align: right; margin: 2rem 1rem"
               trigger="click"
+              @command="handleCommand"
             >
               <i
                 class="el-icon-s-tools"
                 style="font-size: 22px; cursor: pointer"
               ></i>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>退出</el-dropdown-item>
+                <el-dropdown-item command="退出">退出</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </form>
@@ -80,6 +81,19 @@ export default {
         action: "all",
         value: false,
       });
+    },
+    /**
+     * 下拉菜单
+     */
+    handleCommand(com) {
+      if (com == "退出") {
+        this.$xStorage.removeItem("token");
+        this.$xStorage.removeItem("user-role");
+        // this.$xSocket.destroy();
+        // this.$xSocket = 0;
+        this.$router.push("/");
+        this.$message("登出成功");
+      }
     },
   },
   mounted() {},
