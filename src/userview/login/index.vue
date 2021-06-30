@@ -23,7 +23,7 @@
               v-model="password"
               show-password
             ></el-input>
-            <!-- <el-select v-model="teamValue" filterable placeholder="请选择团队">
+            <el-select v-model="teamValue" filterable placeholder="请选择团队">
               <el-option
                 v-for="item in teamoptions"
                 :key="item.Id"
@@ -31,12 +31,7 @@
                 :value="item.Id"
               >
               </el-option>
-            </el-select> -->
-            <el-autocomplete
-              v-model="teamValue"
-              :fetch-suggestions="querySearchAsync"
-              placeholder="请选择团队"
-            ></el-autocomplete>
+            </el-select>
             <div class="v-forget" @click="showLogin = false">忘记密码</div>
             <div class="hp-btn">
               <el-button class="v-button" @click="login" :loading="loading"
@@ -119,6 +114,9 @@ export default {
       loadSubmit: false,
     };
   },
+  mounted() {
+    this.getTeams();
+  },
   methods: {
     /**
      * 点击立即注册
@@ -129,13 +127,17 @@ export default {
     /**
      * 获取团队
      */
-    // getTeams() {
-    //   this.$http.get("/Teams/GetAllTeams.ashx").then((resp) => {
-    //     if (resp.res == 0) {
-    //       this.teamoptions = resp.data;
-    //     }
-    //   });
-    // },
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 1 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamoptions = resp.data;
+          }
+        });
+    },
     onConfirm(ruleForm) {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
@@ -145,14 +147,14 @@ export default {
               Email: this.ruleForm.Email,
             })
             .then((res) => {
-              this.loadSubmit = false;
               if (res.res == 0) {
                 this.$modal.hide("forgetpw");
                 this.$message.success(res.msg);
               } else {
                 this.$message.error(res.msg);
               }
-            });
+            })
+            .finally(() => (this.loadSubmit = false));
         } else {
           return false;
         }
@@ -182,11 +184,13 @@ export default {
                 message: "登陆成功",
                 type: "success",
               });
-              console.log(req);
               this.$xStorage.setItem("token", req.data.token, req.data.exp);
               this.$xStorage.setItem(
                 "user-role",
-                req.data.RoleName,
+                {
+                  role: req.data.RoleName,
+                  team: this.teamValue,
+                },
                 req.data.exp
               );
               const query = window.location.search.substr(1).split("&");
@@ -200,6 +204,10 @@ export default {
                 this.$router.push({
                   path: "/manager",
                 });
+              } else {
+                this.$router.push({
+                  path: "/profile",
+                });
               }
             }
           })
@@ -208,26 +216,7 @@ export default {
           });
       }
     },
-    querySearchAsync(queryString, cb) {
-      if (!queryString) {
-        cb([]);
-      } else {
-        this.$http
-          .get("/Teams/GetAllTeams.ashx", {
-            params: { searchText: queryString },
-          })
-          .then((resp) => {
-            if (resp.res == 0) {
-              const data = resp.data.map((m) => {
-                return {
-                  value: m.Name,
-                };
-              });
-              cb(data);
-            }
-          });
-      }
-    },
+
     // inputchange() {
     //   let bool = /^([0-9A-Za-z\-_\.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g;
     //   if (bool.test(this.input)) {

@@ -170,7 +170,7 @@ const routes = [
       },
     ],
   },
-  // 忘记密码
+  // 修改密码
   {
     path: "/resetpassword",
     component: () => import("@/userview/reset-password"),

@@ -32,7 +32,7 @@ router.beforeEach((to, from, next) => {
   let role = Vue.prototype.$xStorage.getItem("user-role");
   if (token && role) {
     if (to.path == "/") {
-      if (role == "管理员") {
+      if (role.role == "管理员") {
         next({ path: "/manager" });
       } else {
         next({ path: "/profile" });

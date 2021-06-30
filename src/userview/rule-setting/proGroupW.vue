@@ -102,13 +102,10 @@ export default {
       this.$refs.editForm.validate((valid) => {
         if (valid) {
           this.submiting();
-          let params = {
-            id: this.formData.id, // 添加时值是 undefined
-            name: this.formData.name,
-          };
+
           if (!this.formData.id) {
             this.$http
-              .post("/MGT/System/ProgressGroup/AddProgressGroup.ashx", {
+              .post("/ProgressGroup/AddProgressGroup.ashx", {
                 name: this.formData.name,
               })
               .then((res) => {
@@ -125,8 +122,12 @@ export default {
                 }
               });
           } else {
+            let params = {
+              id: this.formData.id, // 添加时值是 undefined
+              name: this.formData.name,
+            };
             this.$http
-              .post("/MGT/System/ProgressGroup/EditProgressGroup.ashx", params)
+              .post("/ProgressGroup/EditProgressGroup.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({

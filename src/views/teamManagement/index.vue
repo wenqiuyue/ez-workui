@@ -188,6 +188,7 @@ export default {
     },
     /**搜索 */
     handleSearchByKeyWord(val) {
+      this.pageData.pageIndex = 1;
       this.searchVal = val;
       this.getTeamList();
     },

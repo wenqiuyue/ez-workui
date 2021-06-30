@@ -2,24 +2,38 @@
   <!-- 菜单 -->
   <div id="manager-label">
     <c-content v-loading="loading">
-      <!-- 搜索部分 -->
-      <c-title
-        slot="search"
-        :TInfo="titleInfo"
-        @addClick="addClick"
-        @startClick="stateClick(1)"
-        @closeClick="stateClick(0)"
-        @delClick="delClick"
-        @searchClick="searchClick"
-      >
-      </c-title>
+      <div slot="search" class="screen">
+        <div class="screen_left">
+          <span class="lable">团队</span>
+          <el-select v-model="teamValue" filterable placeholder="请选择团队">
+            <el-option
+              v-for="item in teamOptions"
+              :key="item.Id"
+              :label="item.Name"
+              :value="item.Id"
+            >
+            </el-option>
+          </el-select>
+          <el-button
+            type="primary"
+            size="medium"
+            style="margin-left: 5px"
+            @click="getDataList"
+            >搜索</el-button
+          >
+        </div>
+        <div class="screen_right">
+          <el-button type="primary" @click="addClick" size="medium"
+            >添加</el-button
+          >
+        </div>
+      </div>
       <!-- 主体表格部分 -->
       <el-table
         slot="main"
         :data="tableData"
         ref="multipleTable"
         style="width: 100%"
-        @selection-change="handleSelectionChange"
         :cell-style="cellStyle"
         :header-cell-style="cellStyle"
       >
@@ -32,12 +46,11 @@
             />
           </div>
         </template>
-        <el-table-column type="selection" width="55" fixed></el-table-column>
+
         <el-table-column
           min-width="100"
           label="进程组名称"
           :show-overflow-tooltip="true"
-          fixed
           prop="Name"
         >
         </el-table-column>
@@ -47,7 +60,12 @@
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top" width="350">
+            <el-popover
+              trigger="hover"
+              placement="top"
+              width="350"
+              v-if="scope.row.UserData.length"
+            >
               <div slot="reference" class="name-wrapper">
                 <p style="cursor: pointer">{{ scope.row.UserData.length }}</p>
               </div>
@@ -67,6 +85,7 @@
                 </li>
               </ul>
             </el-popover>
+            <span v-else>{{ scope.row.UserData.length }}人</span>
           </template>
         </el-table-column>
         <!--      <el-table-column min-width="150" label="标签状态" :show-overflow-tooltip="true">
@@ -84,10 +103,12 @@
         <el-table-column label="操作" min-width="110">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <c-btn>
-              <span @click="handleEdit(scope.$index, scope.row)">详情</span>
-              <span @click="handleDelt(scope.$index, scope.row)">删除</span>
-            </c-btn>
+            <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
+              >详情</el-button
+            >
+            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
+              >删除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -110,36 +131,20 @@
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
-    CTitle: () => import("@/components/CTitle"),
-    CBtn: () => import("@/components/CBtn"),
+
     CPages: () => import("@/components/CPages"),
     LabelW: () => import("./proGroupW"),
   },
   data() {
     "#main";
     return {
+      teamValue: null, //选择的团队
+      teamOptions: [],
       loading: false,
       pageData: {
         pageIndex: 1,
         pageSize: 10,
         totalNum: 100,
-      },
-      // CX Title组件
-      titleInfo: {
-        // 控制左侧：按钮组四个
-        btnShow: [
-          { type: "addBtn", ishow: true },
-          { type: "startBtn", ishow: false, disabled: true },
-          { type: "closeBtn", ishow: false, disabled: true },
-          { type: "delBtn", ishow: true, disabled: true },
-        ],
-        // 控制右侧：下拉细节 搜索框
-        dropDown: {
-          // Input组件们的：右侧共同属性
-          searchInput: {
-            placeholder: "请输入进程组名称",
-          },
-        },
       },
 
       tableData: [],
@@ -155,76 +160,26 @@ export default {
       },
     };
   },
-  created() {
-    this.getDataList();
+  mounted() {
+    this.getTeams();
   },
   methods: {
-    // toggleSelection(rows) {
-    //     if (rows) {
-    //         rows.forEach(row => {
-    //             this.$refs.multipleTable.toggleRowSelection(row)
-    //         })
-    //     } else {
-    //         this.$refs.multipleTable.clearSelection()
-    //     }
-    // },
-    handleSelectionChange(val) {
-      if (String(val) !== "") {
-        // 引用类型破坏数组
-        this.titleInfo.btnShow.map((item) => (item.disabled = false));
-      } else {
-        this.titleInfo.btnShow.map((item) => (item.disabled = true));
-      }
-      this.multipleSelection = val;
-    },
-
-    // 切换状态
-    stateToggle(row, type) {
-      let txt = "";
-      switch (type) {
-        case 1:
-          txt = "启用";
-          break;
-        case 0:
-          txt = "禁用";
-          break;
-        case -1:
-          txt = "隐藏"; // 删除呗
-          break;
-      }
-      this.$confirm("设置此标签的状态为" + txt + "?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = {
-            id: [row.ID],
-          };
-          this.comToggleState(params);
-        })
-        .catch(() => {});
-    },
-    stateClick(type) {
-      let params = {
-        ids: this.multipleSelection.map((item) => item.ID),
-        sta: type,
-      };
-      this.comToggleState(params);
-    },
-    comToggleState(params) {
-      console.log(params);
+    /**
+     * 获取团队
+     */
+    getTeams() {
       this.$http
-        .post("/MGT/Task/TaskTag/StaTaskTag.ashx", params)
-        .then((result) => {
-          if (result.res == 0) {
-            this.getDataList();
+        .get("/Teams/MembersTeamList.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
           }
         });
     },
-
     // 删除某一行
-    handleDelt(ind, row) {
+    handleDelt(row) {
       this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -238,19 +193,16 @@ export default {
         })
         .catch(() => {});
     },
-    // 删多行
-    delClick() {
-      let params = {
-        id: this.multipleSelection.map((item) => item.ID),
-      };
-      this.comDelete(params);
-    },
     comDelete(params) {
-      console.log(params);
       this.$http
-        .post("/MGT/System/ProgressGroup/DelProgressGroup.ashx", params)
+        .post("/ProgressGroup/DelProgressGroup.ashx", params)
         .then((result) => {
           if (result.res == 0) {
+            this.$message({
+              showClose: true,
+              message: "删除成功！",
+              type: "success",
+            });
             this.getDataList();
           }
         });
@@ -261,7 +213,7 @@ export default {
       this.openWin("ad");
     },
     // 编辑
-    handleEdit(i, row) {
+    handleEdit(row) {
       this.openWin("ed", row.ID, row.Name);
     },
     // 打开窗口
@@ -278,23 +230,25 @@ export default {
         this.$refs.proGroupWindow.changeEditState();
       });
     },
-
-    // 查询
-    searchClick(val) {
-      this.searchKW = val;
-      this.pageData.pageIndex = 1;
-      this.getDataList();
-    },
     // 分页
     getDataList() {
+      if (!this.teamValue) {
+        this.$message({
+          showClose: true,
+          message: "请选择团队",
+          type: "warning",
+        });
+        return;
+      }
       let params = {
         name: this.searchKW,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
+        teamId: this.teamValue,
       };
       this.loading = true;
       this.$http
-        .post("/MGT/System/ProgressGroup/QueryProgressGroupList.ashx", params)
+        .post("/ProgressGroup/QueryProgressGroupList.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             console.log(result);
@@ -351,5 +305,17 @@ export default {
 #manager-label {
   height: 100%;
   box-sizing: border-box;
+  .screen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .screen_left {
+      .lable {
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-right: 5px;
+      }
+    }
+  }
 }
 </style>

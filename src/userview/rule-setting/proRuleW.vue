@@ -36,6 +36,7 @@
                   <el-option
                     v-for="(item, index) in processOptions"
                     :label="item.Name"
+                    :key="index"
                     :value="item.ID"
                   ></el-option>
                 </el-select>
@@ -157,18 +158,16 @@
 </template>
 
 <script>
-let proxy = "";
-if (process.env.NODE_ENV === "development") {
-  proxy = "http://localhost:8081/Api";
-} else {
-  proxy = location.origin;
-}
 export default {
   components: {
     XModel: () => import("@/components/XModal"),
     mb: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   props: {
+    teamValue: {
+      type: Number,
+      default: null,
+    },
     operationName: {
       type: String | Number,
       default: 1,
@@ -203,18 +202,14 @@ export default {
       loading: false,
     };
   },
-  watch: {
-    "loadForm.rType"(newVal) {
-      console.log(newVal);
-    },
-  },
   methods: {
     getUser(arr) {
       this.loadForm.member = arr;
     },
     async GetProgressGroup() {
-      const resp = await this.$http.get(
-        "/MGT/Personnel/User/GetProgressGroupSelected.ashx"
+      const resp = await this.$http.post(
+        "/User/GetProgressGroupSelected.ashx",
+        { teamId: this.teamValue }
       );
       if (resp.res == 0) {
         this.processOptions = resp.data;
@@ -230,28 +225,27 @@ export default {
     getDetail() {
       this.loading = true;
       this.$http
-        .post("/MGT/System/Progress/QueryRuleDetail.ashx", {
-          ID: this.id,
+        .get("/ProcessRules/ProcessRulesDetail.ashx", {
+          params: { ruleId: this.id },
         })
         .then((res) => {
           if (res.res == 0) {
             this.loading = false;
             if (this.activeItem == "进程组") {
               this.loadForm.rType = 1;
-              this.loadForm.g = res.data.ProgressGroupIds;
+              this.loadForm.g = res.data.PreocessGroup.map((m) => m.ID);
             } else {
               this.loadForm.rType = 2;
               this.user = [];
               this.loadForm.member = [];
-              res.data.UInfo.forEach((item) => {
+              res.data.UserData.forEach((item) => {
                 this.loadForm.member.push({
-                  UName: item.Name,
-                  Picture: item.Picture,
-                  UId: item.UsId,
+                  Name: item.Name,
+                  UsId: item.UsId,
                 });
               });
             }
-            if (res.data.ProgressNames.length) {
+            if (res.data.ProgressNames && res.data.ProgressNames.length) {
               res.data.ProgressNames.forEach((item, index) => {
                 this.loadForm.pn[index] = item;
               });
@@ -259,9 +253,11 @@ export default {
             } else {
               this.loadForm.radio = true;
             }
-            res.data.FormNames.forEach((item, index) => {
-              this.loadForm.word[index] = item;
-            });
+            if (res.data.FormNames && res.data.FormNames.length) {
+              res.data.FormNames.forEach((item, index) => {
+                this.loadForm.word[index] = item;
+              });
+            }
             this.loadForm.RuleName = res.data.RuleName;
             this.loadForm.mk1 =
               res.data.MarkInCheck == "上班" ? "工作" : res.data.MarkInCheck;
@@ -359,20 +355,21 @@ export default {
         let params = {
           Id: this.id,
           RuleName: this.loadForm.RuleName,
-          type: this.loadForm.rType == 1 ? "进程组" : "成员组",
-          RuleArray:
-            this.loadForm.rType == 1
-              ? this.loadForm.g
-              : this.loadForm.member.map((item) => item.UId),
+          ProgressGroupIds: this.loadForm.rType == 1 ? this.loadForm.g : [],
+          UserIds:
+            this.loadForm.rType == 2
+              ? this.loadForm.member.map((item) => item.UsId)
+              : [],
+          ProgressNames: this.loadForm.radio ? [] : pn,
+          FormNames: word,
           MarkOutCheck: this.loadForm.mk2,
           MarkInCheck: this.loadForm.mk1,
-          ProcessName: this.loadForm.radio ? 1 : pn,
-          Word: word,
-          Automatic: this.loadForm.Automatic ? 0 : 1,
+          Automatic: this.loadForm.Automatic,
+          teamId: this.teamValue,
         };
         params = this.filterParams(params);
         this.$http
-          .get("/MGT/System/Progress/AddRuleName.ashx", {
+          .get("/ProcessRules/SaveProcessRules.ashx", {
             params,
           })
           .then((res) => {

@@ -226,6 +226,7 @@ export default {
      * 搜索
      */
     searchClick(val) {
+      this.pageData.pageIndex = 1;
       this.searchtext = val;
       this.getDataList();
     },

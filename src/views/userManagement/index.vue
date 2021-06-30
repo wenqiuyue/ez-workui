@@ -145,6 +145,7 @@ export default {
      * 搜索
      */
     searchClick(val) {
+      this.pageData.pageIndex=1
       this.searchVal = val;
       this.getTableList();
     },

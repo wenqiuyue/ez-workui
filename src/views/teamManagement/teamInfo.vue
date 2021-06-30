@@ -1,7 +1,7 @@
 <template>
   <div id="teamInfo">
     <!-- 列表页 -->
-    <CContent v-if="selRow">
+    <CContent v-if="selRow" v-loading="loading">
       <template #search>
         <div class="info_header">
           <div class="h_left">
@@ -14,7 +14,109 @@
         </div>
       </template>
       <template #main>
-        <el-table :data="tableData" v-loading="loading">
+        <div class="head_info">
+          <el-row :gutter="20">
+            <el-col :span="12"
+              ><el-card class="box-card">
+                <div slot="header" class="clearfix">
+                  <span>团队信息</span>
+                </div>
+                <div class="card_contend">
+                  <ul v-if="teamInfo">
+                    <li>
+                      <span class="lable">团队名称：</span>
+                      <span>{{ teamInfo.Name }}</span>
+                    </li>
+                    <li>
+                      <span class="lable">创建人：</span>
+                      <span>{{ teamInfo.UserName }}</span>
+                    </li>
+                    <li>
+                      <span class="lable">创建时间：</span>
+                      <span>{{
+                        teamInfo.CreatTime
+                          ? teamInfo.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
+                          : "无"
+                      }}</span>
+                    </li>
+                    <li>
+                      <span class="lable">过期时间：</span>
+                      <span>{{
+                        teamInfo.ExpireTime
+                          ? teamInfo.ExpireTime.timeFormat("yyyy-MM-dd HH:mm")
+                          : "无"
+                      }}</span>
+                    </li>
+                    <li style="width: 100%">
+                      <span class="lable">团队描述：</span>
+                      <span>{{
+                        teamInfo.Describe ? teamInfo.Describe : "无"
+                      }}</span>
+                    </li>
+                    <li style="width: 100%">
+                      <span class="lable">成员是否可以添加成员：</span>
+                      <span>{{ teamInfo.IsAgree == 1 ? "允许" : "禁止" }}</span>
+                    </li>
+                  </ul>
+                  <ul v-else>
+                    <li>无团队信息</li>
+                  </ul>
+                </div>
+              </el-card></el-col
+            >
+            <el-col :span="12" style="padding-right: 0px"
+              ><el-card class="box-card">
+                <div slot="header" class="clearfix">
+                  <span>版本信息</span>
+                </div>
+                <div class="card_contend">
+                  <ul v-if="verInfo">
+                    <li>
+                      <span class="lable">版本名称：</span>
+                      <span>{{
+                        verInfo.VsersionName ? verInfo.VsersionName : "无"
+                      }}</span>
+                    </li>
+                    <li>
+                      <span class="lable">版本金额：</span>
+                      <span
+                        >{{
+                          verInfo.VersionPrice ? verInfo.VersionPrice : 0
+                        }}元</span
+                      >
+                    </li>
+                    <li>
+                      <span class="lable">版本期限：</span>
+                      <span
+                        >{{
+                          verInfo.VersionPeriod ? verInfo.VersionPeriod : 0
+                        }}天</span
+                      >
+                    </li>
+                    <li>
+                      <span class="lable">可加入人数：</span>
+                      <span
+                        >{{ verInfo.Capacity ? verInfo.Capacity : 0 }}人</span
+                      >
+                    </li>
+                    <li>
+                      <span class="lable">创建时间：</span>
+                      <span>{{
+                        verInfo.CreatTime
+                          ? verInfo.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                          : "无"
+                      }}</span>
+                    </li>
+                  </ul>
+                  <ul v-else>
+                    <li>无版本信息</li>
+                  </ul>
+                </div>
+              </el-card></el-col
+            >
+          </el-row>
+        </div>
+        <el-table :data="tableData">
           <el-table-column label="成员姓名" prop="Name" align="center" />
           <el-table-column
             label="加入时间"
@@ -110,6 +212,8 @@ export default {
       selUser: null,
       loading: false,
       tableData: [],
+      teamInfo: null,
+      verInfo: null,
     };
   },
   mounted() {
@@ -128,6 +232,8 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.tableData = resp.data.Membersdata;
+            this.teamInfo = resp.data.Teamdata;
+            this.verInfo = resp.data.Vsersion;
           }
         })
         .finally(() => {
@@ -148,6 +254,43 @@ export default {
 <style lang="less" scoped>
 #teamInfo {
   height: 100%;
+  .head_info {
+    width: calc(100% - 10px);
+    padding-bottom: 8px;
+    background: #f6f6f6;
+    /deep/.el-col {
+      height: 180px;
+    }
+    .box-card {
+      height: 100%;
+      .clearfix {
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+      /deep/.el-card__header {
+        padding: 8px 20px;
+      }
+      /deep/.el-card__body {
+        padding: 14px 20px !important;
+      }
+      .card_contend {
+        ul {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          flex-wrap: wrap;
+          font-size: 1.3rem;
+          li {
+            width: 50%;
+            line-height: 3rem;
+            .lable {
+              width: 100px;
+            }
+          }
+        }
+      }
+    }
+  }
   .info_header {
     background: #ffffff;
     line-height: 4rem;

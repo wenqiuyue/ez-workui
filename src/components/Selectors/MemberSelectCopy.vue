@@ -1,7 +1,7 @@
 <!-- 
 	@Description:成员选择器 
 	@Author:zxg 
-	@Params: eid【 项目id 】
+	@Params: 
 			size 【头像大小 small medium 默认medium 】
 			readonly 【是否只读  默认false（如果要设置只读属性，请同时设置为单选 isSelection=false）】
 			isSelection【true为多选 默认true】
@@ -112,7 +112,10 @@
                   >
                     <img :src="img(null)" />
                     <em :title="item.Name">{{ item.Name }}</em>
-                    <span></span>
+                    <el-tag v-if="teamId && item.MType">{{
+                      item.MType == 1 ? "成员" : "管理人"
+                    }}</el-tag>
+                    <span v-else></span>
                   </el-checkbox>
                   <div
                     class="tip_text"
@@ -131,7 +134,10 @@
                   >
                     <img :src="img(null)" />
                     <em>{{ item.Name }}</em>
-                    <span></span>
+                    <el-tag v-if="teamId && item.MType">{{
+                      item.MType == 1 ? "成员" : "管理人"
+                    }}</el-tag>
+                    <span v-else></span>
                   </el-checkbox>
                   <div class="tip_text" v-if="isSearching">搜索中...</div>
                   <div class="tip_text" v-if="searchData.length == 0">
@@ -186,9 +192,9 @@ export default {
     },
   },
   props: {
-    //项目ID，如果不为空则显示项目内成员
-    eid: {
-      type: String | Number,
+    //团队id
+    teamId: {
+      type: Number,
       default: null,
     },
     //是否显示选中人
@@ -273,9 +279,7 @@ export default {
       reverse: false, //反选
       all: false, //全选
       checkedCities: [], //选中的成员
-      project: null, //项目
       position: null, //职位
-      department: null, //部门
       pageData: null, //页数据
       loading: false, //加载
       searchText: "", //搜索成员
@@ -322,11 +326,12 @@ export default {
     //加载数据
     beforeOpen() {
       if (this.pageData == null) {
-        if (this.eid != null) {
-          this.getData(this.project, 0);
+        if (this.teamId) {
+          this.getTeamData();
         } else {
-          this.getData(this.position, 1);
+          this.getData();
         }
+
         this.defalutId = 0;
         this.$nextTick(function () {
           this.$refs.input.focus();
@@ -340,23 +345,48 @@ export default {
         this.checkedCities.push(val.pop());
       }
     },
-    getData(pageData, type) {
+    getData() {
       this.defalutId = 0;
-      if (pageData == null) {
-        this.loading = true;
-        this.$http
-          .get("/General/memberSelector.ashx", {
-            params: {
-              name: this.searchText,
-            },
-          })
-          .then((resp) => {
-            if (resp.res == 0) {
-              this.pageData = resp.data;
-              this.loading = false;
-            }
-          });
-      }
+      this.loading = true;
+      this.$http
+        .get("/General/memberSelector.ashx", {
+          params: {
+            name: this.searchText,
+          },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.pageData = resp.data;
+            this.loading = false;
+          }
+        });
+      this.$refs.scroll.scrollTop = 0;
+      this.isSearch = false;
+      this.searchText = "";
+    },
+    getTeamData() {
+      this.defalutId = 0;
+      this.loading = true;
+      const data = {
+        teamId: this.teamId,
+        Ids: [],
+      };
+      this.$http
+        .post("/Management/TeamManagement/MenberSelects.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.pageData = resp.data.map((m) => {
+              return {
+                UsId: m.Id,
+                Name: m.Name,
+                Name_Pinyin: null,
+                Picture: m.Picture,
+                MType: m.MType,
+              };
+            });
+            this.loading = false;
+          }
+        });
       this.$refs.scroll.scrollTop = 0;
       this.isSearch = false;
       this.searchText = "";

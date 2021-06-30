@@ -34,6 +34,24 @@
           </selMember>
         </div>
         <div class="sel_inline">
+          <div class="sel" v-if="isShowTeam">
+            <span>团队</span>
+            <div>
+              <el-select
+                v-model="teamValue"
+                filterable
+                placeholder="请选择团队"
+              >
+                <el-option
+                  v-for="item in teamOptions"
+                  :key="item.Id"
+                  :label="item.Name"
+                  :value="item.Id"
+                >
+                </el-option>
+              </el-select>
+            </div>
+          </div>
           <div class="sel">
             <span>日期</span>
             <div class="sel-date">
@@ -70,23 +88,14 @@
               >
               </el-date-picker>
             </div>
-            <el-button
-              type="primary"
-              class="btn"
-              @click="handleGetData"
-              :loading="loading"
-              >搜 索</el-button
-            >
           </div>
-          <!-- <div>
-            <div class="sel">
-              <el-input
-                v-model="inputSearch"
-                placeholder="精准搜索员工"
-              ></el-input>
-              <el-button type="primary" class="btn">搜 索</el-button>
-            </div>
-          </div> -->
+          <el-button
+            type="primary"
+            class="btn"
+            @click="handleGetData"
+            :loading="loading"
+            >搜 索</el-button
+          >
         </div>
       </div>
       <div class="people_list" v-if="memberData && memberData.length">
@@ -225,6 +234,8 @@ export default {
   },
   data() {
     return {
+      teamOptions: [], //团队选择器
+      teamValue: null, //选择的团队
       selMem: [], //选择的成员
       pickOption: this.pickDate(),
       isListPage: true, //是否在列表页
@@ -248,10 +259,33 @@ export default {
       stime: null,
       clickKeyWord: null, //要查看的关键词
       pname: null, //选择的关键词的窗口名
+      isShowTeam: false, // 是否显示团队选择
     };
   },
-  mounted() {},
+  mounted() {
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.getTeams();
+  },
   methods: {
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/MembersTeamList.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     /**
      * 获取列表数据
      */
@@ -424,7 +458,10 @@ export default {
       .sel_inline {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        align-items: center;
+        .btn {
+          margin-left: 2rem;
+        }
       }
       .sel {
         display: flex;

@@ -1,49 +1,110 @@
 <template>
   <div class="team-info">
-    <el-row :gutter="20">
+    <el-row :gutter="20" v-loading="loading">
       <!-- 左边 -->
-      <el-col :span="7"
+      <el-col :span="7" v-if="infoData"
         ><div class="info_left">
           <h3 class="info-title">团队信息</h3>
-          <div class="info_img">
+          <!-- <div class="info_img">
             <el-avatar
               src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
             ></el-avatar>
-          </div>
+          </div> -->
           <div class="info_form">
             <ul>
               <li>
                 <span class="lable">团队名称：</span>
-                <span>XXX团队</span>
+                <span>{{ infoData.Teamdata.Name }}</span>
               </li>
               <li>
                 <span class="lable">当前人数：</span>
-                <span>200人</span>
+                <span
+                  >{{
+                    infoData.Membersdata && infoData.Membersdata.length
+                      ? infoData.Membersdata.length
+                      : 0
+                  }}人</span
+                >
               </li>
               <li class="img_row">
                 <span class="lable">创建人：</span>
                 <span class="number">
                   <el-avatar
                     size="small"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="$url + infoData.Teamdata.UserPicture"
                   ></el-avatar>
-                  <span>文秋月</span>
+                  <span>{{ infoData.Teamdata.UserName }}</span>
                 </span>
               </li>
               <li class="img_row_list">
                 <span class="lable">管理员：</span>
-                <div class="number_list">
-                  <span class="number" v-for="(item, index) in 5" :key="index">
+                <div
+                  class="number_list"
+                  v-if="infoData.Membersdata && infoData.Membersdata.length"
+                >
+                  <span
+                    class="number"
+                    v-for="(item, index) in infoData.Membersdata"
+                    :key="index"
+                  >
                     <el-avatar
                       size="small"
-                      src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                      :src="$url + item.Picture"
                     ></el-avatar>
-                    <span>文秋月</span>
+                    <span>{{ item.Name }}</span>
                   </span>
                 </div>
+                <div v-else>无</div>
+              </li>
+              <li>
+                <span class="lable">创建时间：</span>
+                <span
+                  >{{
+                    infoData.Teamdata.CreatTime
+                      ? infoData.Teamdata.CreatTime.timeFormat(
+                          "yyyy-MM-dd HH:ss"
+                        )
+                      : "无"
+                  }}人</span
+                >
+              </li>
+              <li v-if="infoData.Teamdata.ExpireTime">
+                <span class="lable">过期时间：</span>
+                <span
+                  >{{
+                    infoData.Teamdata.ExpireTime
+                      ? infoData.Teamdata.ExpireTime.timeFormat(
+                          "yyyy-MM-dd HH:ss"
+                        )
+                      : "无"
+                  }}人</span
+                >
+              </li>
+              <li v-if="infoData.Teamdata.Describe">
+                <span class="lable">团队描述：</span>
+                <span
+                  >{{
+                    infoData.Teamdata.Describe
+                      ? infoData.Teamdata.Describe
+                      : "无"
+                  }}人</span
+                >
+              </li>
+              <li>
+                <span class="lable">成员是否可以添加成员：</span>
+                <span
+                  >{{
+                    infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
+                  }}人</span
+                >
               </li>
               <li class="num_row">
-                <p><span class="lable">团队号：</span> <span>12345678</span></p>
+                <p>
+                  <span class="lable">团队号：</span>
+                  <span>{{
+                    infoData.Teamdata.Code ? infoData.Teamdata.Code : "无"
+                  }}</span>
+                </p>
                 <p>用户可通过团队号加入团队</p>
               </li>
               <li><span class="lable">设置：</span></li>
@@ -68,7 +129,11 @@
                 ></el-input>
               </li>
               <li style="margin-top: 32px">
-                <el-button type="primary" style="width: 100%" size="medium"
+                <el-button
+                  type="primary"
+                  style="width: 100%"
+                  size="medium"
+                  @click="handleInvit"
                   >邀请成员加入</el-button
                 >
               </li>
@@ -77,288 +142,69 @@
         </div></el-col
       >
       <!-- 右边 -->
-      <el-col :span="17"
-        ><div class="info_right">
-          <!-- 右边标题 -->
-          <h3 class="info-title">
-            <span>团队邀请管理</span>
-            <div class="screen_left">
-              <el-button type="success" size="small">全部同意</el-button>
-              <el-button type="danger" size="small">全部拒绝</el-button>
-              <el-button type="info" size="small">清空记录</el-button>
-            </div>
-          </h3>
-          <!-- 右边搜索 -->
-          <div class="r_screen">
-            <div class="screen_right">
-              <ul>
-                <li>
-                  <span class="lable">时间范围</span>
-                  <el-date-picker
-                    v-model="timeScreen"
-                    type="daterange"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                  >
-                  </el-date-picker>
-                </li>
-                <li>
-                  <span class="lable">状态</span>
-                  <el-select
-                    v-model="statusScreen"
-                    multiple
-                    collapse-tags
-                    placeholder="请选择状态"
-                  >
-                    <el-option
-                      v-for="item in statusOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    >
-                    </el-option>
-                  </el-select>
-                </li>
-                <li>
-                  <el-button type="primary" icon="el-icon-search" size="medium"
-                    >搜索</el-button
-                  >
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!-- 右边表格 -->
-          <div class="right_table">
-            <el-table :data="tableData" stripe>
-              <el-table-column label="被邀请人" prop="Name" align="center">
-                <template slot-scope="scope"> 文秋月（15803675211） </template>
-              </el-table-column>
-              <el-table-column label="邀请人" prop="Name" align="center">
-                <template slot-scope="scope"> 文秋月（15803675211） </template>
-              </el-table-column>
-              <el-table-column
-                label="申请时间"
-                prop="CreatTime"
-                show-overflow-tooltip
-                align="center"
-                ><template slot-scope="scope">
-                  {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="120" align="center">
-                <template slot-scope="scope">
-                  <c-btn>
-                    <span>同意</span>
-                    <span>拒绝</span>
-                  </c-btn>
-                </template>
-              </el-table-column>
-            </el-table>
-            <div class="page">
-              <CPages
-                v-model="pageData"
-                @changeEvent="handlePaginationChange"
-              />
-            </div>
-          </div></div
-      ></el-col>
+      <el-col :span="17">
+        <InvitationList></InvitationList>
+      </el-col>
     </el-row>
+    <!-- 邀请成员 -->
+    <InvitationUser :teamId="selRow.Id" :mName="'infoInvit'"></InvitationUser>
   </div>
 </template>
 <script>
 export default {
   components: {
-    CBtn: () => import("@/components/CBtn"),
-    CPages: () => import("@/components/CPages"),
+    InvitationList: () => import("./invitation-list"),
+    InvitationUser: () => import("./invitation-user"),
+  },
+  props: {
+    //选择的团队
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
-      statusOptions: [
-        {
-          label: "已通过",
-          value: 1,
-        },
-        {
-          label: "未通过",
-          value: 2,
-        },
-        {
-          label: "未审核",
-          value: 3,
-        },
-      ],
+      infoData: null, //详细信息
+
       loading: false,
       setOne: true,
       setTwo: true,
       setThree: false,
       passwordVal: null, //口令
-      timeScreen: null, //时间筛选
-      statusScreen: null, //状态筛选
-      tableData: [
-        {
-          Name: "团队名称",
-          CreatTime: "2021-02-02 12:21",
-          MType: 1,
-          MemberCount: 20,
-          Shape: 1,
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-      ],
-      pageData: {
-        pageIndex: 1,
-        pageSize: 10,
-        totalNum: 0,
-      },
     };
+  },
+  mounted() {
+    this.getData();
   },
   methods: {
     /**
-     * 分页
+     * 邀请成员
      */
-    handlePaginationChange(val) {},
+    handleInvit() {
+      this.$modal.show("infoInvit");
+    },
+    /**
+     * 获取团队信息
+     */
+    getData() {
+      this.loading = true;
+      this.$http
+        .get("/Teams/TeamManagementDetail.ashx", {
+          params: { teamId: this.selRow.Id },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.infoData = resp.data;
+            this.setOne = this.infoData.Teamdata.IsTeamCode == 1 ? true : false;
+            this.setTwo = this.infoData.Teamdata.IsAgree == 1 ? true : false;
+            this.setThree =
+              this.infoData.Teamdata.IsInvitationCode == 1 ? true : false;
+            this.passwordVal = this.infoData.Teamdata.InvitationCode;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
   },
 };
 </script>
@@ -374,8 +220,7 @@ export default {
     height: 100%;
     padding-bottom: 10px;
   }
-  .info_left,
-  .info_right {
+  .info_left {
     height: 100%;
     background: #ffffff;
     border: 1px solid #dcdfe6;
@@ -450,7 +295,7 @@ export default {
           }
         }
         .num_row {
-          padding: 10px 0;
+          padding: 16px 0;
           p:last-child {
             font-size: 12px;
             color: #e6a23c;
@@ -468,84 +313,6 @@ export default {
             height: 34px;
             line-height: 34px;
           }
-        }
-      }
-    }
-  }
-  .info_right {
-    .r_screen {
-      line-height: 4.5rem;
-      border-top: 1px solid #e4e7ed;
-      border-bottom: 1px solid #e4e7ed;
-      padding: 0 10px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      .screen_right {
-        ul {
-          display: flex;
-          flex-direction: row;
-          li {
-            margin-right: 14px;
-            display: flex;
-            align-items: center;
-            .lable {
-              margin-right: 3px;
-              font-weight: bold;
-              color: #606266;
-            }
-            /deep/.el-range-editor {
-              width: 234px;
-              height: 36px;
-              line-height: 36px;
-              .el-input__icon {
-                height: auto;
-              }
-              .el-range-separator {
-                width: 20px;
-                height: auto;
-              }
-            }
-            /deep/.el-select {
-              .el-input__inner {
-                border: 1px solid #e4e7ed !important;
-                height: 36px;
-                line-height: 36px;
-              }
-            }
-          }
-        }
-      }
-    }
-    .right_table {
-      height: calc(100% - 86px);
-      display: flex;
-      flex-direction: column;
-      .mem_count {
-        cursor: pointer;
-        &:hover {
-          color: #409eff;
-        }
-      }
-      .page {
-        position: relative;
-        padding: 0.4rem 0;
-        border-top: 1px solid #ebeef5;
-        // total弄到最右边
-        .el-pagination__total {
-          position: absolute;
-          right: 0;
-          height: 28px;
-          line-height: 28px;
-          font-size: 13px;
-          display: inline-block;
-        }
-      }
-      /deep/.el-table {
-        .el-table__body-wrapper {
-          height: calc(100% - 47px);
-          overflow-y: auto;
         }
       }
     }

@@ -1,7 +1,7 @@
 <template>
   <div class="userTeamInfo">
     <XModal name="userTeamInfo" width="40%" height="77%">
-      <CWinTmp :indexData="indexData" v-loading="loading">
+      <CWinTmp :indexData="indexData">
         <div slot="form" class="info_content" v-if="selUser">
           <el-row>
             <el-col :span="24"

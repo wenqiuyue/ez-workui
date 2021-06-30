@@ -27,7 +27,7 @@ const msg = {
   otherCount: 0, //其他消息未读数量
   systemCount: 0, //系统消息未读数量
   chatCount: 0, //聊天消息未读数量
-  immediateCount: 0,//即时消息
+  immediateCount: 0, //即时消息
   unreadMainMenu: true, //主菜单的消息是否未读，用于点击后就取消掉消息主菜单的标签提示
 };
 /**
@@ -116,5 +116,5 @@ export default {
   contracts,
   audio,
   auditListData,
-  isProLeader
+  isProLeader,
 };

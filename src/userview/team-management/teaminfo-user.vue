@@ -4,7 +4,8 @@
     <div class="info_header">
       <div class="h_left">
         <span @click="$emit('viewChange')"
-          ><i class="el-icon-d-arrow-left"></i>XXX团队</span
+          ><i class="el-icon-d-arrow-left"></i
+          >{{ selRow ? selRow.Name : "" }}</span
         >
       </div>
       <div class="h_right">
@@ -25,8 +26,8 @@
         </el-button-group>
       </div>
     </div>
-    <UserList v-if="viewType == 2"></UserList>
-    <TeamInfo v-else></TeamInfo>
+    <UserList v-if="viewType == 2" :selRow="selRow"></UserList>
+    <TeamInfo v-else :selRow="selRow"></TeamInfo>
   </div>
 </template>
 
@@ -35,6 +36,13 @@ export default {
   components: {
     UserList: () => import("./user-list"),
     TeamInfo: () => import("./team-info"),
+  },
+  props: {
+    //选择的团队
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
