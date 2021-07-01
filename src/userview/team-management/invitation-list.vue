@@ -1,12 +1,18 @@
 <template>
-  <div class="info_right">
+  <div class="info_right" v-loading="loading">
     <!-- 右边标题 -->
     <h3 class="info-title">
       <span>团队邀请管理</span>
       <div class="screen_left">
-        <el-button type="success" size="small">全部同意</el-button>
-        <el-button type="danger" size="small">全部拒绝</el-button>
-        <el-button type="info" size="small">清空记录</el-button>
+        <el-button type="success" size="small" @click="handleInv(null, 1)"
+          >全部同意</el-button
+        >
+        <el-button type="danger" size="small" @click="handleInv(null, -1)"
+          >全部拒绝</el-button
+        >
+        <el-button type="info" size="small" @click="handleDel"
+          >清空记录</el-button
+        >
       </div>
     </h3>
     <!-- 右边搜索 -->
@@ -26,12 +32,7 @@
           </li>
           <li>
             <span class="lable">状态</span>
-            <el-select
-              v-model="statusScreen"
-              multiple
-              collapse-tags
-              placeholder="请选择状态"
-            >
+            <el-select v-model="statusScreen" placeholder="请选择状态">
               <el-option
                 v-for="item in statusOptions"
                 :key="item.value"
@@ -41,8 +42,19 @@
               </el-option>
             </el-select>
           </li>
+          <li class="number_screen">
+            <!-- <span class="lable">状态</span> -->
+            <el-input
+              v-model="numberScreen"
+              placeholder="邀请人/被邀请人"
+            ></el-input>
+          </li>
           <li>
-            <el-button type="primary" icon="el-icon-search" size="medium"
+            <el-button
+              type="primary"
+              icon="el-icon-search"
+              size="medium"
+              @click="handleSearch"
               >搜索</el-button
             >
           </li>
@@ -52,11 +64,12 @@
     <!-- 右边表格 -->
     <div class="right_table">
       <el-table :data="tableData" stripe>
-        <el-table-column label="被邀请人" prop="Name" align="center">
-          <template slot-scope="scope"> 文秋月（15803675211） </template>
+        <el-table-column label="申请人" prop="UserName" align="center">
         </el-table-column>
-        <el-table-column label="邀请人" prop="Name" align="center">
-          <template slot-scope="scope"> 文秋月（15803675211） </template>
+        <el-table-column label="邀请人" prop="Inviter" align="center">
+          <template slot-scope="scope">
+            {{ scope.row.Inviter ? scope.row.Inviter : "无" }}
+          </template>
         </el-table-column>
         <el-table-column
           label="申请时间"
@@ -64,14 +77,18 @@
           show-overflow-tooltip
           align="center"
           ><template slot-scope="scope">
-            {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+            {{
+              scope.row.CreateTime
+                ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss")
+                : "--"
+            }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="120" align="center">
           <template slot-scope="scope">
-            <c-btn>
-              <span>同意</span>
-              <span>拒绝</span>
+            <c-btn v-if="scope.row.InvitedStatus == 0">
+              <span @click="handleInv(scope.row, 1)">同意</span>
+              <span @click="handleInv(scope.row, -1)">拒绝</span>
             </c-btn>
           </template>
         </el-table-column>
@@ -88,176 +105,38 @@ export default {
     CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
   },
+  props: {
+    //团队id
+    teamId: {
+      type: Number,
+      default: null,
+    },
+  },
   data() {
     return {
+      loading: true,
       statusOptions: [
+        {
+          label: "所有",
+          value: null,
+        },
         {
           label: "已通过",
           value: 1,
         },
         {
           label: "未通过",
-          value: 2,
+          value: -1,
         },
         {
           label: "未审核",
-          value: 3,
+          value: 0,
         },
       ],
+      numberScreen: null, //邀请人、被邀请人筛选
       timeScreen: null, //时间筛选
       statusScreen: null, //状态筛选
-      tableData: [
-        {
-          Name: "团队名称",
-          CreatTime: "2021-02-02 12:21",
-          MType: 1,
-          MemberCount: 20,
-          Shape: 1,
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-        {
-          Name: "团队名称",
-          UserName: "文秋月",
-          CreatTime: "2021-02-02 12:21",
-          AdminUserName: "文秋月",
-          MemberCount: 20,
-          Vsersion: {
-            Name: 20,
-          },
-          ExpireTime: "2021-02-02 12:21",
-        },
-      ],
+      tableData: [],
       pageData: {
         pageIndex: 1,
         pageSize: 10,
@@ -265,7 +144,102 @@ export default {
       },
     };
   },
+  mounted() {
+    this.getListData();
+  },
   methods: {
+    /**
+     * 清空邀请
+     */
+    handleDel() {
+      this.$confirm("此操作将清空所有记录, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          const data = {
+            Ids: "",
+            teamId: this.teamId,
+          };
+          this.$http
+            .post("/Teams/InvitedOrApply/DelSubmit.ashx", data)
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  type: "success",
+                  message: "清空记录成功!",
+                });
+                this.handleSearch();
+              }
+            });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消操作",
+          });
+        });
+    },
+    /**
+     * 同意/拒绝申请
+     */
+    handleInv(val, type) {
+      const data = {
+        Ids: val ? [val.Id] : "",
+        operation: type,
+        teamId: this.teamId,
+      };
+      this.$http
+        .post("/Teams/InvitedOrApply/BatchOperation.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              showClose: true,
+              message: "申请处理成功！",
+              type: "success",
+            });
+            this.getListData();
+          }
+        });
+    },
+    /**
+     * 搜索
+     */
+    handleSearch() {
+      this.pageData.pageIndex = 1;
+      this.getListData();
+    },
+    /**
+     * 邀请列表查询
+     */
+    getListData() {
+      this.loading = true;
+      const data = {
+        name: this.numberScreen,
+        teamId: this.teamId,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+        status: this.statusScreen,
+        sdate:
+          this.timeScreen && this.timeScreen.length
+            ? this.timeScreen[0].timeFormat("yyyy-MM-dd")
+            : null,
+        edate:
+          this.timeScreen && this.timeScreen.length
+            ? this.timeScreen[1].timeFormat("yyyy-MM-dd")
+            : null,
+      };
+      this.$http
+        .get("/Teams/InvitedOrApply/GetTeamApply.ashx", { params: data })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data.data;
+            this.pageData.totalNum = resp.data.total;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
     /**
      * 分页
      */
@@ -323,6 +297,17 @@ export default {
             }
           }
           /deep/.el-select {
+            width: 140px;
+            .el-input__inner {
+              border: 1px solid #e4e7ed !important;
+              height: 36px;
+              line-height: 36px;
+            }
+          }
+        }
+        .number_screen {
+          /deep/.el-input {
+            width: 150px;
             .el-input__inner {
               border: 1px solid #e4e7ed !important;
               height: 36px;

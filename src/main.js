@@ -7,6 +7,7 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import echarts from "echarts";
+import VueClipboard from "vue-clipboard2";
 import _ from "lodash";
 
 import "@/assets/HiFont/iconfont.js"; //字体图标
@@ -21,7 +22,7 @@ Vue.use(ElementUI);
 Vue.use(xVar);
 Vue.use(xUrl);
 Vue.use(VModal);
-
+Vue.use(VueClipboard);
 Vue.prototype.$echarts = echarts;
 
 /**
@@ -43,7 +44,8 @@ router.beforeEach((to, from, next) => {
   } else if (
     to.path != "/" &&
     to.path != "/resetpassword" &&
-    to.path != "/register"
+    to.path != "/register" &&
+    to.path != "/jointeam"
   ) {
     next({ path: "/" });
   } else {

@@ -180,6 +180,11 @@ const routes = [
     path: "/register",
     component: () => import("@/userview/register"),
   },
+  // 邀请加入团队
+  {
+    path: "/jointeam",
+    component: () => import("@/userview/team-management/invitation-join"),
+  },
 ];
 
 const _flat = (data) => {

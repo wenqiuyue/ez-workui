@@ -41,12 +41,18 @@
             </el-radio-group>
           </el-form-item>
         </el-form>
-        <div class="code_content">
+        <div class="code_content" v-if="linkCode">
           <div v-if="ruleForm.invType == 1">
             <div class="link">
               <el-input placeholder="请输入内容" v-model="linkCode" disabled>
                 <template slot="append">
-                  <span class="copy">复制</span>
+                  <span
+                    class="copy"
+                    v-clipboard:copy="linkCode"
+                    v-clipboard:success="copySuccess"
+                    v-clipboard:error="copyError"
+                    >复制</span
+                  >
                 </template>
               </el-input>
               <p>分享链接邀请你的团队伙伴吧！</p>
@@ -54,7 +60,7 @@
           </div>
           <div v-if="ruleForm.invType == 2">
             <div class="code">
-              <vue-qr text="Hello world!"></vue-qr>
+              <vue-qr :text="linkCode"></vue-qr>
               <p>分享二维码邀请你的团队伙伴吧！</p>
             </div>
           </div>
@@ -83,7 +89,7 @@ export default {
   },
   data() {
     return {
-      linkCode: "dsajkdsajflsfaslkfjla", //链接邀请码
+      linkCode: null, //链接邀请码
       ruleForm: {
         teamValue: null,
         invType: 1,
@@ -101,6 +107,7 @@ export default {
      * 弹窗打开回调
      */
     opened() {
+      Object.assign(this.$data, this.$options.data());
       this.getTeams();
       this.$nextTick(() => {
         if (this.teamId) {
@@ -113,7 +120,7 @@ export default {
      */
     getTeams() {
       this.$http
-        .get("/Teams/MembersTeamList.ashx", {
+        .get("/Teams/GetAllTeams.ashx", {
           params: { searchText: null, type: 2 },
         })
         .then((resp) => {
@@ -129,9 +136,35 @@ export default {
     onConfirm() {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
+          this.$refs.invitation.loadBtn(true);
+          const data = {
+            teamId: this.ruleForm.teamValue,
+          };
+          this.$http
+            .post("/Teams/InvitedOrApply/CreateInvitedCode.ashx", data)
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.linkCode = resp.data;
+              }
+            })
+            .finally(() => this.$refs.invitation.loadBtn(false));
         } else {
           return;
         }
+      });
+    },
+    //复制链接后的回调
+    copySuccess: function () {
+      this.$notify({
+        type: "success",
+        title: "复制成功",
+      });
+    },
+    copyError: function () {
+      this.$notify({
+        type: "error",
+        title: "复制失败",
+        msg: "请确认浏览器是否支持此功能",
       });
     },
   },

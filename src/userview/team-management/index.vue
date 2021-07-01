@@ -146,7 +146,7 @@
       :selRow="selRow"
     ></TeamInfoUser>
     <!-- 创建团队 -->
-    <AddTeam @success="getTeamList"></AddTeam>
+    <AddTeam @success="handleSearch"></AddTeam>
     <!-- 加入团队 -->
     <JoinTeam></JoinTeam>
     <!-- 邀请成员 -->

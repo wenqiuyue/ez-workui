@@ -1,89 +1,61 @@
 <template>
-  <div class="user-info">
+  <div class="userInfo">
     <XModal name="userInfo" width="40%" height="77%">
-      <CWinTmp :indexData="indexData" v-loading="loading">
-        <div slot="form" class="info_content">
+      <CWinTmp :indexData="indexData">
+        <div slot="form" class="info_content" v-if="selUser">
           <el-row>
             <el-col :span="24"
               ><div class="user_pic">
-                <el-avatar
-                  src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                ></el-avatar>
-                <span class="name">文秋月</span>
+                <el-avatar :src="$url + selUser.Picture"></el-avatar>
+                <span class="name">{{ selUser.Name }}</span>
+              </div></el-col
+            >
+            <el-col :span="12"
+              ><div class="info_list">
+                <span class="info_lable">角色：</span>
+                {{ selUser.MType == 1 ? "成员" : "管理人" }}
               </div></el-col
             >
 
             <el-col :span="12"
               ><div class="info_list">
-                <span class="info_lable">用户账户：</span>
-                文秋月
-              </div></el-col
-            >
-            <el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">用户昵称：</span>
-                文秋月
-              </div></el-col
-            >
-            <el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">用户密码：</span>
-                123123
-              </div></el-col
-            ><el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">性别：</span>
-                女
-              </div></el-col
-            ><el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">角色：</span>
-                管理员
-              </div></el-col
-            >
-            <el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">用户属性：</span>
-                属性
-              </div></el-col
-            >
-            <el-col :span="12"
-              ><div class="info_list">
                 <span class="info_lable">邮箱：</span>
-                1402472721@qq.com
+                {{ selUser.addres }}
               </div></el-col
             ><el-col :span="12"
               ><div class="info_list">
-                <span class="info_lable">联系方式：</span>
-                15802120322
+                <span class="info_lable">状态：</span>
+                {{ $D.ITEM("g_status", selUser.Shape).name }}
               </div></el-col
             >
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">注册时间：</span>
-                2021-6-24 16:49
-              </div></el-col
-            >
-            <el-col :span="12"
-              ><div class="info_list">
-                <span class="info_lable">上次登录：</span>
-                2021-6-24 16:49
+                {{
+                  selUser.CreatTime
+                    ? selUser.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
+                    : "无"
+                }}
               </div></el-col
             >
             <el-col :span="24"
               ><div class="info_list">
                 <span class="info_lable">可见成员：</span>
-                <div>
+                <div v-if="selUser.VisibleUser && selUser.VisibleUser.length">
                   <ul class="mem-imgs">
-                    <li v-for="(item, index) in 10" :key="index">
+                    <li
+                      v-for="(item, index) in selUser.VisibleUser"
+                      :key="index"
+                    >
                       <el-avatar
                         size="medium"
-                        src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                        :src="$url + item.Picture"
                       ></el-avatar>
-                      <p>文秋月</p>
+                      <p>{{ item.Name }}</p>
                     </li>
                   </ul>
                 </div>
+                <span v-else>无</span>
               </div></el-col
             >
           </el-row>
@@ -98,11 +70,14 @@ export default {
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
   },
+  props: {
+    selUser: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
-      loading: false,
-      visible: false,
-      data: null,
       indexData: {
         type: "",
         name: "成员详情",
@@ -113,7 +88,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-.user-info {
+.userInfo {
   .info_content {
     .user_pic {
       display: flex;

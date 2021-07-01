@@ -205,9 +205,17 @@ export default {
                   path: "/manager",
                 });
               } else {
-                this.$router.push({
-                  path: "/profile",
-                });
+                //如果是从邀请界面过来，登录成功后跳转到邀请界面
+                const url = this.$route.query.invitUrl;
+                if (url) {
+                  this.$router.push({
+                    path: url,
+                  });
+                } else {
+                  this.$router.push({
+                    path: "/profile",
+                  });
+                }
               }
             }
           })

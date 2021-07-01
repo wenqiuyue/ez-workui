@@ -277,7 +277,7 @@ export default {
      */
     getTeams() {
       this.$http
-        .get("/Teams/MembersTeamList.ashx", {
+        .get("/Teams/GetAllTeams.ashx", {
           params: { searchText: null, type: 2 },
         })
         .then((resp) => {

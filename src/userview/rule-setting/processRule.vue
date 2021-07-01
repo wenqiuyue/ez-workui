@@ -300,8 +300,8 @@ export default {
      */
     getTeams() {
       this.$http
-        .get("/Teams/MembersTeamList.ashx", {
-          params: { searchText: null, type: 2 },
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 3 },
         })
         .then((resp) => {
           if (resp.res == 0) {

@@ -1,16 +1,16 @@
 <template>
   <div class="team-info">
-    <el-row :gutter="20" v-loading="loading">
+    <el-row :gutter="20">
       <!-- 左边 -->
-      <el-col :span="7" v-if="infoData"
-        ><div class="info_left">
+      <el-col :span="7"
+        ><div class="info_left" v-loading="loading">
           <h3 class="info-title">团队信息</h3>
           <!-- <div class="info_img">
             <el-avatar
               src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
             ></el-avatar>
           </div> -->
-          <div class="info_form">
+          <div class="info_form" v-if="infoData">
             <ul>
               <li>
                 <span class="lable">团队名称：</span>
@@ -92,11 +92,9 @@
               </li>
               <li>
                 <span class="lable">成员是否可以添加成员：</span>
-                <span
-                  >{{
-                    infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
-                  }}人</span
-                >
+                <span>{{
+                  infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
+                }}</span>
               </li>
               <li class="num_row">
                 <p>
@@ -110,22 +108,24 @@
               <li><span class="lable">设置：</span></li>
               <li class="set_row">
                 <span>可否通过团队号加入</span>
-                <el-switch v-model="setOne"> </el-switch>
+                <el-switch v-model="setOne" @change="changeSet"> </el-switch>
               </li>
               <li class="set_row">
                 <span>成员可否邀请其他人加入</span>
-                <el-switch v-model="setTwo"> </el-switch>
+                <el-switch v-model="setTwo" @change="changeSet"> </el-switch>
               </li>
               <li>
                 <p class="set_row">
                   <span>是否设置邀请口令</span>
-                  <el-switch v-model="setThree"> </el-switch>
+                  <el-switch v-model="setThree" @change="changeSetPass">
+                  </el-switch>
                 </p>
                 <el-input
                   class="set_input"
                   v-if="setThree"
                   v-model="passwordVal"
-                  placeholder="请输入邀请口令"
+                  placeholder="请输入邀请口令(按Enter键保存)"
+                  @keyup.enter.native="changeSet"
                 ></el-input>
               </li>
               <li style="margin-top: 32px">
@@ -143,7 +143,7 @@
       >
       <!-- 右边 -->
       <el-col :span="17">
-        <InvitationList></InvitationList>
+        <InvitationList :teamId="selRow.Id"></InvitationList>
       </el-col>
     </el-row>
     <!-- 邀请成员 -->
@@ -178,6 +178,35 @@ export default {
     this.getData();
   },
   methods: {
+    /**
+     * 邀请口令设置
+     */
+    changeSetPass() {
+      if (!this.setThree) {
+        this.passwordVal = null;
+        this.changeSet();
+      }
+    },
+    /**
+     * 详情设置
+     */
+    changeSet() {
+      const data = {
+        teamId: this.selRow.Id,
+        IsTeamCode: this.setOne ? 1 : 0,
+        IsAgree: this.setTwo ? 1 : 0,
+        IsInvitationCode: this.setThree ? 1 : 0,
+        InvitationCode: this.passwordVal,
+      };
+      this.$http.post("/Teams/TeamSet.ashx", data).then((resp) => {
+        if (resp.res == 0) {
+          this.$message({
+            message: "设置成功",
+            type: "success",
+          });
+        }
+      });
+    },
     /**
      * 邀请成员
      */
