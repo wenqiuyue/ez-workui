@@ -127,7 +127,7 @@
               {{
                 scope.row.CreatTime
                   ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
-                  : ""
+                  : "--"
               }}
             </template>
           </el-table-column>
@@ -157,7 +157,7 @@
                     v-for="(item, index) in scope.row.VisibleUser"
                     :key="index"
                   >
-                    <img :src="item.Picture" alt="" />
+                    <img :src="imgChange(item.Picture)" alt="" />
                     <span>{{ item.Name }}</span>
                     <i
                       :style="
@@ -196,6 +196,7 @@
 </template>
 
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
@@ -222,6 +223,7 @@ export default {
     });
   },
   methods: {
+    imgChange,
     /**
      * 获取团队成员列表
      */

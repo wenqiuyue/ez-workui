@@ -6,27 +6,38 @@
       class="baseHeader"
     ></Header>
     <div class="container">
-      <div class="warp-left" v-show="!isEdit">
-        <div class="head"><img v-lazy="user.img" /></div>
+      <div class="warp-left" v-loading="loading" v-show="!isEdit">
+        <div class="head" v-if="user">
+          <img :src="imgChange(user.Picture, true)" />
+        </div>
         <div class="title">我的信息</div>
-        <el-form label-width="80px" class="look">
-          <el-form-item label="名字">{{ user.name }}</el-form-item>
-          <el-form-item label="部门">
-            <el-tag v-for="(item, i) in user.departments" :key="i">{{
-              item.Name
-            }}</el-tag>
-          </el-form-item>
-          <el-form-item label="职位">
-            <el-tag v-for="(item, i) in user.positions" :key="i">{{
-              item.Name
-            }}</el-tag>
-          </el-form-item>
-          <el-form-item label="QQ号码">{{ user.qq }}</el-form-item>
-          <el-form-item label="手机号码">{{ user.phone }}</el-form-item>
-          <el-form-item label="邮箱地址">{{ user.email }}</el-form-item>
-          <el-form-item label="WHB账号">{{ user.whb }}</el-form-item>
+        <el-form label-width="100px" class="look" v-if="user">
+          <el-form-item label="账户">{{ user.UseName }}</el-form-item>
+          <el-form-item label="昵称">{{
+            user.Name ? user.Name : "无"
+          }}</el-form-item>
+          <el-form-item label="角色">{{ user.RoleName }}</el-form-item>
+          <el-form-item label="性别">{{
+            user.Sex == 1 ? "男" : "女"
+          }}</el-form-item>
+          <el-form-item label="邮箱地址">{{ user.addres }}</el-form-item>
+          <el-form-item label="联系方式">{{
+            user.Phone ? user.Phone : "无"
+          }}</el-form-item>
+          <el-form-item label="当前团队" v-if="nowTeam && nowTeam.length"
+            ><el-tag size="small">{{ nowTeam[0].Name }}</el-tag></el-form-item
+          >
+          <el-form-item label="团队数量">{{ user.TeamCount }}</el-form-item>
+          <el-form-item label="注册时间">{{
+            user.SignTime ? user.SignTime.timeFormat("yyyy-MM-dd HH:ss") : "--"
+          }}</el-form-item>
+          <el-form-item label="上次登录时间">{{
+            user.LastClientOnline
+              ? user.LastClientOnline.timeFormat("yyyy-MM-dd HH:ss")
+              : "--"
+          }}</el-form-item>
           <el-form-item
-            ><el-button type="primary" @click="isEdit = true" class="update"
+            ><el-button type="primary" @click="handleEdit" class="update"
               >修改</el-button
             ></el-form-item
           >
@@ -34,7 +45,7 @@
       </div>
       <div class="warp-left" v-show="isEdit">
         <div class="head">
-          <img v-lazy="form.img" />
+          <img :src="imgChange(form.Picture, true)" />
           <div>
             <el-upload
               class="upload-demo"
@@ -58,20 +69,23 @@
           ref="ruleForm"
           class="edit"
         >
-          <el-form-item label="名字" prop="name"
-            ><el-input v-model="form.name"></el-input
+          <el-form-item label="账号" prop="UseName"
+            ><el-input v-model="form.UseName"></el-input
           ></el-form-item>
-          <el-form-item label="QQ号码" prop="qq"
-            ><el-input v-model="form.qq"></el-input
+          <el-form-item label="昵称" prop="Name"
+            ><el-input v-model="form.Name"></el-input
           ></el-form-item>
-          <el-form-item label="手机号码" prop="phone"
-            ><el-input v-model="form.phone"></el-input
+          <el-form-item label="性别" prop="Sex">
+            <el-radio-group v-model="form.Sex">
+              <el-radio :label="1">男</el-radio>
+              <el-radio :label="2">女</el-radio>
+            </el-radio-group></el-form-item
+          >
+          <el-form-item label="联系方式" prop="Phone"
+            ><el-input v-model="form.Phone"></el-input
           ></el-form-item>
-          <el-form-item label="邮箱地址" prop="email"
-            ><el-input v-model="form.email"></el-input
-          ></el-form-item>
-          <el-form-item label="WHB账号"
-            ><el-input v-model="form.whb"></el-input
+          <el-form-item label="邮箱地址" prop="addres"
+            ><el-input v-model="form.addres"></el-input
           ></el-form-item>
           <el-form-item>
             <el-button
@@ -86,17 +100,80 @@
         </el-form>
       </div>
       <div class="warp-right">
-        <div class="info-right-title">高级设置</div>
-        <div class="right-form">
-          <el-form label-width="70px" label-position="left">
-            <el-form-item label="可见成员"
-              ><MemberSelect
-                :arrays="memberList"
-                :selRange="1"
-                @Confirm="getMember"
-              ></MemberSelect
-            ></el-form-item>
-          </el-form>
+        <div class="info-right-title">团队列表</div>
+        <div class="right-form" v-loading="tableLoading">
+          <el-table :data="tableData">
+            <el-table-column
+              label="团队名称"
+              prop="Name"
+              show-overflow-tooltip
+              align="center"
+            />
+            <el-table-column
+              label="创建人"
+              prop="UserName"
+              show-overflow-tooltip
+              align="center"
+            />
+            <el-table-column
+              label="创建时间"
+              prop="CreatTime"
+              show-overflow-tooltip
+              align="center"
+              ><template slot-scope="scope">
+                {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="管理员"
+              prop="AdminUserName"
+              show-overflow-tooltip
+              align="center"
+            >
+              <template slot-scope="scope">
+                <div
+                  v-if="
+                    scope.row.AdminUserName && scope.row.AdminUserName.length
+                  "
+                >
+                  <span
+                    v-for="(admin, index) in scope.row.AdminUserName"
+                    :key="index"
+                    >{{ index == 0 ? admin : `、${admin}` }}</span
+                  >
+                </div>
+                <div v-else>无</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="团队人数" prop="MemberCount" align="center"
+              ><template slot-scope="scope">
+                {{ scope.row.MemberCount }}人
+              </template></el-table-column
+            >
+            <el-table-column label="购买版本" align="center"
+              ><template slot-scope="scope">
+                {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
+              </template></el-table-column
+            >
+            <el-table-column label="服务器" align="center"
+              ><template slot-scope="scope">
+                {{ scope.row.Vsersion ? scope.row.Vsersion.Capacity : "无" }}
+              </template></el-table-column
+            >
+            <el-table-column
+              label="到期时间"
+              prop="ExpireTime"
+              show-overflow-tooltip
+              align="center"
+            >
+              <template slot-scope="scope">{{
+                scope.row.ExpireTime
+                  ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:ss")
+                  : "--"
+              }}</template></el-table-column
+            >
+          </el-table>
+          <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
         </div>
       </div>
     </div>
@@ -128,10 +205,11 @@
   </div>
 </template>
 <script>
-import { mapState, mapActions } from "vuex";
+import { imgChange } from "@/commons";
 export default {
   components: {
     Header: () => import("@/components/Header"),
+    CPages: () => import("@/components/CPages"),
     MemberSelect: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   data() {
@@ -148,6 +226,17 @@ export default {
       callback();
     };
     return {
+      nowTeam: null, //当前团队
+      tableLoading: false,
+      tableData: [], //团队列表
+      pageData: {
+        //团队分页
+        pageIndex: 1,
+        pageSize: 10,
+        totalNum: 0,
+      },
+      user: null,
+      loading: false,
       isEdit: false,
       form: {},
       btnLoading: false,
@@ -181,8 +270,67 @@ export default {
       memberList: [],
     };
   },
+  mounted() {
+    this.getUserInfo();
+    this.getTeamList();
+  },
   methods: {
-    ...mapActions(["user_setInfo"]),
+    imgChange,
+    /**
+     * 分页
+     */
+    handlePaginationChange(val) {
+      this.pageData = val;
+      this.getTeamList();
+    },
+    /**
+     * 获取团队列表
+     */
+    getTeamList() {
+      this.tableLoading = true;
+      const data = {
+        searchText: null,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+        type: 2,
+      };
+      this.$http
+        .get("/Teams/TeamManagement.ashx", { params: data })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data.data;
+            this.pageData.totalNum = resp.data.total;
+            //获取当前团队
+            const role = this.$xStorage.getItem("user-role");
+            this.nowTeam = this.tableData.filter((m) => m.Id == role.team);
+          }
+        })
+        .finally(() => (this.tableLoading = false));
+    },
+    /**
+     * 修改
+     */
+    handleEdit() {
+      this.form = JSON.parse(JSON.stringify(this.user));
+      this.isEdit = true;
+    },
+    /**
+     * 获取用户信息
+     */
+    getUserInfo() {
+      this.loading = true;
+      this.$http
+        .get("/Management/UserManagement/GetUserDetail.ashx", {
+          params: { usId: null },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.user = resp.data;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
+
     //取消
     cancelEdit() {
       this.isEdit = false;
@@ -193,20 +341,14 @@ export default {
       this.$refs.ruleForm.validate(async (valid) => {
         if (valid) {
           this.btnLoading = true;
-          let resp = await this.$http.post("/Person/personInformation.ashx", {
-            head: this.form.img,
-            name: this.form.name,
-            email: this.form.email,
-            phone: this.form.phone,
-            qq: this.form.qq,
-            custom1: this.form.whb,
-          });
+          this.form.Id = this.form.UsId;
+          let resp = await this.$http.post("/User/EditUser.ashx", this.form);
           if (resp.res == 0) {
-            this.user_setInfo(this.form);
             this.$notify({
               type: "success",
               message: resp.msg,
             });
+            this.getUserInfo();
             this.isEdit = false;
           }
           this.btnLoading = false;
@@ -214,7 +356,9 @@ export default {
       });
     },
     useDefalut() {
-      this.getDefaultHead(this.form.name);
+      if (this.form.Name) {
+        this.getDefaultHead(this.form.Name);
+      }
     },
     // 上传按钮单机后上传头像 限制图片大小
     changeUpload(file, fileList) {
@@ -234,7 +378,7 @@ export default {
     finishCropper() {
       this.$refs.memberCropper.getCropData((data) => {
         this.cropperOption.img = data;
-        this.form.img = data;
+        this.form.Picture = data;
         this.dialogVisible = false;
       });
     },
@@ -242,11 +386,11 @@ export default {
     getDefaultHead(name) {
       var pattern = new RegExp("[\u4E00-\u9FA5]+");
       if (pattern.test(name)) {
-        this.form.img = this.$userHead(name.substr(name.length - 2, 2));
+        this.form.Picture = this.$userHead(name.substr(name.length - 2, 2));
       }
       var pattern2 = new RegExp("[A-Za-z]+");
       if (pattern2.test(name)) {
-        this.form.img = this.$userHead(name.substr(0, 2));
+        this.form.Picture = this.$userHead(name.substr(0, 2));
       }
     },
     async inTaskLoad() {
@@ -261,15 +405,6 @@ export default {
         });
         this.depList = resp.data.InTaskReachId;
       }
-    },
-    //获取部门
-    getDep(result) {
-      let inTaskReachId = [];
-      result.forEach((element) => {
-        inTaskReachId.push(element.RId);
-      });
-      let inTaskUserId = this.filterId(this.memberList, "UId");
-      this.inTaskAdd(inTaskReachId, inTaskUserId);
     },
     //获取成员
     getMember(result) {
@@ -301,13 +436,6 @@ export default {
         });
       }
     },
-  },
-  created() {
-    this.form = Object.assign({}, this.user);
-    // this.inTaskLoad();
-  },
-  computed: {
-    ...mapState(["user"]),
   },
 };
 </script>
@@ -398,6 +526,10 @@ export default {
       }
       .right-form {
         padding: 10px;
+        height: calc(100% - 3.5rem);
+        .el-table {
+          height: calc(100% - 33px);
+        }
       }
       /deep/.set-up {
         & > .el-form-item > .el-form-item__label {

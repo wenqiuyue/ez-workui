@@ -33,6 +33,31 @@
             <h3 style="font-size: 1.8rem; font-weight: bold; color: #333">
               考勤
             </h3>
+            <div
+              class="header_team"
+              v-if="childData.menuType === 'privateAttendance'"
+            >
+              <el-select
+                v-model="teamValue"
+                filterable
+                placeholder="请选择团队"
+              >
+                <el-option
+                  v-for="item in teamOptions"
+                  :key="item.Id"
+                  :label="item.Name"
+                  :value="item.Id"
+                >
+                </el-option>
+              </el-select>
+              <el-button
+                type="primary"
+                size="medium"
+                class="add-btn-process"
+                @click="handleSearchData"
+                >搜索</el-button
+              >
+            </div>
           </li>
           <li>
             <span @click="toggleBtn"
@@ -41,21 +66,13 @@
           </li>
         </ul>
         <div
-          v-if="childData.tabsNum == '1' && childData.publicTab1TimeHeader"
+          v-if="
+            childData.tabsNum == '1' &&
+            childData.publicTab1TimeHeader &&
+            this.teamValue
+          "
           class="time-filters"
         >
-          <div>
-            <span>部门</span>
-            <selDepart
-              :showButtonDef="true"
-              :showButton="false"
-              @getResult="getDepart"
-            >
-              <span slot="buttonCustom" class="btn-custom">
-                <i class="el-icon-plus"></i>
-              </span>
-            </selDepart>
-          </div>
           <div>
             <span>成员</span>
             <selMember
@@ -64,10 +81,8 @@
               :selRange="1"
               :arrays="selMem"
               :showLength="10"
+              :teamId="teamValue"
             >
-              <span slot="button" class="btn-custom">
-                <i class="el-icon-plus"></i>
-              </span>
             </selMember>
           </div>
         </div>
@@ -98,7 +113,7 @@
             >
               <ul class="genera-info">
                 <li>
-                  <img v-lazy="$url + item.Picture" />
+                  <img :src="imgChange(item.Picture)" />
                   <span>{{ item.UserName }}</span>
                 </li>
                 <li>
@@ -158,222 +173,38 @@
             "
           >
             <el-table-column
-              prop="PerScore"
-              label="平均绩效"
+              prop="ShouldBeAttendance"
+              label="应出勤"
               class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{ scope.row.PerScore ? scope.row.PerScore : 0 }}分</template
-              >
-            </el-table-column>
-            <el-table-column label="出勤" class="table-header">
-              <el-table-column
-                prop="ShouldAttendance"
-                label="应出勤"
-                class="table-header"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.ShouldAttendance ? scope.row.ShouldAttendance : 0
-                  }}天</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="ActualAttendance"
-                label="实际出勤"
-                class="table-header"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.ActualAttendance ? scope.row.ActualAttendance : 0
-                  }}天</template
-                >
-              </el-table-column>
-              <el-table-column prop="Leave" label="请假" class="table-header">
-                <template slot-scope="scope"
-                  >{{ scope.row.Leave ? scope.row.Leave : 0 }}天</template
-                >
-              </el-table-column>
-              <el-table-column prop="Adjust" label="调休" class="table-header">
-                <template slot-scope="scope"
-                  >{{ scope.row.Adjust ? scope.row.Adjust : 0 }}天</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="OutsideTotalHour"
-                label="外出"
-                class="table-header"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.OutsideTotalHour ? scope.row.OutsideTotalHour : 0
-                  }}小时</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="Absenteeism"
-                label="旷工"
-                class="table-header"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.Absenteeism ? scope.row.Absenteeism : 0
-                  }}天</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="DeductionLeave"
-                label="抵扣后的请假"
-                class="table-header"
-                width="120"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.DeductionLeave ? scope.row.DeductionLeave : 0
-                  }}天</template
-                >
-              </el-table-column>
-            </el-table-column>
-            <el-table-column label="缺卡" class="table-header">
-              <el-table-column
-                label="上班"
-                class="table-header"
-                prop="StartCard"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.StartCard ? scope.row.StartCard : 0
-                  }}次</template
-                >
-              </el-table-column>
-              <el-table-column prop="EndCard" label="下班" class="table-header">
-                <template slot-scope="scope"
-                  >{{ scope.row.EndCard ? scope.row.EndCard : 0 }}次</template
-                >
-              </el-table-column>
-            </el-table-column>
-            <el-table-column class="table-header" label="早退">
-              <el-table-column
-                prop="LeaveEarly"
-                class="table-header"
-                label="早退"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.LeaveEarly ? scope.row.LeaveEarly : 0
-                  }}次</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="SeriousLeaveEarly"
-                class="table-header"
-                label="严重早退"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.SeriousLeaveEarly
-                      ? scope.row.SeriousLeaveEarly
-                      : 0
-                  }}次</template
-                >
-              </el-table-column>
-            </el-table-column>
-            <el-table-column class="table-header" label="迟到">
-              <el-table-column prop="Late" class="table-header" label="迟到">
-                <template slot-scope="scope"
-                  >{{ scope.row.Late ? scope.row.Late : 0 }}次</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="SeriousLate"
-                class="table-header"
-                label="严重迟到"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.SeriousLate ? scope.row.SeriousLate : 0
-                  }}次</template
-                >
-              </el-table-column>
-            </el-table-column>
-            <el-table-column class="table-header" label="加班">
-              <el-table-column
-                prop="OverTime"
-                class="table-header"
-                label="总时长"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.OverTime ? scope.row.OverTime : 0
-                  }}小时</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="EffectiveOverTime"
-                class="table-header"
-                label="有效时长"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.EffectiveOverTime
-                      ? scope.row.EffectiveOverTime
-                      : 0
-                  }}小时</template
-                >
-              </el-table-column>
-              <el-table-column
-                prop="DeductionOver"
-                label="抵扣后的时长"
-                class="table-header"
-                width="120"
-              >
-                <template slot-scope="scope"
-                  >{{
-                    scope.row.DeductionOver ? scope.row.DeductionOver : 0
-                  }}小时</template
-                >
-              </el-table-column>
-            </el-table-column>
-            <!-- <el-table-column class="table-header" label="消异常次数" prop="LeaveEarlyNumber"></el-table-column> -->
-            <el-table-column label="简报" class="table-header">
-              <el-table-column
-                prop="NotSubBulletin"
-                label="未提交"
-                class="table-header"
-              >
-                <template slot-scope="scope">
-                  <span
-                    >{{
-                      scope.row.NotSubBulletin ? scope.row.NotSubBulletin : 0
-                    }}次</span
-                  >
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="RejectBulletin"
-                label="被驳回"
-                class="table-header"
-              >
-                <template slot-scope="scope">
-                  <span
-                    >{{
-                      scope.row.RejectBulletin ? scope.row.RejectBulletin : 0
-                    }}次</span
-                  >
-                </template>
-              </el-table-column>
-            </el-table-column>
-            <el-table-column
-              prop="ReimbursementPrice"
-              class="table-header"
-              label="报销金额"
             >
               <template slot-scope="scope"
                 >{{
-                  scope.row.ReimbursementPrice
-                    ? scope.row.ReimbursementPrice
+                  scope.row.ShouldBeAttendance
+                    ? scope.row.ShouldBeAttendance
                     : 0
-                }}元</template
+                }}天</template
+              >
+            </el-table-column>
+            <el-table-column
+              prop="ActualAttendance"
+              label="实际出勤"
+              class="table-header"
+            >
+              <template slot-scope="scope"
+                >{{
+                  scope.row.ActualAttendance ? scope.row.ActualAttendance : 0
+                }}天</template
+              >
+            </el-table-column>
+            <el-table-column
+              prop="NoAttendance"
+              label="未出勤"
+              class="table-header"
+            >
+              <template slot-scope="scope"
+                >{{
+                  scope.row.NoAttendance ? scope.row.NoAttendance : 0
+                }}天</template
               >
             </el-table-column>
           </el-table>
@@ -460,9 +291,12 @@
                       "
                     >
                       {{
-                        attenceData[
-                          parseInt(data.day.split("-").slice(2)) - 1
-                        ].Type.slice(0, -1)
+                        attenceData[parseInt(data.day.split("-").slice(2)) - 1]
+                          .Type
+                          ? attenceData[
+                              parseInt(data.day.split("-").slice(2)) - 1
+                            ].Type.slice(0, -1)
+                          : ""
                       }}
                     </p>
                   </el-col>
@@ -1814,6 +1648,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   props: ["childLoading", "fatData", "changeTab", "activeItem"],
   components: {
@@ -1826,11 +1661,12 @@ export default {
     CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
     XModal: () => import("@/components/XModal"),
-    selMember: () => import("@/components/Selectors/MemberSelect"),
-    selDepart: () => import("@/components/Selectors/DepartmentSelector"),
+    selMember: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   data() {
     return {
+      teamValue: null, //选择的团队
+      teamOptions: [],
       // 请求参数
       childData: {
         // timeYM: yyyy-MM, // 左侧查询的时间
@@ -1907,10 +1743,19 @@ export default {
       if (!oldv) {
         return;
       }
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+        return;
+      }
       this.childData.time = val;
       this.childData.reqsTime = val;
       this.attenceData = {};
-      this.getAttendance();
+      if (this.childData.menuType === "publicAttendance") {
+        this.getAttendance();
+      }
     },
     changeTab() {
       this.activeItem = "审核列表";
@@ -1931,6 +1776,43 @@ export default {
     },
   },
   methods: {
+    imgChange,
+    /**
+     * 选择团队后的搜索
+     */
+    handleSearchData() {
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+        return;
+      }
+      this.childData.time = this.timeHeaderToggle;
+      this.childData.reqsTime = this.timeHeaderToggle;
+      this.attenceData = {};
+      this.getAttendance();
+      // this.showData();
+    },
+    // teamOptionsData() {
+    //   return this.teamOptions;
+    // },
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      if (this.childData.menuType == "privateAttendance") {
+        this.$http
+          .get("/Teams/GetAllTeams.ashx", {
+            params: { searchText: null, type: 2 },
+          })
+          .then((resp) => {
+            if (resp.res == 0) {
+              this.teamOptions = resp.data;
+            }
+          });
+      }
+    },
     selectTypeChange() {
       this.Attend = true;
       this.Quit = true;
@@ -2082,8 +1964,6 @@ export default {
       };
     },
     closeModal() {
-      // this.getPersonGatherData()
-      // this.getAttendance()
       this.applyType = 1;
     },
     exportFile() {
@@ -2128,10 +2008,6 @@ export default {
       this.selAttenceMem = arr;
       // this.getuserList();
     },
-    getDepart(arr) {
-      this.selDep = arr;
-      this.getTimeAttendance();
-    },
     // PC单击cell 右上角li 才触发
     attendanceCellPcClick(e, obj) {
       // console.log('ajldfjalj')
@@ -2170,6 +2046,10 @@ export default {
     // 拆解父组件传递的参数
     showData() {
       this.childData = JSON.parse(JSON.stringify(this.fatData)); // 来源props
+      if (this.childData.teamValue) {
+        this.teamValue = this.childData.teamValue;
+      }
+
       // 00  个人考勤
       // debugger;
       if (this.childData.menuType == "privateAttendance") {
@@ -2180,7 +2060,10 @@ export default {
         };
         this.childData = Object.assign(this.childData, obj1);
         this.timeHeaderToggle = this.childData.time;
-        this.getAttendance();
+
+        if (this.teamValue) {
+          this.getAttendance();
+        }
       }
       // 10   时间视图考勤
       if (
@@ -2195,7 +2078,9 @@ export default {
             timeArr[0] + "年" + timeArr[1] + "月" + timeArr[2] + "日",
         };
         this.childData = Object.assign(this.childData, obj2);
-        this.getTimeAttendance();
+        if (this.teamValue) {
+          this.getTimeAttendance();
+        }
       }
       // 11   //成员考勤
       if (
@@ -2218,7 +2103,7 @@ export default {
           this.childData = Object.assign(this.childData, obj3);
         }
         // 如果只点击的头tab，那只做前面的切换，不做请求 这种情况没有UsId
-        if (this.childData.fatUsId) this.getAttendance();
+        if (this.childData.fatUsId && this.teamValue) this.getAttendance();
       }
     },
     //申诉或审批触发改变列表方法
@@ -2243,10 +2128,11 @@ export default {
     getAttendance() {
       this.attendanceLoading = true;
       this.$http
-        .get("/MGT/Personnel/Work/MyAttendance.ashx#", {
+        .get("/Attendance/MyAttendance.ashx", {
           params: {
             Date: this.childData.reqsTime, // '2019-11-01'
             UsId: this.childData.fatUsId, // 不穿就是当前账号
+            teamId: this.teamValue,
           },
         })
         .then((resp) => {
@@ -2304,11 +2190,12 @@ export default {
       }
       this.attendanceLoading = true;
       this.$http
-        .post("/Work/Attendance/MyAttendanceSummaryByDate.ashx", {
+        .post("/Attendance/MyAttendanceSummaryByDate.ashx ", {
           Date: this.childData.reqsTime,
           UsId: this.childData.fatUsId
             ? this.childData.fatUsId
             : this.$store.state.user.id,
+          teamId: this.teamValue,
         })
         .then((res) => {
           if (res.res == 0) {
@@ -2465,17 +2352,13 @@ export default {
       this.attendanceLoading = true;
       let arr1 = [];
       this.selMem.forEach((item) => {
-        arr1.push(item.UId);
-      });
-      let arr2 = [];
-      this.selDep.forEach((item) => {
-        arr2.push(item.RId);
+        arr1.push(item.UsId);
       });
       this.$http
-        .post("/Work/Attendance/QueryUsersAttendanceByDate.ashx#", {
+        .post("/Attendance/QueryUsersAttendanceByDate.ashx#", {
           Date: this.childData.fatTimeYMD, // '2019-11-18 这种01 02 03'
           UList: arr1,
-          RList: arr2,
+          teamId: this.teamValue,
         })
         .then((resp) => {
           if (resp.res === 0) {
@@ -2625,8 +2508,9 @@ export default {
     },
   },
   mounted() {
+    this.getTeams();
     // console.log(this.fatData)
-    this.getAttenceList();
+    // this.getAttenceList();
   },
 };
 </script>
@@ -3267,6 +3151,7 @@ body .el-table colgroup.gutter {
   }
 
   .time-filters {
+    margin-bottom: 5px;
     div {
       height: 5rem;
       align-items: center;
@@ -3286,10 +3171,6 @@ body .el-table colgroup.gutter {
     /deep/#mem-public {
       border: none !important;
 
-      .mem-add {
-        display: none;
-      }
-
       .c_button {
         display: flex;
         align-items: center;
@@ -3306,32 +3187,6 @@ body .el-table colgroup.gutter {
 
     /deep/.main-box {
       border: none;
-    }
-
-    .btn-custom {
-      width: 35px;
-      height: 20px;
-      display: block;
-      border: 1px solid #ccc;
-      border-radius: 0.6rem;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s;
-
-      i {
-        font-size: 1.4rem;
-        color: #6d6d6d;
-      }
-
-      &:hover {
-        border-color: #409eff;
-
-        i {
-          color: #409eff;
-        }
-      }
     }
   }
 
@@ -3367,6 +3222,18 @@ body .el-table colgroup.gutter {
 
     .el-input__prefix {
       display: none;
+    }
+  }
+  .header_team {
+    margin-left: 10px;
+    /deep/.el-select {
+      width: 140px;
+      margin-right: 5px;
+      .el-input__inner {
+        border: 1px solid #e4e7ed !important;
+        height: 36px;
+        line-height: 36px;
+      }
     }
   }
 }

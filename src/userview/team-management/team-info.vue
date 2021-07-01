@@ -31,7 +31,7 @@
                 <span class="number">
                   <el-avatar
                     size="small"
-                    :src="$url + infoData.Teamdata.UserPicture"
+                    :src="imgChange(infoData.Teamdata.UserPicture)"
                   ></el-avatar>
                   <span>{{ infoData.Teamdata.UserName }}</span>
                 </span>
@@ -49,7 +49,7 @@
                   >
                     <el-avatar
                       size="small"
-                      :src="$url + item.Picture"
+                      :src="imgChange(item.Picture)"
                     ></el-avatar>
                     <span>{{ item.Name }}</span>
                   </span>
@@ -151,6 +151,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     InvitationList: () => import("./invitation-list"),
@@ -178,6 +179,7 @@ export default {
     this.getData();
   },
   methods: {
+    imgChange,
     /**
      * 邀请口令设置
      */

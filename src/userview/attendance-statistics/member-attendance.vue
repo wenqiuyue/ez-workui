@@ -7,68 +7,65 @@
   <!--XBB：引用了BaseView的页面必须套一层baseViewPage样式的div-->
   <div class="baseViewPage">
     <BaseView :title_name="'考勤列表'" :load="loading">
-      <el-tabs
-        v-model="activeName"
-        slot="panes"
-        @tab-click="tabClick"
-        v-loading="myload"
-      >
-        <!-- pane 1 -->
-        <el-tab-pane name="1">
-          <span slot="label"><i class="hiFont hi-tag-cr"></i> 时间</span>
-          <el-collapse accordion v-model="activeTime">
-            <el-collapse-item
-              v-for="obj in ulTimeArr"
-              :key="obj.title"
-              :title="obj.title"
-              :name="obj.title"
-            >
-              <ul class="infinite-list">
-                <li
-                  v-for="item in obj.brr"
-                  :key="item.time"
-                  :class="{ activeList: expandId === item.time }"
-                  @click="liClick(item.time, 1, item)"
-                >
-                  <span
-                    >{{ item.time.split("-")[1] }}月{{
-                      item.time.split("-")[2]
-                    }}日</span
-                  >
-                </li>
-              </ul>
-            </el-collapse-item>
-          </el-collapse>
-        </el-tab-pane>
-
-        <!-- pane 2 -->
-        <el-tab-pane name="2">
-          <span slot="label"><i class="el-icon-user"></i> 成员</span>
-          <div>
-            <!--XBB: 分组折叠的话直接照搬以下格式 -->
-            <el-collapse v-model="colllist" accordion>
+      <div slot="panes">
+        <el-select v-model="teamValue" filterable placeholder="请先选择团队">
+          <el-option
+            v-for="item in teamOptions"
+            :key="item.Id"
+            :label="item.Name"
+            :value="item.Id"
+          >
+          </el-option>
+        </el-select>
+        <el-tabs v-model="activeName" @tab-click="tabClick" v-loading="myload">
+          <!-- pane 1 -->
+          <el-tab-pane name="1">
+            <span slot="label"><i class="hiFont hi-tag-cr"></i> 时间</span>
+            <el-collapse accordion v-model="activeTime">
               <el-collapse-item
-                v-for="(item, index) in memberGroup"
-                :key="index"
-                :title="item.Name"
-                :name="item.RId"
+                v-for="obj in ulTimeArr"
+                :key="obj.title"
+                :title="obj.title"
+                :name="obj.title"
               >
                 <ul class="infinite-list">
                   <li
-                    v-for="(obj, i) in item.Mem"
-                    :key="i"
-                    :class="{ activeList: generaId === obj.UsId }"
-                    @click="liClick(obj.UsId, 2, obj)"
+                    v-for="item in obj.brr"
+                    :key="item.time"
+                    :class="{ activeList: expandId === item.time }"
+                    @click="liClick(item.time, 1, item)"
                   >
-                    <img v-lazy="$url + obj.Picture" />
-                    <span>{{ obj.Name }}</span>
+                    <span
+                      >{{ item.time.split("-")[1] }}月{{
+                        item.time.split("-")[2]
+                      }}日</span
+                    >
                   </li>
                 </ul>
               </el-collapse-item>
             </el-collapse>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
+          </el-tab-pane>
+
+          <!-- pane 2 -->
+          <el-tab-pane name="2">
+            <span slot="label"><i class="el-icon-user"></i> 成员</span>
+            <div>
+              <!--XBB: 分组折叠的话直接照搬以下格式 -->
+              <ul class="infinite-list">
+                <li
+                  v-for="(obj, index) in memberGroup"
+                  :key="index"
+                  :class="{ activeList: generaId === obj.Id }"
+                  @click="liClick(obj.Id, 2, obj)"
+                >
+                  <img :src="imgChange(obj.Picture)" />
+                  <span>{{ obj.Name }}</span>
+                </li>
+              </ul>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
       <item
         slot="content"
         :fatData="fatData"
@@ -83,15 +80,21 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     BaseView: () => import("@/components/BaseView"),
     item: () => import("./attendance-info"),
   },
   watch: {
+    //团队切换
+    teamValue(val, oval) {
+      if (val && val != oval) {
+        this.getMember();
+      }
+    },
     filterText(val) {
       this.filterNode(val);
-      console.log(1111);
     },
     $route: "routerchange",
   },
@@ -117,7 +120,6 @@ export default {
       },
       selectName: "所有任务",
       woid: -1,
-      colllist: "", //选中部门
       isSearch: false, //是否在搜索
       index: 2, //点击的ID
 
@@ -130,6 +132,8 @@ export default {
       memberGroup: [],
       activeTime: "",
       changeTab: false,
+      teamValue: null, //选择的团队
+      teamOptions: [],
     };
   },
   //初始化页面数据
@@ -137,7 +141,7 @@ export default {
     // this.loading = true;
 
     this.initPage();
-    this.getMember();
+
     // console.log(this.activeTime)
     this.activeTime = this.ulTimeArr[0].title;
   },
@@ -146,7 +150,25 @@ export default {
       return this.$store.state.user;
     },
   },
+  mounted() {
+    this.getTeams();
+  },
   methods: {
+    imgChange,
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     // 初始化ul 时间列表
     initPage() {
       this.getCalendar3Y();
@@ -164,7 +186,6 @@ export default {
       } else if (tab.index == 1) {
         //成员视图
         this.fatData.tabsNum = "2";
-        this.colllist = this.user.departments[0].RId;
         this.generaId = this.user.id;
         this.memb = {
           UsId: this.user.id,
@@ -201,21 +222,29 @@ export default {
     },
     // 传参给子组件
     sendParams(time, obj) {
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+      }
       // console.log(obj)
       this.fatData = {};
       if (time == undefined) {
         // 时，查询某一人的当月考勤
-        // console.log(123123)
+        console.log(obj);
         this.fatData.menuType = "publicAttendance";
         this.fatData.tabsNum = "2"; // 某单个成员某一月的考勤
         this.fatData.fatTimeYMD = undefined;
-        this.fatData.fatUsId = obj.UsId;
+        this.fatData.fatUsId = obj.MembersId;
         this.fatData.memberName = obj.Name;
+        this.fatData.teamValue = this.teamValue;
       } else {
         this.fatData.menuType = "publicAttendance";
         this.fatData.tabsNum = "1"; // 某一天，所有成员的考勤
         this.fatData.fatTimeYMD = time;
         this.fatData.fatUsId = undefined;
+        this.fatData.teamValue = this.teamValue;
       }
       if (this.openItem) {
         this.$nextTick(() => {
@@ -235,7 +264,6 @@ export default {
         return;
       }
       let targetData = []; // 只筛选出符合的那部分
-      // this.colllist = [] // 控制展开
       // console.log(this.generaData)
       this.generaData.forEach((item, index) => {
         let leftoverGenera = [];
@@ -250,13 +278,11 @@ export default {
           let itm = Object.assign({}, item);
           itm.Mem = leftoverGenera;
           targetData.push(itm);
-          // this.colllist.push(itm.RId)
         }
       });
       this.isSearch = true;
       this.searchGenera = targetData;
       // console.log(this.searchGenera)
-      // console.log(this.colllist)
     },
     //路由参数改变
     routerchange() {
@@ -273,11 +299,16 @@ export default {
       }
     },
     getMember() {
-      this.$http.get("/MGT/Personnel/Work/DeptMember.ashx").then((res) => {
-        if (res.res == 0) {
-          this.memberGroup = res.data;
-        }
-      });
+      const data = {
+        teamId: this.teamValue,
+      };
+      this.$http
+        .post("/Management/TeamManagement/MenberSelects.ashx", data)
+        .then((res) => {
+          if (res.res == 0) {
+            this.memberGroup = res.data;
+          }
+        });
     },
     //选择的值改变
     handleChange(actionId) {

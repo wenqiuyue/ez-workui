@@ -37,10 +37,10 @@ export default {
           value: 1,
           label: "成员数据",
         },
-        {
-          value: 2,
-          label: "成员周况",
-        },
+        // {
+        //   value: 2,
+        //   label: "成员周况",
+        // },
         {
           value: 3,
           label: "成员实况",

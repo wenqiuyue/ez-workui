@@ -53,7 +53,7 @@
               </div>
               <ul class="member-style">
                 <li v-for="(item, index) in scope.row.UserData" :key="index">
-                  <img :src="$url + item.Picture" alt="" /><span>{{
+                  <img :src="imgChange(item.Picture)" alt="" /><span>{{
                     item.Name
                   }}</span>
                   <i
@@ -98,6 +98,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
@@ -149,6 +150,7 @@ export default {
     this.getDataList();
   },
   methods: {
+    imgChange,
     // 删除某一行
     handleDelt(row) {
       this.$confirm("此操作将删除此进程, 是否继续?", "提示", {

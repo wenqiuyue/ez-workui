@@ -43,7 +43,7 @@
               avatar_medium: size === 'medium',
             }"
           >
-            <img v-if="showActiveImg" :src="img(null)" />
+            <img v-if="showActiveImg" :src="imgChange(item.Picture)" />
             <p v-if="showActiveName" :title="item.Name">{{ item.Name }}</p>
           </li>
           <p v-if="showLength != null && showLength < result.length">
@@ -98,7 +98,7 @@
                       <span></span>
                     </div>
                     <el-checkbox :label="0" class="item-data">
-                      <img :src="img(null)" />
+                      <img :src="imgChange(item.Picture)" />
                       <em style="position: absolute; left: 40%">{{
                         defaultName
                       }}</em>
@@ -110,9 +110,9 @@
                     v-for="item in pageData"
                     :key="item.UsId"
                   >
-                    <img :src="img(null)" />
+                    <img :src="imgChange(item.Picture)" />
                     <em :title="item.Name">{{ item.Name }}</em>
-                    <el-tag v-if="teamId && item.MType">{{
+                    <el-tag v-if="teamId && item.MType" size="small">{{
                       item.MType == 1 ? "成员" : "管理人"
                     }}</el-tag>
                     <span v-else></span>
@@ -132,7 +132,7 @@
                     v-for="item in searchData"
                     :key="item.UsId"
                   >
-                    <img :src="img(null)" />
+                    <img :src="imgChange(item.Picture)" />
                     <em>{{ item.Name }}</em>
                     <el-tag v-if="teamId && item.MType">{{
                       item.MType == 1 ? "成员" : "管理人"
@@ -173,6 +173,7 @@
 </template>
 
 <script>
+import { imgChange } from "@/commons";
 import Location from "@/components/Location";
 export default {
   components: {
@@ -293,6 +294,7 @@ export default {
     };
   },
   methods: {
+    imgChange,
     //部门全选
     selectGroup(index) {
       let flag = null;
@@ -377,7 +379,7 @@ export default {
           if (resp.res == 0) {
             this.pageData = resp.data.map((m) => {
               return {
-                UsId: m.Id,
+                UsId: m.MembersId,
                 Name: m.Name,
                 Name_Pinyin: null,
                 Picture: m.Picture,
@@ -421,14 +423,6 @@ export default {
       //返回数据给父组件
       this.$emit("Confirm", this.result);
       if (this.openAt) this.clearValue();
-    },
-    //格式化头像
-    img(picture) {
-      if (picture) {
-        return this.$url + picture;
-      }
-      // return "../../assets/img/user.png";
-      return "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
     },
     //反选
     reversechange(val) {

@@ -38,7 +38,7 @@
             </div>
             <ul class="member-style">
               <li v-for="(item, index) in scope.row.VisibleUser" :key="index">
-                <img :src="item.Picture" alt="" />
+                <img :src="imgChange(item.Picture)" alt="" />
                 <span>{{ item.Name }}</span>
                 <i
                   :style="
@@ -75,6 +75,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     CPages: () => import("@/components/CPages"),
@@ -102,6 +103,7 @@ export default {
     this.getTeamList();
   },
   methods: {
+    imgChange,
     /**
      * 删除成员
      */

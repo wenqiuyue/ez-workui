@@ -71,7 +71,7 @@
               </div>
               <ul class="member-style">
                 <li v-for="(item, index) in scope.row.UserData" :key="index">
-                  <img :src="$url + item.Picture" alt="" /><span>{{
+                  <img :src="imgChange(item.Picture)" alt="" /><span>{{
                     item.Name
                   }}</span>
                   <i
@@ -128,6 +128,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
@@ -164,6 +165,7 @@ export default {
     this.getTeams();
   },
   methods: {
+    imgChange,
     /**
      * 获取团队
      */

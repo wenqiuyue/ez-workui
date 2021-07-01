@@ -267,7 +267,10 @@ export default {
     /**
      * 分页
      */
-    handlePaginationChange(val) {},
+    handlePaginationChange(val) {
+      this.pageData = val;
+      this.getTeamList();
+    },
     /**
      * 返回列表页
      */

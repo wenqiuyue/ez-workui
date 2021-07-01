@@ -1,20 +1,38 @@
 <template>
   <div id="memberProccess" v-loading="load">
     <div class="select-conditions">
-      <div class="sel">
-        <span>员工</span>
-        <selMember
-          size="small"
-          @Confirm="getSelMember"
-          :selRange="1"
-          :arrays="selMem"
-          :showLength="10"
-        >
-          <span slot="button" class="btn-custom">
-            <i class="el-icon-plus"></i>
-          </span>
-        </selMember>
+      <div class="sel_inline">
+        <div class="sel">
+          <span>团队</span>
+          <div>
+            <el-select v-model="teamValue" filterable placeholder="请选择团队">
+              <el-option
+                v-for="item in teamOptions"
+                :key="item.Id"
+                :label="item.Name"
+                :value="item.Id"
+              >
+              </el-option>
+            </el-select>
+          </div>
+        </div>
+        <div class="sel" v-if="teamValue">
+          <span>员工</span>
+          <selMember
+            size="small"
+            @Confirm="getSelMember"
+            :selRange="1"
+            :arrays="selMem"
+            :showLength="10"
+            :teamId="teamValue"
+          >
+            <span slot="button" class="btn-custom">
+              <i class="el-icon-plus"></i>
+            </span>
+          </selMember>
+        </div>
       </div>
+      <el-button type="primary" class="btn" @click="getTask">搜 索</el-button>
     </div>
     <div
       class="pro_content"
@@ -40,7 +58,7 @@
                 <div class="mobile-collapse">
                   <div class="title">
                     <div class="touxiang">
-                      <img :src="$url + item.usInfo.Picture" alt="" />
+                      <img :src="imgChange(item.usInfo.Picture, true)" alt="" />
                       <span :title="item.usInfo.Name">{{
                         item.usInfo.Name
                       }}</span>
@@ -206,7 +224,7 @@
                           }}
                         </p>
                         <div class="screen-shot">
-                          <p @click="shotScreenPhoto()">
+                          <p @click="shotScreenPhoto(item.usInfo.UsId)">
                             <span v-if="imgload && item.usInfo.UsId == userID"
                               ><i class="el-icon-loading"></i>截图中...</span
                             ><span v-else>屏幕截图</span>
@@ -219,7 +237,7 @@
                               >
                                 <span>{{ pic.time }}</span>
                                 <img
-                                  v-lazy="$url + pic.imgUrl"
+                                  :src="$url + pic.imgUrl"
                                   :preview="item.usInfo.UsId"
                                   :οnerrοr="errorImg"
                                 />
@@ -247,6 +265,7 @@
 </template>
 
 <script>
+import { imgChange } from "@/commons";
 // import xSocketLink from "@/assets/xSocketLink";
 export default {
   components: {
@@ -255,6 +274,8 @@ export default {
 
   data() {
     return {
+      teamOptions: [], //团队选择器
+      teamValue: null, //选择的团队
       errorImg: require("@/assets/img/emptyCon.png"),
       imgload: false,
       userID: "",
@@ -303,7 +324,6 @@ export default {
       timer: null,
       showFilter: false,
       selMem: [],
-      selDepart: [],
       calcTime: null,
     };
   },
@@ -381,6 +401,21 @@ export default {
     },
   },
   methods: {
+    imgChange,
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     getSelMember(val) {},
     changeUser() {
       //点击某成员获得正在执行的任务
@@ -432,19 +467,24 @@ export default {
       }
     },
     getTask() {
-      //获得正在进行中的任务
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+        return;
+      }
+      //获得实况数据
       this.load = true;
 
       this.$http
         .post(
-          "/HomePage/UsersTask/TaskCurrentList.ashx#",
+          "/User/TaskCurrentList.ashx#",
           {
-            rid: this.selDepart.map((item) => {
-              return item.RId;
-            }),
             uid: this.selMem.map((item) => {
               return item.UId;
             }),
+            teamId: this.teamValue,
           },
           {
             timeout: 1000 * 60 * 3,
@@ -497,16 +537,12 @@ export default {
         return result;
       }
     },
-    shotScreenPhoto(type, index) {
+    shotScreenPhoto(id) {
+      this.userID = id;
       //屏幕截图
       this.imgload = true;
       this.$http
-        .get("/Work/WrokAreas/NoticeUserScreenshots.ashx", {
-          params: {
-            Id: this.userID,
-          },
-          timeout: 1000 * 60 * 3,
-        })
+        .post("/Work/WrokAreas/NoticeUserScreenshots.ashx", { Id: this.userID })
         .then((res) => {
           if (this.timer) {
             clearInterval(this.timer);
@@ -546,12 +582,9 @@ export default {
     getMember(arr) {
       this.selMem = arr;
     },
-    getDepart(arr) {
-      this.selDepart = arr;
-    },
   },
   mounted() {
-    this.getTask();
+    this.getTeams();
   },
   created() {
     this.$E.$on("renewProccess", (res) => {
@@ -722,11 +755,18 @@ export default {
   overflow: auto;
   .select-conditions {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 1rem;
     background: #ffffff;
     padding: 5px 14px 0 10px;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 5%);
+    .sel_inline {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
     .sel {
       display: flex;
       border-bottom: 1px solid #eee;

@@ -150,6 +150,11 @@ export default {
     progresscom: () => import("../progressCom"),
   },
   props: {
+    //团队id
+    teamId: {
+      type: Number,
+      default: null,
+    },
     //开始的日期
     stime: {
       type: String,
@@ -253,8 +258,9 @@ export default {
           u: this.uid,
           st: this.stime,
           et: this.etime,
+          teamId: this.teamId,
         };
-        api = "/Company/MemberJob/MemberDataDetailsSummary.ashx#";
+        api = "/User/MemberDataDetailsSummary.ashx";
       }
       this.$http.get(api, { params: data }).then((resp) => {
         if (resp.res == 0) {

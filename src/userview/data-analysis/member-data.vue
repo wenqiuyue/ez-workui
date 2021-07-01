@@ -10,29 +10,16 @@
       :clickUserName="clickUserName"
       :stime="stime"
       :etime="etime"
+      :teamId="teamValue"
     ></staffData>
     <div
-      class="content"
+      class="mem_content"
       v-else
       v-infinite-scroll="scrollLoad"
       infinite-scroll-disabled="busy"
       infinite-scroll-distance="30"
     >
       <div class="select-conditions">
-        <div class="sel">
-          <span>员工</span>
-          <selMember
-            size="small"
-            @Confirm="getSelMember"
-            :selRange="1"
-            :arrays="selMem"
-            :showLength="10"
-          >
-            <span slot="button" class="btn-custom">
-              <i class="el-icon-plus"></i>
-            </span>
-          </selMember>
-        </div>
         <div class="sel_inline">
           <div class="sel" v-if="isShowTeam">
             <span>团队</span>
@@ -52,6 +39,23 @@
               </el-select>
             </div>
           </div>
+          <div class="sel" v-if="teamValue" style="margin-left: 8px">
+            <span>员工</span>
+            <selMember
+              :teamId="teamValue"
+              size="small"
+              @Confirm="getSelMember"
+              :selRange="1"
+              :arrays="selMem"
+              :showLength="10"
+            >
+              <span slot="button" class="btn-custom">
+                <i class="el-icon-plus"></i>
+              </span>
+            </selMember>
+          </div>
+        </div>
+        <div class="sel_inline">
           <div class="sel">
             <span>日期</span>
             <div class="sel-date">
@@ -265,6 +269,7 @@ export default {
   mounted() {
     const role = this.$xStorage.getItem("user-role");
     if (role.team) {
+      this.teamValue = role.team;
       this.isShowTeam = false;
     } else {
       this.isShowTeam = true;
@@ -290,6 +295,13 @@ export default {
      * 获取列表数据
      */
     handleGetData() {
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+        return;
+      }
       this.memberData = [];
       this.getMemberData();
     },
@@ -362,11 +374,11 @@ export default {
         c: this.pageData.pageSize,
         wk: wk,
         dt: this.dateType,
-        u: JSON.stringify(this.selDepart),
-        us: JSON.stringify(this.selMem.map((m) => m.UId)),
+        us: JSON.stringify(this.selMem.map((m) => m.UsId)),
+        teamId: this.teamValue,
       };
       this.$http
-        .get("/Company/MemberJob/MemberPeriod.ashx", {
+        .get("/User/MemberPeriod.ashx", {
           params: data,
         })
         .then((resp) => {
@@ -444,9 +456,9 @@ export default {
   /deep/.tooltip_text {
     font-size: 1.3rem;
   }
-  .content {
+  .mem_content {
     padding: 0px;
-    height: calc(100% - 24px);
+    height: 100%;
     overflow-y: auto;
     .select-conditions {
       display: flex;
