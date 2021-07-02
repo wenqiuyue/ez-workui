@@ -38,6 +38,7 @@
               v-if="childData.menuType === 'privateAttendance'"
             >
               <el-select
+                v-if="isShowTeam"
                 v-model="teamValue"
                 filterable
                 placeholder="请选择团队"
@@ -1608,7 +1609,7 @@
       <c-pages
         class="footer-page"
         v-model="pageData"
-        @childEvent="getTableList"
+        @changeEvent="pageChange"
         v-if="tableData.length > 0"
         v-show="childData.menuType === 'publicAttendance'"
       ></c-pages>
@@ -1728,15 +1729,13 @@ export default {
       fatherDetail: {},
       isCalendarModal: 0,
       briefingType: null, //选择查看的简报类型
+      isShowTeam: true,
     };
   },
   computed: {
     user() {
       return this.$store.state.user;
     },
-  },
-  created() {
-    this.showData();
   },
   watch: {
     timeHeaderToggle(val, oldv) {
@@ -1778,6 +1777,13 @@ export default {
   methods: {
     imgChange,
     /**
+     * 分页
+     */
+    pageChange(val) {
+      this.pageData = val;
+      this.getTableList();
+    },
+    /**
      * 选择团队后的搜索
      */
     handleSearchData() {
@@ -1801,7 +1807,7 @@ export default {
      * 获取团队
      */
     getTeams() {
-      if (this.childData.menuType == "privateAttendance") {
+      if (this.childData.menuType == "privateAttendance" && !this.teamValue) {
         this.$http
           .get("/Teams/GetAllTeams.ashx", {
             params: { searchText: null, type: 2 },
@@ -2508,6 +2514,14 @@ export default {
     },
   },
   mounted() {
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.teamValue = role.team;
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.showData();
     this.getTeams();
     // console.log(this.fatData)
     // this.getAttenceList();

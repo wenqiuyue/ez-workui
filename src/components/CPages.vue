@@ -9,7 +9,7 @@
     <el-col :span="24" class="hidden-sm-and-down">
       <el-pagination
         background
-        layout="prev, pager, next, jumper, total, sizes"
+        layout="total, sizes, prev, pager, next, jumper"
         :current-page="childData.pageIndex"
         :page-size="childData.pageSize"
         :page-sizes="[10, 30, 50, 100]"

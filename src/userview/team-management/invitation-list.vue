@@ -243,7 +243,10 @@ export default {
     /**
      * 分页
      */
-    handlePaginationChange(val) {},
+    handlePaginationChange(val) {
+      this.pageData = val;
+      this.getListData();
+    },
   },
 };
 </script>

@@ -8,7 +8,12 @@
   <div class="baseViewPage">
     <BaseView :title_name="'考勤列表'" :load="loading">
       <div slot="panes">
-        <el-select v-model="teamValue" filterable placeholder="请先选择团队">
+        <el-select
+          v-model="teamValue"
+          filterable
+          placeholder="请先选择团队"
+          v-if="isShowTeam"
+        >
           <el-option
             v-for="item in teamOptions"
             :key="item.Id"
@@ -134,24 +139,34 @@ export default {
       changeTab: false,
       teamValue: null, //选择的团队
       teamOptions: [],
+      isShowTeam: true,
     };
   },
   //初始化页面数据
-  created() {
-    // this.loading = true;
-
-    this.initPage();
-
-    // console.log(this.activeTime)
-    this.activeTime = this.ulTimeArr[0].title;
-  },
+  created() {},
   computed: {
     user() {
       return this.$store.state.user;
     },
   },
   mounted() {
-    this.getTeams();
+    // this.loading = true;
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.teamValue = role.team;
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.initPage();
+
+    // console.log(this.activeTime)
+    this.activeTime = this.ulTimeArr[0].title;
+    this.$nextTick(() => {
+      if (!this.teamValue) {
+        this.getTeams();
+      }
+    });
   },
   methods: {
     imgChange,

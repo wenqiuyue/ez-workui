@@ -1,11 +1,11 @@
 <template>
   <div id="processRulesManager">
-    <Header
-      title="进程规则管理"
-      titleEnglish="Process Rules Management"
-      class="baseHeader"
-    >
+    <Header title="XXX版本" titleEnglish="" class="baseHeader">
       <div slot="btnGroup">
+        <span class="go_ver" @click="$emit('handleVerList')"
+          ><i class="el-icon-d-arrow-left"></i>返回版本列表</span
+        >
+        <el-divider direction="vertical"></el-divider>
         <a
           v-for="item in tabList"
           :key="item.value"
@@ -53,7 +53,22 @@ export default {
 <style lang="less" scoped>
 #processRulesManager {
   height: 100%;
+
   /deep/header.baseHeader .right {
+    .go_ver {
+      font-size: 1.5rem;
+      cursor: pointer;
+      font-weight: 700;
+      padding-top: 0.3rem;
+      margin-right: 8px;
+      color: #303133;
+      i {
+        margin-right: 8px;
+      }
+      &:hover {
+        color: #448ef5;
+      }
+    }
     & > div > a.router-link-active {
       color: #448ef5 !important;
       border-top-color: #448ef5;

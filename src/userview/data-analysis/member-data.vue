@@ -222,6 +222,7 @@
       :pname="pname"
       :name="'meData'"
       :dateType="dateType"
+      :teamId="teamValue"
     ></keywordfrequency>
   </div>
 </template>

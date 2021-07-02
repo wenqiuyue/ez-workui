@@ -3,9 +3,15 @@
   <div id="manager-label">
     <c-content v-loading="loading">
       <div slot="search" class="screen">
-        <div class="screen_left">
+        <div class="screen_left" v-if="isShowTeam">
           <span class="lable">团队</span>
-          <el-select v-model="teamValue" filterable placeholder="请选择团队">
+          <el-select
+            v-model="teamValue"
+            filterable
+            placeholder="请选择团队"
+            clearable
+            @change="handleChange"
+          >
             <el-option
               v-for="item in teamOptions"
               :key="item.Id"
@@ -14,13 +20,6 @@
             >
             </el-option>
           </el-select>
-          <el-button
-            type="primary"
-            size="medium"
-            style="margin-left: 5px"
-            @click="getDataList"
-            >搜索</el-button
-          >
         </div>
         <div class="screen_right">
           <el-button type="primary" @click="addClick" size="medium"
@@ -71,7 +70,7 @@
               </div>
               <ul class="member-style">
                 <li v-for="(item, index) in scope.row.UserData" :key="index">
-                  <img :src="imgChange(item.Picture)" alt="" /><span>{{
+                  <img :src="imgChange(item.Picture, true)" alt="" /><span>{{
                     item.Name
                   }}</span>
                   <i
@@ -103,12 +102,21 @@
         <el-table-column label="操作" min-width="110">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
-              >详情</el-button
-            >
-            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
-              >删除</el-button
-            >
+            <span v-if="scope.row.IsReadOnly">
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleEdit(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="danger"
+                size="mini"
+                @click="handleDelt(scope.row)"
+                >删除</el-button
+              >
+            </span>
+            <el-tag type="info" v-else>无操作权限</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -116,7 +124,7 @@
       <c-pages
         slot="pages"
         v-model="pageData"
-        @childEvent="getDataList"
+        @changeEvent="handlePage"
       ></c-pages>
     </c-content>
 
@@ -139,13 +147,14 @@ export default {
   data() {
     "#main";
     return {
+      isShowTeam: true,
       teamValue: null, //选择的团队
       teamOptions: [],
       loading: false,
       pageData: {
         pageIndex: 1,
         pageSize: 10,
-        totalNum: 100,
+        totalNum: 0,
       },
 
       tableData: [],
@@ -162,17 +171,40 @@ export default {
     };
   },
   mounted() {
-    this.getTeams();
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.teamValue = role.team;
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.getDataList();
+    this.$nextTick(() => {
+      if (!this.teamValue) {
+        this.getTeams();
+      }
+    });
   },
   methods: {
     imgChange,
+    handleChange() {
+      this.pageData.pageIndex = 1;
+      this.getDataList();
+    },
+    /**
+     * 分页
+     */
+    handlePage(val) {
+      this.pageData = val;
+      this.getDataList();
+    },
     /**
      * 获取团队
      */
     getTeams() {
       this.$http
         .get("/Teams/GetAllTeams.ashx", {
-          params: { searchText: null, type: 3 },
+          params: { searchText: null, type: 2 },
         })
         .then((resp) => {
           if (resp.res == 0) {
@@ -234,14 +266,14 @@ export default {
     },
     // 分页
     getDataList() {
-      if (!this.teamValue) {
-        this.$message({
-          showClose: true,
-          message: "请选择团队",
-          type: "warning",
-        });
-        return;
-      }
+      // if (!this.teamValue) {
+      //   this.$message({
+      //     showClose: true,
+      //     message: "请选择团队",
+      //     type: "warning",
+      //   });
+      //   return;
+      // }
       let params = {
         name: this.searchKW,
         pageIndex: this.pageData.pageIndex,

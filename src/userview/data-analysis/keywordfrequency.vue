@@ -8,7 +8,7 @@
       :title="`${word}使用频率`"
       @opened="opened"
     >
-      <div class="content " v-loading="loading">
+      <div class="content" v-loading="loading">
         <div class="keyWordPic" v-if="!loading">
           <el-button type="primary" size="small" @click="handleKeyWordInfo"
             >高频词详情</el-button
@@ -33,6 +33,10 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    teamId: {
+      type: Number,
+      default: null,
+    },
     name: {
       type: String,
       default: null,
@@ -108,10 +112,11 @@ export default {
         dateend: etime,
         word: this.word,
         type: this.searchType,
+        teamId: this.teamId,
       };
       this.loading = true;
       this.$http
-        .get("/Work/ProcessStatisticsChart.ashx", {
+        .get("/User/Work/ProcessStatisticsChart.ashx", {
           params: data,
         })
         .then((resp) => {

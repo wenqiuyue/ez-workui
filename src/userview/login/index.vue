@@ -168,12 +168,8 @@ export default {
         let params = {
           acc: this.input,
           pwd: this.password,
-          info: null,
           teamId: this.teamValue,
         };
-        if (window.hasOwnProperty("plus")) {
-          params.info = JSON.stringify(window.plus.push.getClientInfo());
-        }
         this.$http
           .post("/UserLogin.ashx", params)
           .then((req) => {

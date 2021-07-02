@@ -139,6 +139,7 @@ export default {
       this.loading = true;
       this.$http
         .get("/Company/MemberJob/AppDetails.ashx", {
+          
           params: data,
         })
         .then((resp) => {

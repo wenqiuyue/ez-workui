@@ -68,9 +68,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <div class="page">
-      <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
-    </div>
     <UserInfo :selUser="selUser"></UserInfo>
   </div>
 </template>
@@ -78,7 +75,6 @@
 import { imgChange } from "@/commons";
 export default {
   components: {
-    CPages: () => import("@/components/CPages"),
     UserInfo: () => import("./user-info"),
   },
   props: {
@@ -92,11 +88,6 @@ export default {
       selUser: null,
       loading: false,
       tableData: [],
-      pageData: {
-        pageIndex: 1,
-        pageSize: 10,
-        totalNum: 0,
-      },
     };
   },
   mounted() {
@@ -158,10 +149,6 @@ export default {
       this.selUser = val;
       this.$modal.show("userInfo");
     },
-    /**
-     * 分页
-     */
-    handlePaginationChange(val) {},
   },
 };
 </script>

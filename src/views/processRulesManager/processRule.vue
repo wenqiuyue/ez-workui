@@ -185,7 +185,7 @@
       <c-pages
         slot="pages"
         v-model="pageData"
-        @childEvent="getDataList"
+        @changeEvent="handlePage"
       ></c-pages>
     </c-content>
     <ProRuleW
@@ -270,6 +270,13 @@ export default {
   watch: {},
   filters: {},
   methods: {
+    /**
+     * 分页
+     */
+    handlePage(val) {
+      this.pageData = val;
+      this.getDataList();
+    },
     getTab(item) {
       this.activeItem = item.join();
       this.getDataList();

@@ -31,7 +31,7 @@
                 <span class="number">
                   <el-avatar
                     size="small"
-                    :src="imgChange(infoData.Teamdata.UserPicture)"
+                    :src="imgChange(infoData.Teamdata.UserPicture, true)"
                   ></el-avatar>
                   <span>{{ infoData.Teamdata.UserName }}</span>
                 </span>
@@ -49,7 +49,7 @@
                   >
                     <el-avatar
                       size="small"
-                      :src="imgChange(item.Picture)"
+                      :src="imgChange(item.Picture, true)"
                     ></el-avatar>
                     <span>{{ item.Name }}</span>
                   </span>
@@ -58,15 +58,11 @@
               </li>
               <li>
                 <span class="lable">创建时间：</span>
-                <span
-                  >{{
-                    infoData.Teamdata.CreatTime
-                      ? infoData.Teamdata.CreatTime.timeFormat(
-                          "yyyy-MM-dd HH:ss"
-                        )
-                      : "无"
-                  }}人</span
-                >
+                <span>{{
+                  infoData.Teamdata.CreatTime
+                    ? infoData.Teamdata.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                    : "无"
+                }}</span>
               </li>
               <li v-if="infoData.Teamdata.ExpireTime">
                 <span class="lable">过期时间：</span>

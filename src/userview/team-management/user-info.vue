@@ -6,7 +6,7 @@
           <el-row>
             <el-col :span="24"
               ><div class="user_pic">
-                <el-avatar :src="$url + selUser.Picture"></el-avatar>
+                <el-avatar :src="imgChange(selUser.Picture, true)"></el-avatar>
                 <span class="name">{{ selUser.Name }}</span>
               </div></el-col
             >
@@ -49,7 +49,7 @@
                     >
                       <el-avatar
                         size="medium"
-                        :src="$url + item.Picture"
+                        :src="imgChange(item.Picture, true)"
                       ></el-avatar>
                       <p>{{ item.Name }}</p>
                     </li>
@@ -65,6 +65,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     XModal: () => import("@/components/XModal"),
@@ -84,6 +85,9 @@ export default {
         xModalName: "userInfo",
       },
     };
+  },
+  methods: {
+    imgChange,
   },
 };
 </script>

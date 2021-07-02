@@ -14,7 +14,7 @@
           <!-- 标题 -->
           <form>
             <h3>工作平台</h3>
-            <el-dropdown
+            <!-- <el-dropdown
               style="text-align: right; margin: 2rem 1rem"
               trigger="click"
               @command="handleCommand"
@@ -26,7 +26,7 @@
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="退出">退出</el-dropdown-item>
               </el-dropdown-menu>
-            </el-dropdown>
+            </el-dropdown> -->
           </form>
 
           <!-- 菜单列表 -->
@@ -41,6 +41,9 @@
               >
                 <span>{{ name }}</span>
               </router-link>
+              <a href="javascript:;" @click="exit" class="hiFont hi-signout">
+                <span>登出</span>
+              </a>
             </div>
           </div>
         </div>
@@ -83,17 +86,15 @@ export default {
       });
     },
     /**
-     * 下拉菜单
+     * 退出
      */
-    handleCommand(com) {
-      if (com == "退出") {
-        this.$xStorage.removeItem("token");
-        this.$xStorage.removeItem("user-role");
-        // this.$xSocket.destroy();
-        // this.$xSocket = 0;
-        this.$router.push("/");
-        this.$message("登出成功");
-      }
+    exit() {
+      this.$xStorage.removeItem("token");
+      this.$xStorage.removeItem("user-role");
+      // this.$xSocket.destroy();
+      // this.$xSocket = 0;
+      this.$router.push("/");
+      this.$message("登出成功");
     },
   },
   mounted() {},

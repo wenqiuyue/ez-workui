@@ -165,7 +165,7 @@ export default {
   },
   props: {
     teamValue: {
-      type: Number,
+      type: Number | String,
       default: null,
     },
     operationName: {

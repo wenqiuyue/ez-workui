@@ -2,7 +2,7 @@
   <div id="memberProccess" v-loading="load">
     <div class="select-conditions">
       <div class="sel_inline">
-        <div class="sel">
+        <div class="sel" v-if="isShowTeam">
           <span>团队</span>
           <div>
             <el-select v-model="teamValue" filterable placeholder="请选择团队">
@@ -20,7 +20,7 @@
           <span>员工</span>
           <selMember
             size="small"
-            @Confirm="getSelMember"
+            @Confirm="getMember"
             :selRange="1"
             :arrays="selMem"
             :showLength="10"
@@ -274,6 +274,7 @@ export default {
 
   data() {
     return {
+      isShowTeam: false, // 是否显示团队选择
       teamOptions: [], //团队选择器
       teamValue: null, //选择的团队
       errorImg: require("@/assets/img/emptyCon.png"),
@@ -416,7 +417,6 @@ export default {
           }
         });
     },
-    getSelMember(val) {},
     changeUser() {
       //点击某成员获得正在执行的任务
       this.taskType = 0;
@@ -482,7 +482,7 @@ export default {
           "/User/TaskCurrentList.ashx#",
           {
             uid: this.selMem.map((item) => {
-              return item.UId;
+              return item.UsId;
             }),
             teamId: this.teamValue,
           },
@@ -584,7 +584,20 @@ export default {
     },
   },
   mounted() {
-    this.getTeams();
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.teamValue = role.team;
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.$nextTick(() => {
+      if (this.teamValue) {
+        this.getTask();
+      } else {
+        this.getTeams();
+      }
+    });
   },
   created() {
     this.$E.$on("renewProccess", (res) => {

@@ -128,6 +128,7 @@
       :word="clickKeyWord"
       :pname="pname"
       :name="'staffDataWord'"
+      :teamId="teamId"
     ></keywordfrequency>
     <progresscom
       :name="'staffDataPic'"

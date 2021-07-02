@@ -1,11 +1,23 @@
 <template>
-  <div id="databaseManagement" v-loading="loading">
+  <div id="databaseManagement">
     <Header
       title="数据库管理"
       titleEnglish="Database Management"
       class="baseHeader"
-    />
-    <CContent>
+    >
+      <div slot="btnGroup">
+        <a
+          v-for="item in tabList"
+          :key="item.value"
+          :class="{ 'router-link-active': tabType == item.value }"
+        >
+          <span @click="tabChange(item.value)" class="el-dropdown-link">
+            <label>{{ item.label }}</label>
+          </span>
+        </a>
+      </div>
+    </Header>
+    <CContent v-loading="loading">
       <template #search>
         <el-button type="primary" size="medium">提交更新</el-button>
       </template>
@@ -21,9 +33,6 @@
           <el-table-column label="提交时间" prop="date"> </el-table-column>
           <el-table-column label="已完成更新" prop="num">
             <template slot-scope="scope"> 200人 </template>
-          </el-table-column>
-          <el-table-column label="未完成更新" prop="num"
-            ><template slot-scope="scope"> 200人 </template>
           </el-table-column>
           <el-table-column label="更新内容" prop="num" show-overflow-tooltip>
             <template slot-scope="scope">
@@ -57,36 +66,22 @@ export default {
     DatabaseM: () => import("./databaseM"),
   },
   data: () => ({
+    tabType: 1,
+    tabList: [
+      {
+        value: 1,
+        label: "创建数据库",
+      },
+      {
+        value: 2,
+        label: "更新数据库",
+      },
+    ],
     loading: false,
     cellStyle: {
       textAlign: "center",
     },
-    tableData: [
-      {
-        date: "2016-05-02",
-        name: "王小虎",
-        jurisdiction: "管理员",
-        num: "20",
-      },
-      {
-        date: "2016-05-04",
-        name: "王小虎",
-        jurisdiction: "管理员",
-        num: "23",
-      },
-      {
-        date: "2016-05-01",
-        name: "王小虎",
-        jurisdiction: "成员",
-        num: "20",
-      },
-      {
-        date: "2016-05-03",
-        name: "王小虎",
-        jurisdiction: "成员",
-        num: "20",
-      },
-    ],
+    tableData: [],
     pageData: {
       pageIndex: 1,
       pageSize: 10,
@@ -95,18 +90,27 @@ export default {
   }),
   methods: {
     /**
-     * 搜索
+     * 获取数据库列表
      */
-    searchClick(val) {
-      console.log(val);
+    getDataList() {
+      this.loading = true;
     },
-    async handlePaginationChange(...a) {
-      console.log(a);
+    /**
+     * 创建和更新的切换
+     */
+    tabChange(value) {
+      this.tabType = value;
+    },
+    /**
+     * 分页
+     */
+    async handlePaginationChange(a) {
+      this.pageData = a;
     },
     /**
      * 查看
      */
-    handleView(...a) {
+    handleView(a) {
       this.$modal.show("databaseM");
       console.log(a);
     },
@@ -117,5 +121,14 @@ export default {
 <style lang="less" scoped>
 #databaseManagement {
   height: 100%;
+  /deep/header.baseHeader .right {
+    & > div > a.router-link-active {
+      color: #448ef5 !important;
+      border-top-color: #448ef5;
+    }
+  }
+  .el-dropdown-link {
+    padding: 0.5rem 1rem;
+  }
 }
 </style>

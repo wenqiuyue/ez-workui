@@ -23,12 +23,13 @@
                 {{ userInfo.Name ? userInfo.Name : "无" }}
               </div></el-col
             >
-            <el-col :span="12"
+            <!-- <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">用户密码：</span>
                 {{ userInfo.Pwd }}
               </div></el-col
-            ><el-col :span="12"
+            > -->
+            <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">性别：</span>
                 {{ userInfo.Sex == 1 ? "男" : "女" }}

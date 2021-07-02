@@ -1,6 +1,6 @@
 <template>
   <XModal
-    name="proGroupWindow"
+    name="verModal"
     :width="'35%'"
     height="35%"
     @beforeClose="beforeClose"
@@ -24,7 +24,7 @@
         <!-- 必填项 -->
         <el-row>
           <el-col :sm="24" :md="24">
-            <el-form-item label="名称：" prop="name" style="width: 100%">
+            <el-form-item label="版本名称：" prop="name" style="width: 100%">
               <el-input
                 v-model="formData.name"
                 placeholder="请填写进程组名称"
@@ -115,7 +115,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("verModal");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -135,7 +135,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("verModal");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();

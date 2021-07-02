@@ -13,13 +13,6 @@
           </div>
           <div id="resetForm" @keyup.enter="reset">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm">
-              <el-form-item prop="oldPwd">
-                <el-input
-                  v-model="ruleForm.oldPwd"
-                  placeholder="请输入旧密码"
-                  :autofocus="true"
-                ></el-input>
-              </el-form-item>
               <el-form-item prop="newPwd">
                 <el-input
                   v-model="ruleForm.newPwd"
@@ -60,18 +53,10 @@ export default {
     return {
       loading: false,
       ruleForm: {
-        oldPwd: null,
         newPwd: null,
         secPwd: null,
       },
       rules: {
-        oldPwd: [
-          {
-            required: true,
-            message: "请输入旧密码",
-            trigger: "blur",
-          },
-        ],
         newPwd: [
           {
             required: true,
@@ -95,8 +80,12 @@ export default {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           this.loading = true;
+          const data = {
+            userID: this.$route.query.userID,
+            password: this.ruleForm.newPwd,
+          };
           this.$http
-            .post("/User/personPwd.ashx", this.ruleForm)
+            .post("/ResetPassword.ashx", data)
             .then((res) => {
               if (res.res == 0) {
                 this.$message.success("修改密码成功返回登录页面");

@@ -43,7 +43,7 @@
               avatar_medium: size === 'medium',
             }"
           >
-            <img v-if="showActiveImg" :src="imgChange(item.Picture)" />
+            <img v-if="showActiveImg" :src="imgChange(item.Picture, true)" />
             <p v-if="showActiveName" :title="item.Name">{{ item.Name }}</p>
           </li>
           <p v-if="showLength != null && showLength < result.length">
@@ -98,7 +98,7 @@
                       <span></span>
                     </div>
                     <el-checkbox :label="0" class="item-data">
-                      <img :src="imgChange(item.Picture)" />
+                      <img :src="imgChange(item.Picture, true)" />
                       <em style="position: absolute; left: 40%">{{
                         defaultName
                       }}</em>
@@ -110,7 +110,7 @@
                     v-for="item in pageData"
                     :key="item.UsId"
                   >
-                    <img :src="imgChange(item.Picture)" />
+                    <img :src="imgChange(item.Picture, true)" />
                     <em :title="item.Name">{{ item.Name }}</em>
                     <el-tag v-if="teamId && item.MType" size="small">{{
                       item.MType == 1 ? "成员" : "管理人"
@@ -132,7 +132,7 @@
                     v-for="item in searchData"
                     :key="item.UsId"
                   >
-                    <img :src="imgChange(item.Picture)" />
+                    <img :src="imgChange(item.Picture, true)" />
                     <em>{{ item.Name }}</em>
                     <el-tag v-if="teamId && item.MType">{{
                       item.MType == 1 ? "成员" : "管理人"

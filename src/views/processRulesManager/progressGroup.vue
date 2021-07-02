@@ -113,7 +113,7 @@ export default {
       pageData: {
         pageIndex: 1,
         pageSize: 10,
-        totalNum: 100,
+        totalNum: 0,
       },
       // CX Title组件
       titleInfo: {
@@ -235,6 +235,7 @@ export default {
      */
     handlePaginationChange(val) {
       this.pageData = val;
+      this.getDataList();
     },
   },
 };

@@ -138,9 +138,9 @@ const routes = [
             icon: "hi-shenhe7",
           },
           {
-            path: "/manager/processRulesManager",
+            path: "/manager/processRulesVer",
             name: "进程规则管理",
-            component: () => import("@/views/processRulesManager"),
+            component: () => import("@/views/processRulesVer"),
             layout: true,
             icon: "hi-contract",
           },

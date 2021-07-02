@@ -4,8 +4,15 @@
     <Tab :options="tabOptions" @change="getTab">
       <template slot="custom">
         <div class="screen">
-          <span class="lable">团队</span>
-          <el-select v-model="teamValue" filterable placeholder="请选择团队">
+          <span class="lable" v-if="isShowTeam">团队</span>
+          <el-select
+            v-model="teamValue"
+            filterable
+            placeholder="请选择团队"
+            v-if="isShowTeam"
+            @change="getDataList"
+            clearable
+          >
             <el-option
               v-for="item in teamOptions"
               :key="item.Id"
@@ -18,20 +25,13 @@
             type="primary"
             size="medium"
             class="add-btn-process"
-            @click="getDataList"
-            >搜索</el-button
-          >
-          <el-button
-            type="primary"
-            size="medium"
-            class="add-btn-process"
             @click="addClick"
             >添加规则</el-button
           >
         </div>
       </template>
     </Tab>
-    <c-content v-loading="loading">
+    <c-content v-loading="loading" style="height: calc(100% - 3.6rem)">
       <!-- 主体表格部分 -->
       <el-table
         slot="main"
@@ -192,15 +192,29 @@
         <el-table-column label="操作" min-width="110">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
-              >详情</el-button
-            >
-            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
-              >删除</el-button
-            >
+            <span v-if="scope.row.IsReadOnly">
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleEdit(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="danger"
+                size="mini"
+                @click="handleDelt(scope.row)"
+                >删除</el-button
+              >
+            </span>
+            <el-tag type="info" v-else>无操作权限</el-tag>
           </template>
         </el-table-column>
       </el-table>
+      <c-pages
+        slot="pages"
+        v-model="pageData"
+        @changeEvent="pageChange"
+      ></c-pages>
     </c-content>
     <ProRuleW
       :operationName="operationName"
@@ -218,17 +232,19 @@ export default {
     CContent: () => import("@/components/CContent"),
     Tab: () => import("@/components/TabUtil"),
     ProRuleW: () => import("./proRuleW"),
+    CPages: () => import("@/components/CPages"),
   },
   data() {
     "#main";
     return {
+      isShowTeam: true,
       teamValue: null, //选择的团队
       teamOptions: [],
       loading: false,
       pageData: {
         pageIndex: 1,
         pageSize: 10,
-        totalNum: 100,
+        totalNum: 0,
       },
 
       // CX Title组件
@@ -292,16 +308,35 @@ export default {
   watch: {},
   filters: {},
   mounted() {
-    this.getTeams();
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.teamValue = role.team;
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.getDataList();
+    this.$nextTick(() => {
+      if (!this.teamValue) {
+        this.getTeams();
+      }
+    });
   },
   methods: {
+    /**
+     * 分页
+     */
+    pageChange(val) {
+      this.pageData = val;
+      this.getDataList();
+    },
     /**
      * 获取团队
      */
     getTeams() {
       this.$http
         .get("/Teams/GetAllTeams.ashx", {
-          params: { searchText: null, type: 3 },
+          params: { searchText: null, type: 2 },
         })
         .then((resp) => {
           if (resp.res == 0) {
@@ -358,14 +393,14 @@ export default {
     },
     // 获取表单数据
     getDataList() {
-      if (!this.teamValue) {
-        this.$message({
-          showClose: true,
-          message: "请选择团队",
-          type: "warning",
-        });
-        return;
-      }
+      // if (!this.teamValue) {
+      //   this.$message({
+      //     showClose: true,
+      //     message: "请选择团队",
+      //     type: "warning",
+      //   });
+      //   return;
+      // }
       this.loading = true;
       const data = {
         type: this.activeItem == "进程组" ? 1 : 2,
