@@ -4,7 +4,12 @@
       <!-- 左边 -->
       <el-col :span="7"
         ><div class="info_left" v-loading="loading">
-          <h3 class="info-title">团队信息</h3>
+          <h3 class="info-title">
+            <span>团队信息</span
+            ><el-button type="text" @click="handleEditTeam"
+              >编辑团队基础信息</el-button
+            >
+          </h3>
           <!-- <div class="info_img">
             <el-avatar
               src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
@@ -43,15 +48,16 @@
                   v-if="infoData.Membersdata && infoData.Membersdata.length"
                 >
                   <span
-                    class="number"
                     v-for="(item, index) in infoData.Membersdata"
                     :key="index"
                   >
-                    <el-avatar
-                      size="small"
-                      :src="imgChange(item.Picture, true)"
-                    ></el-avatar>
-                    <span>{{ item.Name }}</span>
+                    <span class="number" v-if="item.MType == 2">
+                      <el-avatar
+                        size="small"
+                        :src="imgChange(item.Picture, true)"
+                      ></el-avatar>
+                      <span>{{ item.Name }}</span>
+                    </span>
                   </span>
                 </div>
                 <div v-else>无</div>
@@ -59,8 +65,10 @@
               <li>
                 <span class="lable">创建时间：</span>
                 <span>{{
-                  infoData.Teamdata.CreatTime
-                    ? infoData.Teamdata.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                  infoData.Teamdata.CreateTime
+                    ? infoData.Teamdata.CreateTime.timeFormat(
+                        "yyyy-MM-dd HH:ss"
+                      )
                     : "无"
                 }}</span>
               </li>
@@ -144,6 +152,12 @@
     </el-row>
     <!-- 邀请成员 -->
     <InvitationUser :teamId="selRow.Id" :mName="'infoInvit'"></InvitationUser>
+    <!-- 创建团队 -->
+    <AddTeam
+      @success="getData"
+      :modalName="'editTeam'"
+      :editData="infoData ? infoData.Teamdata : null"
+    ></AddTeam>
   </div>
 </template>
 <script>
@@ -152,6 +166,7 @@ export default {
   components: {
     InvitationList: () => import("./invitation-list"),
     InvitationUser: () => import("./invitation-user"),
+    AddTeam: () => import("./add-team"),
   },
   props: {
     //选择的团队
@@ -176,6 +191,12 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 编辑团队信息
+     */
+    handleEditTeam() {
+      this.$modal.show("editTeam");
+    },
     /**
      * 邀请口令设置
      */

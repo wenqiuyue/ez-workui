@@ -196,7 +196,7 @@ export default {
                   return;
                 }
               }
-              if (req.data.RoleName == "管理员") {
+              if (req.data.RoleName.indexOf("管理员") != -1) {
                 this.$router.push({
                   path: "/manager",
                 });

@@ -542,7 +542,7 @@ export default {
       //屏幕截图
       this.imgload = true;
       this.$http
-        .post("/Work/WrokAreas/NoticeUserScreenshots.ashx", { Id: this.userID })
+        .post("/User/Work/NoticeUserScreenshots.ashx", { Id: this.userID })
         .then((res) => {
           if (this.timer) {
             clearInterval(this.timer);

@@ -1,5 +1,5 @@
 <template>
-  <div id="processRulesVer">
+  <div id="process-rulesver">
     <div class="ver" v-if="!isInfoView">
       <Header
         title="进程规则管理"
@@ -8,15 +8,42 @@
       >
       </Header>
       <c-content v-loading="loading">
-        <!-- 搜索部分 -->
-        <c-title
-          slot="search"
-          :TInfo="titleInfo"
-          @addClick="addClick"
-          @searchClick="searchClick"
-          :showSearch="false"
-        >
-        </c-title>
+        <div slot="search" class="header_con">
+          <div>
+            <el-select
+              v-model="teamValue"
+              filterable
+              placeholder="请选择团队"
+              @change="getDataList"
+            >
+              <el-option
+                v-for="item in teamOptions"
+                :key="item.Id"
+                :label="item.Name"
+                :value="item.Id"
+              >
+              </el-option>
+            </el-select>
+          </div>
+          <div>
+            <el-button
+              type="primary"
+              size="medium"
+              icon="el-icon-set-up"
+              v-if="iSShowApplication"
+              @click="handleCopy(1)"
+              :loading="copyLoading"
+              >应用系统配置组</el-button
+            >
+            <el-button
+              type="primary"
+              @click="addClick"
+              icon="el-icon-circle-plus-outline"
+              size="medium"
+              >新增</el-button
+            >
+          </div>
+        </div>
         <!-- 主体表格部分 -->
         <el-table
           slot="main"
@@ -40,6 +67,15 @@
             :show-overflow-tooltip="true"
             prop="ConfigName"
           >
+          </el-table-column>
+          <el-table-column
+            label="是否是系统配置组"
+            :show-overflow-tooltip="true"
+            prop="IsSystem"
+          >
+            <template slot-scope="scope">{{
+              scope.row.IsSystem ? "是" : "否"
+            }}</template>
           </el-table-column>
           <el-table-column
             label="创建时间"
@@ -69,20 +105,36 @@
                 @click="handleEdit(scope.row)"
                 >编辑</el-button
               >
+              <el-button
+                type="warning"
+                size="mini"
+                @click="handleCopy(2)"
+                v-if="scope.row.IsSystem && scope.row.IsUpdate"
+                >更新</el-button
+              >
+              <el-button
+                type="danger"
+                size="mini"
+                @click="handleCopy(3)"
+                v-if="scope.row.IsSystem && scope.row.IsReset"
+                >重置</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
       </c-content>
     </div>
-    <processRulesManager
+    <RuleSetting
       v-else
       @handleVerList="handleVerList"
       :selRow="selRow"
-    ></processRulesManager>
+      :teamValue="teamValue"
+    ></RuleSetting>
     <VerModal
       :indexData="indexData"
       ref="VerModal"
       @eventComfirm="getDataList"
+      :teamValue="teamValue"
     ></VerModal>
   </div>
 </template>
@@ -91,12 +143,16 @@
 export default {
   components: {
     Header: () => import("@/components/Header"),
-    CTitle: () => import("@/components/CTitle"),
     CContent: () => import("@/components/CContent"),
-    processRulesManager: () => import("../processRulesManager"),
+    RuleSetting: () => import("../rule-setting"),
     VerModal: () => import("./verModal"),
   },
   data: () => ({
+    copyLoading: false,
+    iSShowApplication: false,
+    isShowTeam: true,
+    teamValue: null, //选择的团队
+    teamOptions: [],
     selRow: null,
     isInfoView: false,
     loading: false,
@@ -129,10 +185,62 @@ export default {
       textAlign: "center",
     },
   }),
-  created() {
-    this.getDataList();
+  mounted() {
+    const role = this.$xStorage.getItem("user-role");
+    if (role.team) {
+      this.teamValue = role.team;
+      this.isShowTeam = false;
+    } else {
+      this.isShowTeam = true;
+    }
+    this.$nextTick(() => {
+      if (!this.teamValue) {
+        this.getTeams();
+      } else {
+        this.getDataList();
+      }
+    });
   },
   methods: {
+    /**
+     * 引用系统配置组
+     */
+    handleCopy(type) {
+      let name = null;
+      if (type == 1) {
+        name = "应用";
+        this.copyLoading = true;
+      } else if (type == 2) {
+        name = "更新";
+      } else {
+        name = "重置";
+      }
+      this.$http
+        .post("/ConfigGroup/UpdateTeamConfig.ashx", { teamId: this.teamValue })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              message: `${name}成功`,
+              type: "success",
+            });
+          }
+        })
+        .finally(() => (this.copyLoading = false));
+    },
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     /**
      * 返回到版本列表
      */
@@ -208,10 +316,13 @@ export default {
     getDataList() {
       this.loading = true;
       this.$http
-        .get("/Management/ConfigGroupManagement/SystemConfigGroupList.ashx")
+        .get("/ConfigGroup/ConfigGroupList.ashx", {
+          params: { teamId: this.teamValue },
+        })
         .then((result) => {
           if (result.res == 0) {
-            this.tableData = result.data;
+            this.tableData = result.data.Data;
+            this.iSShowApplication = result.data.ISApplication ? false : true;
             this.loading = false;
           }
         });
@@ -221,10 +332,19 @@ export default {
 </script>
 
 <style lang="less" scoped>
-#processRulesVer {
+#process-rulesver {
   height: 100%;
   .ver {
     height: 100%;
+  }
+  .header_con {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    .el-select {
+      margin-right: 12px;
+    }
   }
 }
 </style>

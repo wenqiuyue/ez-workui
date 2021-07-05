@@ -379,7 +379,7 @@ export default {
           if (resp.res == 0) {
             this.pageData = resp.data.map((m) => {
               return {
-                UsId: m.MembersId,
+                UsId: m.UserId,
                 Name: m.Name,
                 Name_Pinyin: null,
                 Picture: m.Picture,

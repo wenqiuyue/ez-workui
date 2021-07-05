@@ -136,6 +136,7 @@
       :stime="selActiveTime"
       :etime="selActiveTime"
       :uid="uid"
+      :teamValue="teamId"
     ></progresscom>
   </div>
 </template>
@@ -246,51 +247,80 @@ export default {
      */
     getDataInfo() {
       this.loading = true;
-      let data = null;
-      let api = null;
       if (this.selActiveTime) {
-        data = {
+        const data = {
           u: this.uid,
           date: this.selActiveTime,
+          teamId: this.teamId,
         };
-        api = "/Company/MemberJob/MemberDataDetails.ashx#";
+        this.$http
+          .get("/Teams/MemberJob/MemberDataDetails.ashx", { params: data })
+          .then((resp) => {
+            if (resp.res == 0) {
+              //本日工作状态占比图表数据
+              this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
+                (m) => {
+                  return {
+                    name: m.name,
+                    value: m.value.toFixed(1),
+                  };
+                }
+              );
+              //本日使用软件占比
+              this.echartSoftWearData = resp.data.AppDetails.map((m) => {
+                return {
+                  name: m.AppName,
+                  value: m.ratio,
+                };
+              });
+              //高频关键词
+              this.ThreeTexts = resp.data.KeyWordFreqs.filter(
+                (m, index) => index < 30
+              );
+              //时间轴与使用软件、定期截图数据
+              this.softData = resp.data.TimeLine;
+              this.workTime = resp.data.WorkTime;
+              this.loading = false;
+            }
+          });
       } else {
-        data = {
+        const data = {
           u: this.uid,
           st: this.stime,
           et: this.etime,
           teamId: this.teamId,
         };
-        api = "/User/MemberDataDetailsSummary.ashx";
-      }
-      this.$http.get(api, { params: data }).then((resp) => {
-        if (resp.res == 0) {
-          //本日工作状态占比图表数据
-          this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
-            (m) => {
-              return {
-                name: m.name,
-                value: m.value.toFixed(1),
-              };
+        this.$http
+          .post("/User/MemberDataDetailsSummary.ashx", data)
+          .then((resp) => {
+            if (resp.res == 0) {
+              //本日工作状态占比图表数据
+              this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
+                (m) => {
+                  return {
+                    name: m.name,
+                    value: m.value.toFixed(1),
+                  };
+                }
+              );
+              //本日使用软件占比
+              this.echartSoftWearData = resp.data.AppDetails.map((m) => {
+                return {
+                  name: m.AppName,
+                  value: m.ratio,
+                };
+              });
+              //高频关键词
+              this.ThreeTexts = resp.data.KeyWordFreqs.filter(
+                (m, index) => index < 30
+              );
+              //时间轴与使用软件、定期截图数据
+              this.softData = resp.data.TimeLine;
+              this.workTime = resp.data.WorkTime;
+              this.loading = false;
             }
-          );
-          //本日使用软件占比
-          this.echartSoftWearData = resp.data.AppDetails.map((m) => {
-            return {
-              name: m.AppName,
-              value: m.ratio,
-            };
           });
-          //高频关键词
-          this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-            (m, index) => index < 30
-          );
-          //时间轴与使用软件、定期截图数据
-          this.softData = resp.data.TimeLine;
-          this.workTime = resp.data.WorkTime;
-          this.loading = false;
-        }
-      });
+      }
     },
     /**
      * 查看某个关键词

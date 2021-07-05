@@ -1,17 +1,15 @@
 <template>
   <!-- 菜单 -->
   <div id="manager-func">
-    <Tab :options="tabOptions" @change="getTab">
-      <el-button
-        slot="custom"
-        type="primary"
-        size="medium"
-        class="add-btn-process"
-        @click="addClick"
-        >添 加</el-button
+    <c-content v-loading="loading">
+      <!-- 搜索部分 -->
+      <c-title
+        slot="search"
+        :TInfo="titleInfo"
+        @addClick="addClick"
+        @searchClick="searchClick"
       >
-    </Tab>
-    <c-content v-loading="loading" style="height: calc(100% - 3.6rem)">
+      </c-title>
       <!-- 主体表格部分 -->
       <el-table
         slot="main"
@@ -194,6 +192,7 @@
       ref="detail"
       :id="id"
       @update="getDataList"
+      :selRow="selRow"
     ></ProRuleW>
   </div>
 </template>
@@ -201,45 +200,43 @@
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
-    Tab: () => import("@/components/TabUtil"),
+    CTitle: () => import("@/components/CTitle"),
     CPages: () => import("@/components/CPages"),
     ProRuleW: () => import("./proRuleW"),
+  },
+  props: {
+    //版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     "#main";
     return {
+      searchVal: null,
       loading: false,
       pageData: {
         pageIndex: 1,
         pageSize: 10,
         totalNum: 0,
       },
-      // CX Title组件
       titleInfo: {
         // 控制左侧：按钮组四个
         btnShow: [
-          {
-            type: "addBtn",
-            ishow: true,
-          },
-          {
-            type: "startBtn",
-            ishow: false,
-            disabled: true,
-          },
-          {
-            type: "closeBtn",
-            ishow: false,
-            disabled: true,
-          },
-          {
-            type: "delBtn",
-            ishow: true,
-            disabled: true,
-          },
+          { type: "addBtn", ishow: true },
+          { type: "startBtn", ishow: false, disabled: true },
+          { type: "closeBtn", ishow: false, disabled: true },
+          { type: "delBtn", ishow: false, disabled: true },
         ],
+        // 控制右侧：下拉细节 搜索框
+        dropDown: {
+          // Input组件们的：右侧共同属性
+          searchInput: {
+            placeholder: "进程规则名称",
+          },
+        },
       },
-      tabOptions: ["进程组", "成员组"],
       operationName: 1,
       tableData: [],
       formParams: {
@@ -270,6 +267,12 @@ export default {
   watch: {},
   filters: {},
   methods: {
+    // 查询
+    searchClick(val) {
+      this.searchVal = val;
+      this.pageData.pageIndex = 1;
+      this.getDataList();
+    },
     /**
      * 分页
      */
@@ -290,7 +293,9 @@ export default {
       })
         .then(() => {
           this.$http
-            .post("/ProcessRules/DelProcessRules.ashx", { id: [row.ID] })
+            .post("/Management/ProgressManagement/DelSystemProcessRules.ashx", {
+              Ids: [row.ID],
+            })
             .then((res) => {
               if (res.res == 0) {
                 this.$message({
@@ -325,9 +330,10 @@ export default {
     getDataList() {
       this.loading = true;
       const data = {
-        type: this.activeItem == "进程组" ? 1 : 2,
+        searchtext: this.searchVal,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
+        configId: this.selRow.Id,
       };
       this.$http
         .get("/Management/ProgressManagement/ProcessRuleAllList.ashx", {
@@ -346,7 +352,6 @@ export default {
                 item.MarkOutCheck = "工作";
               }
             });
-            console.log(this.tableData);
           }
         });
     },
@@ -364,10 +369,6 @@ export default {
 
   /deep/.tab_flex {
     padding-left: 0;
-  }
-
-  /deep/.title-box {
-    display: none;
   }
 
   /deep/.add-btn-process {

@@ -16,7 +16,11 @@
           <el-form-item label="昵称">{{
             user.Name ? user.Name : "无"
           }}</el-form-item>
-          <el-form-item label="角色">{{ user.RoleName }}</el-form-item>
+          <el-form-item label="角色"
+            ><span v-for="(role, index) in user.RoleName" :key="index">{{
+              index == 0 ? role : `、role`
+            }}</span></el-form-item
+          >
           <el-form-item label="性别">{{
             user.Sex == 1 ? "男" : "女"
           }}</el-form-item>
@@ -117,11 +121,11 @@
             />
             <el-table-column
               label="创建时间"
-              prop="CreatTime"
+              prop="CreateTime"
               show-overflow-tooltip
               align="center"
               ><template slot-scope="scope">
-                {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+                {{ scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss") }}
               </template>
             </el-table-column>
             <el-table-column

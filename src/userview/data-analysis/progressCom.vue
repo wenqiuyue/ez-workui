@@ -1,6 +1,6 @@
 <!-- 进度条截图 -->
 <template>
-  <div v-if="activeBar">
+  <div v-if="activeBar" class="progressCom">
     <XModal
       width="60%"
       height="80%"
@@ -105,6 +105,10 @@ export default {
     };
   },
   props: {
+    teamValue: {
+      type: Number,
+      default: null,
+    },
     activeBar: {
       type: Object,
       default: function () {
@@ -189,21 +193,24 @@ export default {
         last: this.last,
         pageCount: 15,
         status: this.activeBar.name,
+        teamId: this.teamValue,
       };
-      this.$http.post("/General/GetProcessImg.ashx", params).then((res) => {
-        if (res.res == 0) {
-          this.photoLoading = false;
-          if (res.data.length) {
-            this.photoDis = false;
-            this.progressPhotoArr = this.progressPhotoArr.concat(res.data);
-            this.last = res.data[res.data.length - 1].time;
-          } else {
-            this.morePhoto = false;
-            this.photoDis = true;
+      this.$http
+        .get("/General/GetProcessImg.ashx", { params: params })
+        .then((res) => {
+          if (res.res == 0) {
+            this.photoLoading = false;
+            if (res.data.length) {
+              this.photoDis = false;
+              this.progressPhotoArr = this.progressPhotoArr.concat(res.data);
+              this.last = res.data[res.data.length - 1].time;
+            } else {
+              this.morePhoto = false;
+              this.photoDis = true;
+            }
+            this.loading = false;
           }
-          this.loading = false;
-        }
-      });
+        });
     },
     getProcessImgWithFormData(val) {
       this.photoDis = true;
@@ -214,6 +221,7 @@ export default {
         etime: this.etime,
         pageCount: 15,
         pname: val,
+        teamId: this.teamValue,
       };
       this.$http
         .post("/General/GetProcessImgWithForm.ashx", params)
@@ -241,9 +249,12 @@ export default {
 </script>
 
 <style lang="less" scoped="scoped">
-/deep/.ctn {
-  height: calc(100% - 6rem);
+.progressCom {
+  /deep/.ctn {
+    height: calc(100% - 6rem);
+  }
 }
+
 .work-timeAxis {
   box-sizing: border-box;
   padding: 2rem;

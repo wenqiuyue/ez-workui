@@ -4,23 +4,6 @@
     <Tab :options="tabOptions" @change="getTab">
       <template slot="custom">
         <div class="screen">
-          <span class="lable" v-if="isShowTeam">团队</span>
-          <el-select
-            v-model="teamValue"
-            filterable
-            placeholder="请选择团队"
-            v-if="isShowTeam"
-            @change="getDataList"
-            clearable
-          >
-            <el-option
-              v-for="item in teamOptions"
-              :key="item.Id"
-              :label="item.Name"
-              :value="item.Id"
-            >
-            </el-option>
-          </el-select>
           <el-button
             type="primary"
             size="medium"
@@ -223,6 +206,7 @@
       :id="id"
       @update="getDataList"
       :teamValue="teamValue"
+      :selRow="selRow"
     ></ProRuleW>
   </div>
 </template>
@@ -234,12 +218,20 @@ export default {
     ProRuleW: () => import("./proRuleW"),
     CPages: () => import("@/components/CPages"),
   },
+  props: {
+    //规则版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
+    teamValue: {
+      type: Number,
+      default: 0,
+    },
+  },
   data() {
     "#main";
     return {
-      isShowTeam: true,
-      teamValue: null, //选择的团队
-      teamOptions: [],
       loading: false,
       pageData: {
         pageIndex: 1,
@@ -308,19 +300,7 @@ export default {
   watch: {},
   filters: {},
   mounted() {
-    const role = this.$xStorage.getItem("user-role");
-    if (role.team) {
-      this.teamValue = role.team;
-      this.isShowTeam = false;
-    } else {
-      this.isShowTeam = true;
-    }
     this.getDataList();
-    this.$nextTick(() => {
-      if (!this.teamValue) {
-        this.getTeams();
-      }
-    });
   },
   methods: {
     /**
@@ -329,20 +309,6 @@ export default {
     pageChange(val) {
       this.pageData = val;
       this.getDataList();
-    },
-    /**
-     * 获取团队
-     */
-    getTeams() {
-      this.$http
-        .get("/Teams/GetAllTeams.ashx", {
-          params: { searchText: null, type: 2 },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.teamOptions = resp.data;
-          }
-        });
     },
     getTab(item) {
       this.activeItem = item.join();
@@ -360,6 +326,7 @@ export default {
           this.$http
             .post("/ProcessRules/DelProcessRules.ashx", {
               id: [row.ID],
+              teamId: this.teamValue,
             })
             .then((res) => {
               if (res.res == 0) {
@@ -393,14 +360,6 @@ export default {
     },
     // 获取表单数据
     getDataList() {
-      // if (!this.teamValue) {
-      //   this.$message({
-      //     showClose: true,
-      //     message: "请选择团队",
-      //     type: "warning",
-      //   });
-      //   return;
-      // }
       this.loading = true;
       const data = {
         type: this.activeItem == "进程组" ? 1 : 2,
@@ -408,6 +367,7 @@ export default {
         pageSize: this.pageData.pageSize,
         teamId: this.teamValue,
         searchtext: null,
+        configId: this.selRow.Id,
       };
       this.$http
         .post("/ProcessRules/GetProcessRules.ashx", data)
@@ -438,8 +398,8 @@ export default {
   .screen {
     position: absolute;
     right: 0;
-    top: -7px;
-    padding: 0px 22px;
+    top: -3px;
+    // padding: 0px 22px;
     display: flex;
     flex-direction: row;
     align-items: center;

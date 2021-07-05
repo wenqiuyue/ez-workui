@@ -3,24 +3,7 @@
   <div id="manager-label">
     <c-content v-loading="loading">
       <div slot="search" class="screen">
-        <div class="screen_left" v-if="isShowTeam">
-          <span class="lable">团队</span>
-          <el-select
-            v-model="teamValue"
-            filterable
-            placeholder="请选择团队"
-            clearable
-            @change="handleChange"
-          >
-            <el-option
-              v-for="item in teamOptions"
-              :key="item.Id"
-              :label="item.Name"
-              :value="item.Id"
-            >
-            </el-option>
-          </el-select>
-        </div>
+        <div class="screen_left"></div>
         <div class="screen_right">
           <el-button type="primary" @click="addClick" size="medium"
             >添加</el-button
@@ -47,62 +30,24 @@
         </template>
 
         <el-table-column
-          min-width="100"
           label="进程组名称"
           :show-overflow-tooltip="true"
           prop="Name"
         >
         </el-table-column>
-        <el-table-column
-          min-width="150"
-          label="成员"
-          :show-overflow-tooltip="true"
-        >
+        <el-table-column label="创建名称" :show-overflow-tooltip="true">
           <template slot-scope="scope">
-            <el-popover
-              trigger="hover"
-              placement="top"
-              width="350"
-              v-if="scope.row.UserData.length"
-            >
-              <div slot="reference" class="name-wrapper">
-                <p style="cursor: pointer">{{ scope.row.UserData.length }}</p>
-              </div>
-              <ul class="member-style">
-                <li v-for="(item, index) in scope.row.UserData" :key="index">
-                  <img :src="imgChange(item.Picture, true)" alt="" /><span>{{
-                    item.Name
-                  }}</span>
-                  <i
-                    :style="
-                      (index + 1) % 3 == 0 ||
-                      index == scope.row.UserData.length - 1
-                        ? 'display:none'
-                        : ''
-                    "
-                  ></i>
-                </li>
-              </ul>
-            </el-popover>
-            <span v-else>{{ scope.row.UserData.length }}人</span>
+            {{
+              scope.row.CreatTime
+                ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:sss")
+                : "--"
+            }}
           </template>
         </el-table-column>
-        <!--      <el-table-column min-width="150" label="标签状态" :show-overflow-tooltip="true">
-                <template slot-scope="scope">
-                    <span slot="reference" class='row-state'>
-                        <i v-if="scope.row.Tag.Shape === 1" 
-                            @click="stateToggle(scope.row, 0)" class="el-icon-check">
-                        </i>
-                        <i v-if="scope.row.Tag.Shape === 0" 
-                            @click="stateToggle(scope.row, 1)" class="el-icon-close">
-                        </i>
-                    </span>
-                </template>
-            </el-table-column> -->
-        <el-table-column label="操作" min-width="110">
+        <el-table-column label="操作">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <span v-if="scope.row.IsReadOnly">
+            <span>
               <el-button
                 type="primary"
                 size="mini"
@@ -116,7 +61,6 @@
                 >删除</el-button
               >
             </span>
-            <el-tag type="info" v-else>无操作权限</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -129,6 +73,8 @@
     </c-content>
 
     <LabelW
+      :teamValue="teamValue"
+      :selRow="selRow"
       :indexData="indexData"
       ref="proGroupWindow"
       @eventComfirm="getDataList"
@@ -144,12 +90,20 @@ export default {
     CPages: () => import("@/components/CPages"),
     LabelW: () => import("./proGroupW"),
   },
+  props: {
+    //规则版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
+    teamValue: {
+      type: Number,
+      default: 0,
+    },
+  },
   data() {
     "#main";
     return {
-      isShowTeam: true,
-      teamValue: null, //选择的团队
-      teamOptions: [],
       loading: false,
       pageData: {
         pageIndex: 1,
@@ -171,19 +125,7 @@ export default {
     };
   },
   mounted() {
-    const role = this.$xStorage.getItem("user-role");
-    if (role.team) {
-      this.teamValue = role.team;
-      this.isShowTeam = false;
-    } else {
-      this.isShowTeam = true;
-    }
     this.getDataList();
-    this.$nextTick(() => {
-      if (!this.teamValue) {
-        this.getTeams();
-      }
-    });
   },
   methods: {
     imgChange,
@@ -198,20 +140,6 @@ export default {
       this.pageData = val;
       this.getDataList();
     },
-    /**
-     * 获取团队
-     */
-    getTeams() {
-      this.$http
-        .get("/Teams/GetAllTeams.ashx", {
-          params: { searchText: null, type: 2 },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.teamOptions = resp.data;
-          }
-        });
-    },
     // 删除某一行
     handleDelt(row) {
       this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
@@ -221,7 +149,8 @@ export default {
       })
         .then(() => {
           let params = {
-            id: [row.ID],
+            id: [row.Id],
+            teamId: this.teamValue,
           };
           this.comDelete(params);
         })
@@ -248,7 +177,7 @@ export default {
     },
     // 编辑
     handleEdit(row) {
-      this.openWin("ed", row.ID, row.Name);
+      this.openWin("ed", row.Id, row.Name);
     },
     // 打开窗口
     openWin(ty, code, proName) {
@@ -266,19 +195,12 @@ export default {
     },
     // 分页
     getDataList() {
-      // if (!this.teamValue) {
-      //   this.$message({
-      //     showClose: true,
-      //     message: "请选择团队",
-      //     type: "warning",
-      //   });
-      //   return;
-      // }
       let params = {
         name: this.searchKW,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
         teamId: this.teamValue,
+        configId: this.selRow.Id,
       };
       this.loading = true;
       this.$http

@@ -29,7 +29,6 @@
           </div>
         </template>
         <el-table-column
-          min-width="100"
           label="进程组名称"
           :show-overflow-tooltip="true"
           fixed
@@ -37,40 +36,20 @@
         >
         </el-table-column>
         <el-table-column
-          min-width="150"
-          label="成员"
+          label="创建时间"
           :show-overflow-tooltip="true"
+          fixed
+          prop="CreatTime"
         >
           <template slot-scope="scope">
-            <el-popover
-              trigger="hover"
-              placement="top"
-              width="350"
-              v-if="scope.row.UserData.length"
-            >
-              <div slot="reference" class="name-wrapper">
-                <p style="cursor: pointer">{{ scope.row.UserData.length }}人</p>
-              </div>
-              <ul class="member-style">
-                <li v-for="(item, index) in scope.row.UserData" :key="index">
-                  <img :src="imgChange(item.Picture)" alt="" /><span>{{
-                    item.Name
-                  }}</span>
-                  <i
-                    :style="
-                      (index + 1) % 3 == 0 ||
-                      index == scope.row.UserData.length - 1
-                        ? 'display:none'
-                        : ''
-                    "
-                  ></i>
-                </li>
-              </ul>
-            </el-popover>
-            <span v-else>{{ scope.row.UserData.length }}人</span>
+            {{
+              scope.row.CreatTime
+                ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                : "--"
+            }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="110">
+        <el-table-column label="操作">
           <!-- fixed  -->
           <template slot-scope="scope">
             <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
@@ -94,6 +73,7 @@
       :indexData="indexData"
       ref="proGroupWindow"
       @eventComfirm="getDataList"
+      :selRow="selRow"
     ></LabelW>
   </div>
 </template>
@@ -105,6 +85,13 @@ export default {
     CTitle: () => import("@/components/CTitle"),
     CPages: () => import("@/components/CPages"),
     LabelW: () => import("./proGroupW"),
+  },
+  props: {
+    //版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     "#main";
@@ -146,7 +133,7 @@ export default {
       },
     };
   },
-  created() {
+  mounted() {
     this.getDataList();
   },
   methods: {
@@ -160,7 +147,7 @@ export default {
       })
         .then(() => {
           let params = {
-            id: [row.ID],
+            Ids: [row.Id],
           };
           this.comDelete(params);
         })
@@ -168,7 +155,10 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post("/ProgressGroup/DelProgressGroup.ashx", params)
+        .post(
+          "/Management/ProgressManagement/DelSystemProgressGroup.ashx",
+          params
+        )
         .then((result) => {
           if (result.res == 0) {
             this.$message({
@@ -187,7 +177,7 @@ export default {
     },
     // 编辑
     handleEdit(row) {
-      this.openWin("ed", row.ID, row.Name);
+      this.openWin("ed", row.Id, row.Name);
     },
     // 打开窗口
     openWin(ty, code, proName) {
@@ -216,6 +206,7 @@ export default {
         name: this.searchKW,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
+        configId: this.selRow.Id,
       };
       this.loading = true;
       this.$http

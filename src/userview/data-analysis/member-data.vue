@@ -106,10 +106,12 @@
         <div class="list_card" v-for="(item, index) in memberData" :key="index">
           <div class="people_info">
             <div class="name_pic">
-              <el-avatar size="large" :src="$url + item.User.head"></el-avatar>
+              <el-avatar
+                size="large"
+                :src="imgChange(item.User.head, true)"
+              ></el-avatar>
               <span class="name">{{ item.User.name }}</span>
             </div>
-            <p>职位: {{ item.User.post }}</p>
             <el-button
               type="primary"
               size="mini"
@@ -203,13 +205,19 @@
       </div>
     </div>
     <!-- 所有软件弹窗 -->
-    <allsoftware :stime="stime" :etime="etime" :uid="clickUser"></allsoftware>
+    <allsoftware
+      :stime="stime"
+      :etime="etime"
+      :uid="clickUser"
+      :teamValue="teamValue"
+    ></allsoftware>
     <!-- 进程截图弹窗 -->
     <progresscom
       :activeBar="selWorkItem"
       :stime="stime"
       :etime="etime"
       :uid="clickUser"
+      :teamValue="teamValue"
     ></progresscom>
     <!-- 关键词使用频率 -->
     <keywordfrequency
@@ -227,6 +235,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     selMember: () => import("@/components/Selectors/MemberSelectCopy"),
@@ -278,6 +287,7 @@ export default {
     this.getTeams();
   },
   methods: {
+    imgChange,
     /**
      * 获取团队
      */
@@ -375,13 +385,11 @@ export default {
         c: this.pageData.pageSize,
         wk: wk,
         dt: this.dateType,
-        us: JSON.stringify(this.selMem.map((m) => m.UsId)),
+        us: this.selMem.map((m) => m.UsId),
         teamId: this.teamValue,
       };
       this.$http
-        .get("/User/MemberPeriod.ashx", {
-          params: data,
-        })
+        .post("/User/MemberPeriod.ashx", data)
         .then((resp) => {
           if (resp.res == 0) {
             this.listdateType = this.dateType;
@@ -626,7 +634,7 @@ export default {
             font-weight: bold;
           }
           /deep/.view_btn {
-            margin-top: 6px;
+            margin-top: 12px;
             padding: 6px 11px;
           }
         }

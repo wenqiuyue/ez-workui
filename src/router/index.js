@@ -63,7 +63,7 @@ const routes = [
           {
             path: "/ruleSetting",
             name: "规则设置",
-            component: () => import("@/userview/rule-setting"),
+            component: () => import("@/userview/process-rulesver"),
             layout: true,
             icon: "hi-liuchengshezhi",
           },

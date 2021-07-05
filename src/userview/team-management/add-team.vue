@@ -2,16 +2,17 @@
   <div class="add-team">
     <XModal
       ref="modal"
-      name="addTeam"
-      title="开始创建团队"
-      confirmBtnText="立即创建团队"
+      :name="modalName"
+      :title="modalName == 'editTeam' ? '编辑团队基础信息' : '开始创建团队'"
+      :confirmBtnText="modalName == 'editTeam' ? '提交' : '立即创建团队'"
       width="40%"
       showCrossBtn
       @closed="closed"
       @onConfirm="onConfirm"
+      @opened="opened"
     >
       <div class="content">
-        <p>创建团队，开启高效工作方式</p>
+        <p v-if="modalName != 'editTeam'">创建团队，开启高效工作方式</p>
         <el-form
           :model="ruleForm"
           :rules="rules"
@@ -50,6 +51,16 @@ export default {
   components: {
     XModal: () => import("@/components/XModal"),
   },
+  props: {
+    modalName: {
+      type: String,
+      default: "addTeam",
+    },
+    editData: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
       ruleForm: {
@@ -71,6 +82,16 @@ export default {
     };
   },
   methods: {
+    opened() {
+      this.$nextTick(() => {
+        if (this.modalName == "editTeam" && this.editData) {
+          this.ruleForm.teamId = this.editData.Id;
+          this.ruleForm.name = this.editData.Name;
+          this.ruleForm.describe = this.editData.Describe;
+          this.ruleForm.IsAgree = this.editData.IsAgree;
+        }
+      });
+    },
     closed() {
       Object.assign(this.$data, this.$options.data());
     },
@@ -87,7 +108,7 @@ export default {
                   message: "团队创建成功",
                   type: "success",
                 });
-                this.$modal.hide("addTeam");
+                this.$modal.hide(this.modalName);
                 this.$emit("success");
               }
             })

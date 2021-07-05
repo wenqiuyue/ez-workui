@@ -1,6 +1,6 @@
 <template>
   <XModal
-    name="proGroupWindow"
+    name="verModal"
     :width="'35%'"
     height="35%"
     @beforeClose="beforeClose"
@@ -24,10 +24,10 @@
         <!-- 必填项 -->
         <el-row>
           <el-col :sm="24" :md="24">
-            <el-form-item label="名称：" prop="name" style="width: 100%">
+            <el-form-item label="版本名称：" prop="name" style="width: 100%">
               <el-input
                 v-model="formData.name"
-                placeholder="请填写进程组名称"
+                placeholder="请输入进程版本名称"
                 v-if="editState"
                 :style="{ width: comWidth }"
                 clearable
@@ -47,24 +47,19 @@
 <script>
 export default {
   props: {
+    teamValue: {
+      type: Number,
+      default: null,
+    },
     indexData: {
       type: Object,
       default: null,
-    }, //规则版本信息
-    selRow: {
-      type: Object,
-      default: null,
-    },
-    teamValue: {
-      type: Number,
-      default: 0,
     },
   },
   components: {
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
   },
-
   data() {
     return {
       loading: false,
@@ -80,7 +75,7 @@ export default {
         name: [
           {
             required: true,
-            message: "请输入进程组名称",
+            message: "请输入进程版本名称",
             trigger: "blur",
           },
           {
@@ -119,19 +114,18 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/ProgressGroup/AddProgressGroup.ashx", {
+              .post("/ConfigGroup/SaveConfigGroup.ashx", {
                 name: this.formData.name,
-                configId: this.selRow.Id,
                 teamId: this.teamValue,
               })
               .then((res) => {
                 if (res.res == 0) {
                   this.$message({
-                    message: `添加标签成功`,
+                    message: `添加版本成功`,
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("verModal");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -139,21 +133,20 @@ export default {
               });
           } else {
             let params = {
-              id: this.formData.id, // 添加时值是 undefined
+              Id: this.formData.id, // 添加时值是 undefined
               name: this.formData.name,
-              configId: this.selRow.Id,
               teamId: this.teamValue,
             };
             this.$http
-              .post("/ProgressGroup/EditProgressGroup.ashx", params)
+              .post("/ConfigGroup/SaveConfigGroup.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
-                    message: `编辑标签成功`,
+                    message: `编辑版本成功`,
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("verModal");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();

@@ -12,7 +12,7 @@
         <el-table
           :data="tableData"
           border
-          style="width: 100%;margin-bottom:5px"
+          style="width: 100%; margin-bottom: 5px"
           row-key="rid"
           :header-cell-style="attenceHeaderStyle"
           :tree-props="{ children: 'Form', hasChildren: 'hasChildren' }"
@@ -72,6 +72,7 @@
       :stime="stime"
       :etime="etime"
       :uid="uid"
+      :teamValue="teamValue"
     ></progresscom>
   </div>
 </template>
@@ -82,6 +83,10 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    teamValue: {
+      type: Number,
+      default: null,
+    },
     //开始的日期
     stime: {
       type: String,
@@ -135,11 +140,11 @@ export default {
         stime: this.stime,
         etime: this.etime,
         u: this.uid,
+        teamId: this.teamValue,
       };
       this.loading = true;
       this.$http
-        .get("/Company/MemberJob/AppDetails.ashx", {
-          
+        .get("/Teams/MemberJob/AppDetails.ashx", {
           params: data,
         })
         .then((resp) => {

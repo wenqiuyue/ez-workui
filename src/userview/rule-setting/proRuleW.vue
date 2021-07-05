@@ -22,22 +22,26 @@
               <li>
                 <span>对象类型</span>
                 <el-select v-model="loadForm.rType">
-                  <el-option label="部门" :value="1"></el-option>
+                  <el-option label="进程组" :value="1"></el-option>
                   <el-option label="员工" :value="2"></el-option>
                 </el-select>
               </li>
               <li v-if="loadForm.rType == 2">
                 <span>选择成员</span>
-                <mb @Confirm="getUser" :arrays="loadForm.member"></mb>
+                <mb
+                  @Confirm="getUser"
+                  :arrays="loadForm.member"
+                  :teamId="teamValue"
+                ></mb>
               </li>
               <li v-if="loadForm.rType == 1">
-                <span>规则作用部门</span>
+                <span>规则作用进程组</span>
                 <el-select v-model="loadForm.g" multiple>
                   <el-option
                     v-for="(item, index) in processOptions"
                     :label="item.Name"
                     :key="index"
-                    :value="item.ID"
+                    :value="item.Id"
                   ></el-option>
                 </el-select>
               </li>
@@ -164,8 +168,13 @@ export default {
     mb: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   props: {
+    //规则版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
     teamValue: {
-      type: Number | String,
+      type: Number,
       default: null,
     },
     operationName: {
@@ -209,7 +218,7 @@ export default {
     async GetProgressGroup() {
       const resp = await this.$http.post(
         "/User/GetProgressGroupSelected.ashx",
-        { teamId: this.teamValue }
+        { teamId: this.teamValue, configId: this.selRow.Id }
       );
       if (resp.res == 0) {
         this.processOptions = resp.data;
@@ -226,7 +235,7 @@ export default {
       this.loading = true;
       this.$http
         .get("/ProcessRules/ProcessRulesDetail.ashx", {
-          params: { ruleId: this.id },
+          params: { ruleId: this.id, teamId: this.teamValue },
         })
         .then((res) => {
           if (res.res == 0) {
@@ -263,7 +272,7 @@ export default {
               res.data.MarkInCheck == "上班" ? "工作" : res.data.MarkInCheck;
             this.loadForm.mk2 =
               res.data.MarkOutCheck == "上班" ? "工作" : res.data.MarkOutCheck;
-            this.loadForm.Automatic = res.data.Automatic ? false : true;
+            this.loadForm.Automatic = res.data.Automatic;
             this.loadForm.t = this.activeItem;
             this.copyForm = JSON.stringify(this.loadForm);
             Object.assign({}, this.loadForm);
@@ -366,6 +375,7 @@ export default {
           MarkInCheck: this.loadForm.mk1,
           Automatic: this.loadForm.Automatic,
           teamId: this.teamValue,
+          configId: this.selRow.Id,
         };
         params = this.filterParams(params);
         this.$http

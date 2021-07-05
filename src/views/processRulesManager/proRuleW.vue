@@ -19,25 +19,26 @@
                 <span>规则名称</span>
                 <el-input v-model="loadForm.RuleName"></el-input>
               </li>
-              <li>
+              <!-- <li>
                 <span>对象类型</span>
                 <el-select v-model="loadForm.rType">
                   <el-option label="部门" :value="1"></el-option>
                   <el-option label="员工" :value="2"></el-option>
                 </el-select>
-              </li>
-              <li v-if="loadForm.rType == 2">
+              </li> -->
+              <!-- <li v-if="loadForm.rType == 2">
                 <span>选择成员</span>
                 <mb @Confirm="getUser" :arrays="loadForm.member"></mb>
               </li>
-              <li v-if="loadForm.rType == 1">
-                <span>规则作用部门</span>
+              -->
+              <li>
+                <span>规则作用进程组</span>
                 <el-select v-model="loadForm.g" multiple>
                   <el-option
                     v-for="(item, index) in processOptions"
                     :label="item.Name"
                     :key="index"
-                    :value="item.ID"
+                    :value="item.Id"
                   ></el-option>
                 </el-select>
               </li>
@@ -164,6 +165,11 @@ export default {
     mb: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   props: {
+    //规则版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
     operationName: {
       type: String | Number,
       default: 1,
@@ -202,25 +208,36 @@ export default {
     getUser(arr) {
       this.loadForm.member = arr;
     },
-    async GetProgressGroup() {
-      const resp = await this.$http.post("/User/GetProgressGroupSelected.ashx");
-      if (resp.res == 0) {
-        this.processOptions = resp.data;
-      }
+    GetProgressGroup() {
+      this.$http
+        .post(
+          "/Management/ProgressManagement/GetSystemProgressGroupSelected.ashx",
+          { configId: this.selRow.Id }
+        )
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.processOptions = resp.data;
+          }
+        });
     },
     beforeOpen() {
       this.loading = false;
-      this.GetProgressGroup();
-      if (this.operationName == 2) {
-        this.getDetail();
-      }
+      this.$nextTick(() => {
+        this.GetProgressGroup();
+        if (this.operationName == 2) {
+          this.getDetail();
+        }
+      });
     },
     getDetail() {
       this.loading = true;
       this.$http
-        .get("/ProcessRules/ProcessRulesDetail.ashx", {
-          params: { ruleId: this.id },
-        })
+        .get(
+          "/Management/ProgressManagement/GetSystemProcessRulesDetail.ashx",
+          {
+            params: { Id: this.id },
+          }
+        )
         .then((res) => {
           if (res.res == 0) {
             this.loading = false;
@@ -256,7 +273,7 @@ export default {
               res.data.MarkInCheck == "上班" ? "工作" : res.data.MarkInCheck;
             this.loadForm.mk2 =
               res.data.MarkOutCheck == "上班" ? "工作" : res.data.MarkOutCheck;
-            this.loadForm.Automatic = res.data.Automatic ? false : true;
+            this.loadForm.Automatic = res.data.Automatic;
             this.loadForm.t = this.activeItem;
             this.copyForm = JSON.stringify(this.loadForm);
             Object.assign({}, this.loadForm);
@@ -348,20 +365,17 @@ export default {
         let params = {
           Id: this.id,
           RuleName: this.loadForm.RuleName,
-          ProgressGroupIds: this.loadForm.rType == 1 ? this.loadForm.g : [],
-          UserIds:
-            this.loadForm.rType == 2
-              ? this.loadForm.member.map((item) => item.UsId)
-              : [],
+          ProgressGroupIds: this.loadForm.g,
           ProgressNames: this.loadForm.radio ? [] : pn,
           FormNames: word,
           MarkOutCheck: this.loadForm.mk2,
           MarkInCheck: this.loadForm.mk1,
           Automatic: this.loadForm.Automatic,
+          configId: this.selRow.Id,
         };
         params = this.filterParams(params);
         this.$http
-          .get("/ProcessRules/SaveProcessRules.ashx", {
+          .get("/Management/ProgressManagement/SaveSystemProcessRules.ashx", {
             params,
           })
           .then((res) => {

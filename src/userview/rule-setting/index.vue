@@ -1,11 +1,11 @@
 <template>
   <div id="rule-setting">
-    <Header
-      title="进程规则设置"
-      titleEnglish="Process Rules Setting"
-      class="baseHeader"
-    >
+    <Header :title="selRow.ConfigName" titleEnglish="" class="baseHeader">
       <div slot="btnGroup">
+        <span class="go_ver" @click="$emit('handleVerList')"
+          ><i class="el-icon-d-arrow-left"></i>返回版本列表</span
+        >
+        <el-divider direction="vertical"></el-divider>
         <a
           v-for="item in tabList"
           :key="item.value"
@@ -17,8 +17,12 @@
         </a>
       </div>
     </Header>
-    <ProgressGroup v-if="tabType == 1"></ProgressGroup>
-    <processRule v-else></processRule>
+    <ProgressGroup
+      v-if="tabType == 1"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></ProgressGroup>
+    <processRule v-else :teamValue="teamValue" :selRow="selRow"></processRule>
   </div>
 </template>
 
@@ -28,6 +32,17 @@ export default {
     Header: () => import("@/components/Header"),
     ProgressGroup: () => import("./progressGroup"),
     processRule: () => import("./processRule"),
+  },
+  props: {
+    //规则版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
+    teamValue: {
+      type: Number,
+      default: 0,
+    },
   },
   data: () => ({
     tabType: 1,
@@ -54,6 +69,20 @@ export default {
 #rule-setting {
   height: 100%;
   /deep/header.baseHeader .right {
+    .go_ver {
+      font-size: 1.5rem;
+      cursor: pointer;
+      font-weight: 700;
+      padding-top: 0.3rem;
+      margin-right: 8px;
+      color: #303133;
+      i {
+        margin-right: 8px;
+      }
+      &:hover {
+        color: #448ef5;
+      }
+    }
     & > div > a.router-link-active {
       color: #448ef5 !important;
       border-top-color: #448ef5;

@@ -23,6 +23,7 @@
       :stime="datestart"
       :etime="searchType == 2 ? datestart : dateend"
       :uid="uid"
+      :teamValue="teamId"
     ></progresscom>
   </div>
 </template>
@@ -121,11 +122,8 @@ export default {
         })
         .then((resp) => {
           if (resp.res == 0) {
-            if (
-              resp.data.HighFrequencyWordsChart &&
-              resp.data.HighFrequencyWordsChart.length
-            ) {
-              this.eacharData = resp.data.HighFrequencyWordsChart[0];
+            if (resp.data && resp.data.length) {
+              this.eacharData = resp.data[0];
               this.initEcharts();
             }
           }

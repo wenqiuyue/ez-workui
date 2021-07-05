@@ -1,6 +1,6 @@
 <template>
-  <div id="processRulesManager">
-    <Header title="XXX版本" titleEnglish="" class="baseHeader">
+  <div id="processRulesManager" v-if="selRow">
+    <Header :title="selRow.ConfigName" titleEnglish="" class="baseHeader">
       <div slot="btnGroup">
         <span class="go_ver" @click="$emit('handleVerList')"
           ><i class="el-icon-d-arrow-left"></i>返回版本列表</span
@@ -17,8 +17,8 @@
         </a>
       </div>
     </Header>
-    <ProgressGroup v-if="tabType == 1"></ProgressGroup>
-    <processRule v-else></processRule>
+    <ProgressGroup v-if="tabType == 1" :selRow="selRow"></ProgressGroup>
+    <processRule v-else :selRow="selRow"></processRule>
   </div>
 </template>
 
@@ -28,6 +28,12 @@ export default {
     Header: () => import("@/components/Header"),
     ProgressGroup: () => import("./progressGroup"),
     processRule: () => import("./processRule"),
+  },
+  props: {
+    selRow: {
+      type: Object,
+      default: null,
+    },
   },
   data: () => ({
     tabType: 1,

@@ -46,7 +46,17 @@
 
 <script>
 export default {
-  props: ["indexData"],
+  props: {
+    //规则版本信息
+    selRow: {
+      type: Object,
+      default: null,
+    },
+    indexData: {
+      type: Object,
+      default: null,
+    },
+  },
   components: {
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
@@ -105,13 +115,17 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/ProgressGroup/AddProgressGroup.ashx", {
-                name: this.formData.name,
-              })
+              .post(
+                "/Management/ProgressManagement/AddSystemProgressGroup.ashx",
+                {
+                  name: this.formData.name,
+                  configId: this.selRow.Id,
+                }
+              )
               .then((res) => {
                 if (res.res == 0) {
                   this.$message({
-                    message: `${this.formData.id ? "编辑" : "添加"}进程组成功`,
+                    message: `添加进程组成功`,
                     type: "success",
                   });
                   this.submiting();
@@ -123,15 +137,19 @@ export default {
               });
           } else {
             let params = {
-              id: this.formData.id, // 添加时值是 undefined
+              Id: this.formData.id, // 添加时值是 undefined
               name: this.formData.name,
+              configId: this.selRow.Id,
             };
             this.$http
-              .post("/ProgressGroup/EditProgressGroup.ashx", params)
+              .post(
+                "/Management/ProgressManagement/EditSystemProgressGroup.ashx",
+                params
+              )
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
-                    message: `${this.formData.id ? "编辑" : "添加"}进程组成功`,
+                    message: `编辑进程组成功`,
                     type: "success",
                   });
                   this.submiting();

@@ -53,11 +53,15 @@
           />
           <el-table-column
             label="创建时间"
-            prop="CreatTime"
+            prop="CreateTime"
             show-overflow-tooltip
             align="center"
             ><template slot-scope="scope">
-              {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+              {{
+                scope.row.CreateTime
+                  ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss")
+                  : "--"
+              }}
             </template>
           </el-table-column>
           <el-table-column
