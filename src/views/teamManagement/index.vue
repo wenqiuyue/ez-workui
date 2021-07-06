@@ -26,13 +26,13 @@
           />
           <el-table-column
             label="创建时间"
-            prop="CreatTime"
+            prop="CreateTime"
             show-overflow-tooltip
             align="center"
             ><template slot-scope="scope">
               {{
-                scope.row.CreatTime
-                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                scope.row.CreateTime
+                  ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss")
                   : ""
               }}
             </template>
@@ -66,11 +66,11 @@
               {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
             </template></el-table-column
           >
-          <el-table-column label="服务器" align="center"
+          <!-- <el-table-column label="服务器" align="center"
             ><template slot-scope="scope">
               {{ scope.row.Vsersion ? scope.row.Vsersion.Capacity : "无" }}
             </template></el-table-column
-          >
+          > -->
           <el-table-column
             label="到期时间"
             prop="ExpireTime"
@@ -214,7 +214,9 @@ export default {
       )
         .then(() => {
           this.$http
-            .get("/Teams/DelTeam.ashx", { ids: [val.Id], operation: type })
+            .get("/Teams/DelTeam.ashx", {
+              params: { ids: JSON.stringify([val.Id]), operation: type },
+            })
             .then((resp) => {
               if (resp.res == 0) {
                 this.$message({

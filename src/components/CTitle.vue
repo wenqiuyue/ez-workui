@@ -113,7 +113,6 @@
           :placeholder="TInfo.dropDown.searchInput.placeholder"
           autofocus
           @keyup.enter.native="searchClick"
-          @blur="searchEvent"
           size="medium"
           style="width: 219px"
         >

@@ -60,11 +60,11 @@
               >
             </div>
           </li>
-          <li>
+          <!-- <li>
             <span @click="toggleBtn"
               >{{ onlyUnusual ? "查看全部" : "只看异常" }}考勤</span
             >
-          </li>
+          </li> -->
         </ul>
         <div
           v-if="
@@ -2109,7 +2109,9 @@ export default {
           this.childData = Object.assign(this.childData, obj3);
         }
         // 如果只点击的头tab，那只做前面的切换，不做请求 这种情况没有UsId
-        if (this.childData.fatUsId && this.teamValue) this.getAttendance();
+        if (this.childData.fatUsId && this.teamValue) {
+          this.getAttendance();
+        }
       }
     },
     //申诉或审批触发改变列表方法

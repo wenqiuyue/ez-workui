@@ -37,7 +37,9 @@
             ><el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
-                {{ userInfo.RoleName }}
+                <span v-for="(item, index) in userInfo.RoleName" :key="index">{{
+                  index == 0 ? item : `、${item}`
+                }}</span>
               </div></el-col
             >
             <el-col :span="12"

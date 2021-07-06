@@ -251,7 +251,7 @@ export default {
         this.fatData.menuType = "publicAttendance";
         this.fatData.tabsNum = "2"; // 某单个成员某一月的考勤
         this.fatData.fatTimeYMD = undefined;
-        this.fatData.fatUsId = obj.MembersId;
+        this.fatData.fatUsId = obj.UserId;
         this.fatData.memberName = obj.Name;
         this.fatData.teamValue = this.teamValue;
       } else {

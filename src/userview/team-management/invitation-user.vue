@@ -144,7 +144,15 @@ export default {
             .post("/Teams/InvitedOrApply/CreateInvitedCode.ashx", data)
             .then((resp) => {
               if (resp.res == 0) {
-                this.linkCode = resp.data;
+                if (resp.data) {
+                  this.linkCode = resp.data;
+                } else {
+                  this.$message({
+                    showClose: true,
+                    message: resp.msg,
+                    type: "warning",
+                  });
+                }
               }
             })
             .finally(() => this.$refs.invitation.loadBtn(false));

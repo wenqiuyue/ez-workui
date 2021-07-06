@@ -223,6 +223,7 @@ export default {
               message: `${name}成功`,
               type: "success",
             });
+            this.getDataList();
           }
         })
         .finally(() => (this.copyLoading = false));

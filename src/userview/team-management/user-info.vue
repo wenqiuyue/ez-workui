@@ -1,7 +1,13 @@
 <template>
   <div class="userInfo">
-    <XModal name="userInfo" width="40%" height="77%">
-      <CWinTmp :indexData="indexData">
+    <XModal name="userInfo" width="40%" height="77%" @opened="opened">
+      <CWinTmp
+        ref="cwtinfo"
+        :indexData="indexData"
+        @editClick="editClick"
+        @comfirmClick="comSubmit"
+        v-model="editState"
+      >
         <div slot="form" class="info_content" v-if="selUser">
           <el-row>
             <el-col :span="24"
@@ -10,25 +16,24 @@
                 <span class="name">{{ selUser.Name }}</span>
               </div></el-col
             >
-            <el-col :span="12"
+            <el-col :span="12" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
                 {{ selUser.MType == 1 ? "成员" : "管理人" }}
               </div></el-col
             >
-
-            <el-col :span="12"
+            <el-col :span="12" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">邮箱：</span>
                 {{ selUser.addres }}
               </div></el-col
-            ><el-col :span="12"
+            ><el-col :span="12" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">状态：</span>
                 {{ $D.ITEM("g_status", selUser.Shape).name }}
               </div></el-col
             >
-            <el-col :span="12"
+            <el-col :span="12" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">注册时间：</span>
                 {{
@@ -38,7 +43,7 @@
                 }}
               </div></el-col
             >
-            <el-col :span="24"
+            <el-col :span="24" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">可见成员：</span>
                 <div v-if="selUser.VisibleUser && selUser.VisibleUser.length">
@@ -58,6 +63,24 @@
                 <span v-else>无</span>
               </div></el-col
             >
+            <el-col :span="24" v-if="editState"
+              ><div class="info_list">
+                <span class="info_lable">角色：</span>
+                <el-radio-group v-model="formData.mType">
+                  <el-radio :label="1">成员</el-radio>
+                  <el-radio :label="2">管理人</el-radio>
+                </el-radio-group>
+              </div></el-col
+            >
+            <el-col :span="24" v-if="editState"
+              ><div class="info_list edit">
+                <span class="info_lable">可见成员：</span>
+                <mb
+                  @Confirm="getUser"
+                  :arrays="formData.visible"
+                  :teamId="teamId"
+                ></mb></div
+            ></el-col>
           </el-row>
         </div>
       </CWinTmp>
@@ -70,24 +93,82 @@ export default {
   components: {
     XModal: () => import("@/components/XModal"),
     CWinTmp: () => import("@/components/CWinTmp"),
+    mb: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   props: {
     selUser: {
       type: Object,
       default: null,
     },
+    teamId: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
+      editState: false,
       indexData: {
-        type: "",
+        type: "Edit",
         name: "成员详情",
         xModalName: "userInfo",
+      },
+      formData: {
+        Id: null,
+        visible: [],
+        mType: null,
       },
     };
   },
   methods: {
     imgChange,
+    /**
+     * 编辑
+     */
+    comSubmit() {
+      this.$refs.cwtinfo.toggleComfirm();
+      const data = {
+        Id: this.formData.id,
+        visibleUsId: this.formData.visible.map((m) => m.UsId),
+        mType: this.formData.mType,
+      };
+      this.$http.post("/Teams/EditMember.ashx", data).then((resp) => {
+        if (resp.res == 0) {
+          this.$message({
+            type: "success",
+            message: "删除成功!",
+          });
+          this.$modal.hide("userInfo");
+          this.$emit("success");
+        }
+      });
+    },
+    /**
+     * 弹窗打开回调
+     */
+    opened() {
+      this.editState = false;
+    },
+    editClick() {
+      if (this.editState === true) this.changeEditState();
+    },
+    // 改变窗口状态的，搭配index页 添加和编辑按钮
+    changeEditState() {
+      if (this.selUser) {
+        this.formData.id = this.selUser.Id;
+        this.formData.visible = this.selUser.VisibleUser.map((m) => {
+          return {
+            UsId: m.UserId,
+            Name: m.Name,
+            Picture: m.Picture,
+          };
+        });
+        this.formData.mType = this.selUser.MType;
+      }
+    },
+    getUser(val) {
+      this.formData.visible = val;
+    },
   },
 };
 </script>
@@ -112,8 +193,11 @@ export default {
     .info_list {
       line-height: 46px;
       font-size: 14px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
       .info_lable {
-        width: 100px;
+        // width: 100px;
       }
       .mem-imgs {
         display: flex;
@@ -124,6 +208,15 @@ export default {
         li {
           margin: 0 2.3rem 1rem 0;
         }
+      }
+    }
+    /deep/.edit {
+      .avatar_medium img {
+        width: 3.3rem;
+        height: 3.3rem;
+      }
+      .mem-add {
+        display: flex !important;
       }
     }
   }

@@ -10,5 +10,5 @@ export function imgChange(picture, isurl) {
     //   return this.$url + picture;
     // }
   }
-  return `${require("@/assets/img/user.png")}`;
+  return `${require("@/assets/img/user-admin.png")}`;
 }

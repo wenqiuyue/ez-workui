@@ -17,7 +17,7 @@
       </el-table-column>
       <el-table-column label="角色" prop="MType" align="center"
         ><template slot-scope="scope">
-          {{ scope.row.MType == 1 ? "成员" : "管理人" }}
+          {{ scope.row.MType == 1 ? "成员" : "管理员" }}
         </template></el-table-column
       >
       <el-table-column label="状态" prop="Shape" align="center"
@@ -27,31 +27,34 @@
       >
       <el-table-column label="可查看成员" prop="MemberCount" align="center"
         ><template slot-scope="scope">
-          <el-popover
-            trigger="hover"
-            placement="top"
-            width="350"
-            v-if="scope.row.VisibleUser.length"
-          >
-            <div slot="reference">
-              <p class="mem_count">{{ scope.row.VisibleUser.length }}人</p>
-            </div>
-            <ul class="member-style">
-              <li v-for="(item, index) in scope.row.VisibleUser" :key="index">
-                <img :src="imgChange(item.Picture)" alt="" />
-                <span>{{ item.Name }}</span>
-                <i
-                  :style="
-                    (index + 1) % 3 == 0 ||
-                    index == scope.row.VisibleUser.length - 1
-                      ? 'display:none'
-                      : ''
-                  "
-                ></i>
-              </li>
-            </ul>
-          </el-popover>
-          <span v-else>{{ scope.row.VisibleUser.length }}人</span>
+          <span v-if="scope.row.MType == 2">全部成员</span>
+          <div v-else>
+            <el-popover
+              trigger="hover"
+              placement="top"
+              width="350"
+              v-if="scope.row.VisibleUser.length"
+            >
+              <div slot="reference">
+                <p class="mem_count">{{ scope.row.VisibleUser.length }}人</p>
+              </div>
+              <ul class="member-style">
+                <li v-for="(item, index) in scope.row.VisibleUser" :key="index">
+                  <img :src="imgChange(item.Picture)" alt="" />
+                  <span>{{ item.Name }}</span>
+                  <i
+                    :style="
+                      (index + 1) % 3 == 0 ||
+                      index == scope.row.VisibleUser.length - 1
+                        ? 'display:none'
+                        : ''
+                    "
+                  ></i>
+                </li>
+              </ul>
+            </el-popover>
+            <span v-else>{{ scope.row.VisibleUser.length }}人</span>
+          </div>
         </template></el-table-column
       >
       <el-table-column label="操作" width="150" align="center">
@@ -68,7 +71,12 @@
         </template>
       </el-table-column>
     </el-table>
-    <UserInfo :selUser="selUser"></UserInfo>
+
+    <UserInfo
+      :selUser="selUser"
+      :teamId="selRow ? selRow.Id : null"
+      @success="getTeamList"
+    ></UserInfo>
   </div>
 </template>
 <script>

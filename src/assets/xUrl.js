@@ -11,12 +11,12 @@ if (window.location.protocol === "https:") {
 }
 if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   //***** 测试 *****
-  SocketUrl += "120.25.67.116:773";
-  axios.BaseUrl = "http://192.168.0.225";
+  SocketUrl += "192.168.0.225:8081";
+  axios.BaseUrl = "http://192.168.0.225:8081";
   // axios.BaseUrl = "http://122.9.151.39:702";
 } else {
   //***** 线上 *****
-  SocketUrl += window.location.hostname;
+  SocketUrl += window.location.host;
   axios.BaseUrl = ""; //后端的接口域名
   axios.defaults.withCredentials = true;
 
@@ -87,7 +87,7 @@ axios.interceptors.request.use(
  */
 const filterUrls = [
   "/Client/GetTime.ashx",
-  "/Work/WrokAreas/NoticeUserScreenshots.ashx",
+  "/User/Work/NoticeUserScreenshots.ashx",
   "/Handler/ChatUploadFile.ashx",
 ];
 axios.interceptors.response.use(

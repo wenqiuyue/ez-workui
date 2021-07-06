@@ -57,7 +57,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import { layoutRoutesUser } from "@/router";
-
+import xSocketLink from "@/assets/xSocketLink";
 export default {
   data() {
     "#main";
@@ -97,7 +97,20 @@ export default {
       this.$message("登出成功");
     },
   },
-  mounted() {},
+  mounted() {
+    //建立Socket链接
+    return;
+    let _this = this;
+    new xSocketLink({
+      onMsg: (res) => {
+        if (["25"].includes(res.res)) {
+          _this.$E.$emit("loadpic", res); //发来开始进程截图
+        } else if (["26"].includes(res.res)) {
+          _this.$E.$emit("loadingpic", res); //发来加载进程截图
+        }
+      },
+    });
+  },
 };
 </script>
 
