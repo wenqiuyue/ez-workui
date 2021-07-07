@@ -6,7 +6,10 @@
         ><div class="info_left" v-loading="loading">
           <h3 class="info-title">
             <span>团队信息</span
-            ><el-button type="text" @click="handleEditTeam"
+            ><el-button
+              type="text"
+              @click="handleEditTeam"
+              v-if="infoData && infoData.Teamdata.UserMemberMType == 2"
               >编辑团队基础信息</el-button
             >
           </h3>
@@ -74,25 +77,19 @@
               </li>
               <li v-if="infoData.Teamdata.ExpireTime">
                 <span class="lable">过期时间：</span>
-                <span
-                  >{{
-                    infoData.Teamdata.ExpireTime
-                      ? infoData.Teamdata.ExpireTime.timeFormat(
-                          "yyyy-MM-dd HH:ss"
-                        )
-                      : "无"
-                  }}人</span
-                >
+                <span>{{
+                  infoData.Teamdata.ExpireTime
+                    ? infoData.Teamdata.ExpireTime.timeFormat(
+                        "yyyy-MM-dd HH:ss"
+                      )
+                    : "无"
+                }}</span>
               </li>
               <li v-if="infoData.Teamdata.Describe">
                 <span class="lable">团队描述：</span>
-                <span
-                  >{{
-                    infoData.Teamdata.Describe
-                      ? infoData.Teamdata.Describe
-                      : "无"
-                  }}人</span
-                >
+                <span>{{
+                  infoData.Teamdata.Describe ? infoData.Teamdata.Describe : "无"
+                }}</span>
               </li>
               <li>
                 <span class="lable">成员是否可以添加成员：</span>
@@ -107,31 +104,47 @@
                     infoData.Teamdata.Code ? infoData.Teamdata.Code : "无"
                   }}</span>
                 </p>
-                <p>用户可通过团队号加入团队</p>
-              </li>
-              <li><span class="lable">设置：</span></li>
-              <li class="set_row">
-                <span>可否通过团队号加入</span>
-                <el-switch v-model="setOne" @change="changeSet"> </el-switch>
-              </li>
-              <li class="set_row">
-                <span>成员可否邀请其他人加入</span>
-                <el-switch v-model="setTwo" @change="changeSet"> </el-switch>
-              </li>
-              <li>
-                <p class="set_row">
-                  <span>是否设置邀请口令</span>
-                  <el-switch v-model="setThree" @change="changeSetPass">
-                  </el-switch>
+                <p class="tips">用户可通过团队号加入团队</p>
+                <p
+                  style="margin-top: 5px"
+                  v-if="
+                    infoData.Teamdata.UserMemberMType == 1 &&
+                    infoData.Teamdata.InvitationCode
+                  "
+                >
+                  <span class="lable">邀请口令：</span>
+                  <span>{{
+                    infoData.Teamdata.InvitationCode
+                      ? infoData.Teamdata.InvitationCode
+                      : "无"
+                  }}</span>
                 </p>
-                <el-input
-                  class="set_input"
-                  v-if="setThree"
-                  v-model="passwordVal"
-                  placeholder="请输入邀请口令(按Enter键保存)"
-                  @keyup.enter.native="changeSet"
-                ></el-input>
               </li>
+              <template v-if="infoData.Teamdata.UserMemberMType == 2">
+                <li><span class="lable">设置：</span></li>
+                <li class="set_row">
+                  <span>可否通过团队号加入</span>
+                  <el-switch v-model="setOne" @change="changeSet"> </el-switch>
+                </li>
+                <li class="set_row">
+                  <span>成员可否邀请其他人加入</span>
+                  <el-switch v-model="setTwo" @change="changeSet"> </el-switch>
+                </li>
+                <li>
+                  <p class="set_row">
+                    <span>是否设置邀请口令</span>
+                    <el-switch v-model="setThree" @change="changeSetPass">
+                    </el-switch>
+                  </p>
+                  <el-input
+                    class="set_input"
+                    v-if="setThree"
+                    v-model="passwordVal"
+                    placeholder="请输入邀请口令(按Enter键保存)"
+                    @keyup.enter.native="changeSet"
+                  ></el-input>
+                </li>
+              </template>
               <li style="margin-top: 32px">
                 <el-button
                   type="primary"
@@ -147,7 +160,10 @@
       >
       <!-- 右边 -->
       <el-col :span="17">
-        <InvitationList :teamId="selRow.Id"></InvitationList>
+        <InvitationList
+          :teamId="selRow.Id"
+          :UserMemberMType="infoData ? infoData.Teamdata.UserMemberMType : null"
+        ></InvitationList>
       </el-col>
     </el-row>
     <!-- 邀请成员 -->
@@ -344,7 +360,7 @@ export default {
         }
         .num_row {
           padding: 16px 0;
-          p:last-child {
+          .tips {
             font-size: 12px;
             color: #e6a23c;
           }

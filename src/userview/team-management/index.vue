@@ -88,14 +88,14 @@
               {{ scope.row.MemberCount }}人
             </template></el-table-column
           >
-          <el-table-column label="购买版本" align="center"
+          <!-- <el-table-column label="购买版本" align="center"
             ><template slot-scope="scope">
               {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
             </template></el-table-column
-          >
+          > -->
           <el-table-column label="服务器" align="center"
             ><template slot-scope="scope">
-              {{ scope.row.Vsersion ? scope.row.Vsersion.Capacity : "无" }}
+              {{ scope.row.Database ? scope.row.Database.Server : "无" }}
             </template></el-table-column
           >
           <el-table-column

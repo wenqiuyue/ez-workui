@@ -29,13 +29,9 @@ if (process.env.NODE_ENV === "development" || window.location.port === "773") {
 let cancelToken = axios.CancelToken;
 // 两个取消的请求是一组请写在这里
 let cancelUrl = [
-  // 这是一组
-  ["/Project/taskMenuInquire.ashx#", "/Project/proMenuInquire.ashx#"],
   [
-    "/Work/Performance/queryMyKPIAssess.ashx#",
-    "/Work/Performance/queryMyAddAssess.ashx#",
-    "/Work/Performance/queryMyComplaints.ashx#",
-    "/Work/Performance/queryMyAddComplaints.ashx#",
+    "/User/MemberDataDetailsSummary.ashx#",
+    "/Teams/MemberJob/MemberDataDetails.ashx#",
   ],
 ];
 let pending = [];
@@ -86,7 +82,6 @@ axios.interceptors.request.use(
  * author:zxg
  */
 const filterUrls = [
-  "/Client/GetTime.ashx",
   "/User/Work/NoticeUserScreenshots.ashx",
   "/Handler/ChatUploadFile.ashx",
 ];
@@ -141,13 +136,17 @@ axios.interceptors.response.use(
     return result;
   },
   (error) => {
-    if (error.message.indexOf("500") > -1) {
-      Notification.error({
-        message: "服务器错误 500",
-      });
+    if (error.message) {
+      if (error.message.indexOf("500") > -1) {
+        Notification.error({
+          message: "服务器错误 500",
+        });
+      }
+      // 对响应错误做点什么
+      return Promise.reject(error);
+    } else {
+      return error;
     }
-    // 对响应错误做点什么
-    return Promise.reject(error);
   }
 );
 export default {

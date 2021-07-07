@@ -3,7 +3,7 @@
     <!-- 右边标题 -->
     <h3 class="info-title">
       <span>团队邀请管理</span>
-      <div class="screen_left">
+      <div class="screen_left" v-if="UserMemberMType == 2">
         <el-button type="success" size="small" @click="handleInv(null, 1)"
           >全部同意</el-button
         >
@@ -84,7 +84,12 @@
             }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" align="center">
+        <el-table-column
+          label="操作"
+          width="120"
+          align="center"
+          v-if="UserMemberMType == 2"
+        >
           <template slot-scope="scope">
             <c-btn v-if="scope.row.InvitedStatus == 0">
               <span @click="handleInv(scope.row, 1)">同意</span>
@@ -108,6 +113,11 @@ export default {
   props: {
     //团队id
     teamId: {
+      type: Number,
+      default: null,
+    },
+    //当前用户角色
+    UserMemberMType: {
       type: Number,
       default: null,
     },

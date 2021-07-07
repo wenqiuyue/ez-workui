@@ -69,7 +69,7 @@
         </div>
         <div class="soft">
           <div class="title">时间轴与使用软件</div>
-          <div class="softbox">
+          <div class="softbox" v-if="softData && softData.length">
             <div
               v-for="(item, softind) in softData"
               :key="item.Line"
@@ -98,10 +98,14 @@
               <div class="right"></div>
             </div>
           </div>
+          <div class="nodata" v-else>
+            <i class="hiFont hi-wushuju"></i>
+            <p>暂无数据</p>
+          </div>
         </div>
         <div class="scree">
           <div class="scree_title">定期截图</div>
-          <div class="screephot">
+          <div class="screephot" v-if="softData && softData.length">
             <div
               class="screen"
               v-for="(itempic, picindex) in softData"
@@ -115,6 +119,10 @@
               </el-image>
               <p class="time">{{ itempic.Line }}</p>
             </div>
+          </div>
+          <div class="nodata" v-else>
+            <i class="hiFont hi-wushuju"></i>
+            <p>暂无数据</p>
           </div>
         </div>
       </div>
@@ -145,7 +153,6 @@
 export default {
   components: {
     BaseView: () => import("@/components/BaseView"),
-    Header: () => import("@/components/Header"),
     Staechart: () => import("./satechart.vue"),
     tooltip: () => import("@/components/textTooltip"),
     keywordfrequency: () => import("../keywordfrequency"),
@@ -254,7 +261,7 @@ export default {
           teamId: this.teamId,
         };
         this.$http
-          .get("/Teams/MemberJob/MemberDataDetails.ashx", { params: data })
+          .get("/Teams/MemberJob/MemberDataDetails.ashx#", { params: data })
           .then((resp) => {
             if (resp.res == 0) {
               //本日工作状态占比图表数据
@@ -291,7 +298,7 @@ export default {
           teamId: this.teamId,
         };
         this.$http
-          .post("/User/MemberDataDetailsSummary.ashx", data)
+          .post("/User/MemberDataDetailsSummary.ashx#", data)
           .then((resp) => {
             if (resp.res == 0) {
               //本日工作状态占比图表数据
@@ -646,6 +653,22 @@ export default {
           color: #666666;
         }
       }
+    }
+  }
+  .nodata {
+    font-size: 14px;
+    height: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .hiFont {
+      font-size: 5rem;
+      color: #c0c4cc;
+    }
+    p {
+      margin-top: 8px;
+      color: #909399;
     }
   }
 }

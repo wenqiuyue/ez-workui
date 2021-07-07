@@ -150,8 +150,6 @@ export default {
               if (res.res == 0) {
                 this.$modal.hide("forgetpw");
                 this.$message.success(res.msg);
-              } else {
-                this.$message.error(res.msg);
               }
             })
             .finally(() => (this.loadSubmit = false));
