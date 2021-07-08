@@ -25,6 +25,11 @@
           {{ $D.ITEM("g_status", scope.row.Shape).name }}
         </template></el-table-column
       >
+      <el-table-column label="进程" prop="Shape" align="center"
+        ><template slot-scope="scope">
+          {{ scope.row.ProgressGroupName ? scope.row.ProgressGroupName : "无" }}
+        </template></el-table-column
+      >
       <el-table-column label="可查看成员" prop="MemberCount" align="center"
         ><template slot-scope="scope">
           <span v-if="scope.row.MType == 2">全部成员</span>

@@ -12,8 +12,8 @@ if (window.location.protocol === "https:") {
 if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   //***** 测试 *****
   SocketUrl += "192.168.0.225:8081";
-  axios.BaseUrl = "http://192.168.0.225:8081";
-  // axios.BaseUrl = "http://122.9.151.39:702";
+  // axios.BaseUrl = "http://192.168.0.225:8081";
+  axios.BaseUrl = "http://192.168.1.105:8081";
 } else {
   //***** 线上 *****
   SocketUrl += window.location.host;

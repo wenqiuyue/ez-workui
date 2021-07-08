@@ -35,6 +35,14 @@
             >
             <el-col :span="12" v-if="!editState"
               ><div class="info_list">
+                <span class="info_lable">进程：</span>
+                {{
+                  selUser.ProgressGroupName ? selUser.ProgressGroupName : "无"
+                }}
+              </div></el-col
+            >
+            <el-col :span="12" v-if="!editState"
+              ><div class="info_list">
                 <span class="info_lable">注册时间：</span>
                 {{
                   selUser.CreatTime
@@ -63,7 +71,7 @@
                 <span v-else>无</span>
               </div></el-col
             >
-            <el-col :span="24" v-if="editState"
+            <el-col :span="12" v-if="editState"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
                 <el-radio-group v-model="formData.mType">
@@ -72,6 +80,22 @@
                 </el-radio-group>
               </div></el-col
             >
+            <el-col :span="12" v-if="editState"
+              ><div class="info_list">
+                <span class="info_lable">进程组：</span>
+                <el-select
+                  v-model="formData.progroup"
+                  placeholder="请选择进程组"
+                >
+                  <el-option
+                    v-for="item in options"
+                    :key="item.Id"
+                    :label="item.Name"
+                    :value="item.Id"
+                  >
+                  </el-option>
+                </el-select></div
+            ></el-col>
             <el-col :span="24" v-if="editState"
               ><div class="info_list edit">
                 <span class="info_lable">可见成员：</span>
@@ -107,6 +131,7 @@ export default {
   },
   data() {
     return {
+      options: [],
       editState: false,
       indexData: {
         type: "Edit",
@@ -117,11 +142,26 @@ export default {
         Id: null,
         visible: [],
         mType: null,
+        progroup: null,
       },
     };
   },
   methods: {
     imgChange,
+    // 获取进程组
+    getDataList() {
+      let params = {
+        teamId: this.teamId,
+        configId: null,
+      };
+      this.$http
+        .post("/User/GetProgressGroupSelected.ashx", params)
+        .then((result) => {
+          if (result.res == 0) {
+            this.options = result.data;
+          }
+        });
+    },
     /**
      * 编辑
      */
@@ -131,12 +171,13 @@ export default {
         Id: this.formData.id,
         visibleUsId: this.formData.visible.map((m) => m.UsId),
         mType: this.formData.mType,
+        progressgroupId: this.formData.progroup,
       };
       this.$http.post("/Teams/EditMember.ashx", data).then((resp) => {
         if (resp.res == 0) {
           this.$message({
             type: "success",
-            message: "删除成功!",
+            message: "编辑成功!",
           });
           this.$modal.hide("userInfo");
           this.$emit("success");
@@ -148,6 +189,7 @@ export default {
      */
     opened() {
       this.editState = false;
+      this.getDataList();
     },
     editClick() {
       if (this.editState === true) this.changeEditState();
@@ -164,6 +206,7 @@ export default {
           };
         });
         this.formData.mType = this.selUser.MType;
+        this.formData.progroup = this.selUser.ProgressGroupName;
       }
     },
     getUser(val) {
