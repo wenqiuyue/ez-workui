@@ -79,9 +79,7 @@
                 <span class="lable">过期时间：</span>
                 <span>{{
                   infoData.Teamdata.ExpireTime
-                    ? infoData.Teamdata.ExpireTime.timeFormat(
-                        "yyyy-MM-dd HH:ss"
-                      )
+                    ? infoData.Teamdata.ExpireTime.timeFormat("yyyy-MM-dd")
                     : "无"
                 }}</span>
               </li>

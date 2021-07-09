@@ -43,7 +43,7 @@
                       <span class="lable">过期时间：</span>
                       <span>{{
                         teamInfo.ExpireTime
-                          ? teamInfo.ExpireTime.timeFormat("yyyy-MM-dd HH:mm")
+                          ? teamInfo.ExpireTime.timeFormat("yyyy-MM-dd")
                           : "无"
                       }}</span>
                     </li>
@@ -138,7 +138,7 @@
           >
           <el-table-column label="状态" prop="Shape" align="center"
             ><template slot-scope="scope">
-              {{ $D.ITEM("g_status", scope.row.Shape).name }}
+              {{ scope.row.Shape | getShape }}
             </template></el-table-column
           >
           <el-table-column label="可查看成员" prop="MemberCount" align="center"
@@ -221,6 +221,17 @@ export default {
     this.$nextTick(() => {
       this.getTeamList();
     });
+  },
+  filters: {
+    getShape(val) {
+      if (val == 1) {
+        return "正常";
+      } else if (val == 0) {
+        return "禁用";
+      } else {
+        return "删除";
+      }
+    },
   },
   methods: {
     imgChange,

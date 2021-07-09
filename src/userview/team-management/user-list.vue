@@ -22,7 +22,7 @@
       >
       <el-table-column label="状态" prop="Shape" align="center"
         ><template slot-scope="scope">
-          {{ $D.ITEM("g_status", scope.row.Shape).name }}
+          {{ scope.row.Shape | getShape }}
         </template></el-table-column
       >
       <el-table-column label="进程" prop="Shape" align="center"
@@ -70,7 +70,11 @@
             @click="handleUserDetail(scope.row)"
             >详情</el-button
           >
-          <el-button type="danger" size="small" @click="handleDel(scope.row)"
+          <el-button
+            type="danger"
+            size="small"
+            @click="handleDel(scope.row)"
+            v-if="userMemberMType == 2"
             >删除</el-button
           >
         </template>
@@ -81,6 +85,7 @@
       :selUser="selUser"
       :teamId="selRow ? selRow.Id : null"
       @success="getTeamList"
+      :userMemberMType="userMemberMType"
     ></UserInfo>
   </div>
 </template>
@@ -101,10 +106,22 @@ export default {
       selUser: null,
       loading: false,
       tableData: [],
+      userMemberMType: null,
     };
   },
   mounted() {
     this.getTeamList();
+  },
+  filters: {
+    getShape(val) {
+      if (val == 1) {
+        return "正常";
+      } else if (val == 0) {
+        return "禁用";
+      } else {
+        return "删除";
+      }
+    },
   },
   methods: {
     imgChange,
@@ -149,6 +166,7 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.tableData = resp.data.Membersdata;
+            this.userMemberMType = resp.data.Teamdata.UserMemberMType;
           }
         })
         .finally(() => {

@@ -144,13 +144,13 @@ const routes = [
             layout: true,
             icon: "hi-contract",
           },
-          {
-            path: "/manager/databaseManagement",
-            name: "数据库管理",
-            component: () => import("@/views/databaseManagement"),
-            layout: true,
-            icon: "hi-projects-o",
-          },
+          // {
+          //   path: "/manager/databaseManagement",
+          //   name: "数据库管理",
+          //   component: () => import("@/views/databaseManagement"),
+          //   layout: true,
+          //   icon: "hi-projects-o",
+          // },
 
           {
             path: "/manager/dictionary",

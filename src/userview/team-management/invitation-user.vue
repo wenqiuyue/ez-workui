@@ -5,13 +5,10 @@
       :name="mName"
       title="邀请成员"
       :showCrossBtn="true"
-      confirmBtnText="完成"
-      cancelBtnText="取消"
-      @onConfirm="onConfirm"
       @opened="opened"
       width="40%"
     >
-      <div class="inv_content">
+      <div class="inv_content" v-loading="loading">
         <el-form
           :model="ruleForm"
           :rules="rules"
@@ -24,6 +21,7 @@
               v-model="ruleForm.teamValue"
               filterable
               placeholder="请选择团队"
+              @change="onConfirm"
             >
               <el-option
                 v-for="item in teamOptions"
@@ -89,6 +87,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       linkCode: null, //链接邀请码
       ruleForm: {
         teamValue: null,
@@ -112,6 +111,7 @@ export default {
       this.$nextTick(() => {
         if (this.teamId) {
           this.ruleForm.teamValue = this.teamId;
+          this.onConfirm();
         }
       });
     },
@@ -136,7 +136,7 @@ export default {
     onConfirm() {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
-          this.$refs.invitation.loadBtn(true);
+          this.loading = true;
           const data = {
             teamId: this.ruleForm.teamValue,
           };
@@ -155,7 +155,7 @@ export default {
                 }
               }
             })
-            .finally(() => this.$refs.invitation.loadBtn(false));
+            .finally(() => (this.loading = false));
         } else {
           return;
         }
@@ -181,7 +181,7 @@ export default {
 <style lang="less" scoped>
 .invitation-user {
   .inv_content {
-    padding: 0 30px 10px;
+    padding: 0 30px 5rem;
     .ruleForm {
       /deep/.el-form-item {
         margin-bottom: 12px;

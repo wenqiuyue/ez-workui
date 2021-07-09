@@ -18,7 +18,11 @@
       </div>
     </Header>
     <ProgressGroup v-if="tabType == 1" :selRow="selRow"></ProgressGroup>
-    <processRule v-else :selRow="selRow"></processRule>
+    <processRule v-else-if="tabType == 2" :selRow="selRow"></processRule>
+    <processMarkManager
+      v-else-if="tabType == 3"
+      :selRow="selRow"
+    ></processMarkManager>
   </div>
 </template>
 
@@ -28,6 +32,7 @@ export default {
     Header: () => import("@/components/Header"),
     ProgressGroup: () => import("./progressGroup"),
     processRule: () => import("./processRule"),
+    processMarkManager: () => import("./processMarkManager"),
   },
   props: {
     selRow: {
@@ -45,6 +50,10 @@ export default {
       {
         value: 2,
         label: "进程规则设置",
+      },
+      {
+        value: 3,
+        label: "进程别名设置",
       },
     ],
   }),

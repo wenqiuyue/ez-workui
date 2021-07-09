@@ -79,7 +79,7 @@
           >
             <template slot-scope="scope">{{
               scope.row.ExpireTime
-                ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:ss")
+                ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd")
                 : "--"
             }}</template></el-table-column
           >

@@ -22,7 +22,16 @@
       :teamValue="teamValue"
       :selRow="selRow"
     ></ProgressGroup>
-    <processRule v-else :teamValue="teamValue" :selRow="selRow"></processRule>
+    <processRule
+      v-else-if="tabType == 2"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></processRule>
+    <processMark
+      v-else-if="tabType == 3"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></processMark>
   </div>
 </template>
 
@@ -32,6 +41,7 @@ export default {
     Header: () => import("@/components/Header"),
     ProgressGroup: () => import("./progressGroup"),
     processRule: () => import("./processRule"),
+    processMark: () => import("./processMark"),
   },
   props: {
     //规则版本信息
@@ -54,6 +64,10 @@ export default {
       {
         value: 2,
         label: "进程规则设置",
+      },
+      {
+        value: 3,
+        label: "进程别名设置",
       },
     ],
   }),

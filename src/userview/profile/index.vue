@@ -172,7 +172,7 @@
             >
               <template slot-scope="scope">{{
                 scope.row.ExpireTime
-                  ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:ss")
+                  ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd")
                   : "--"
               }}</template></el-table-column
             >
@@ -348,12 +348,22 @@ export default {
           this.form.Id = this.form.UsId;
           let resp = await this.$http.post("/User/EditUser.ashx", this.form);
           if (resp.res == 0) {
-            this.$notify({
-              type: "success",
-              message: resp.msg,
-            });
-            this.getUserInfo();
-            this.isEdit = false;
+            if (this.form.UseName != this.user.UseName) {
+              this.$notify({
+                type: "warning",
+                message: "您的账户已过期，请重新登录！",
+              });
+              this.$xStorage.removeItem("token");
+              this.$xStorage.removeItem("user-role");
+              this.$router.push("/");
+            } else {
+              this.$notify({
+                type: "success",
+                message: resp.msg,
+              });
+              this.getUserInfo();
+              this.isEdit = false;
+            }
           }
           this.btnLoading = false;
         }

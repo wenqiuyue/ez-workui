@@ -30,7 +30,7 @@
             ><el-col :span="12" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">状态：</span>
-                {{ $D.ITEM("g_status", selUser.Shape).name }}
+                {{ selUser.Shape | getShape }}
               </div></el-col
             >
             <el-col :span="12" v-if="!editState"
@@ -128,13 +128,17 @@ export default {
       type: Number,
       default: null,
     },
+    userMemberMType: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
       options: [],
       editState: false,
       indexData: {
-        type: "Edit",
+        type: "",
         name: "成员详情",
         xModalName: "userInfo",
       },
@@ -145,6 +149,17 @@ export default {
         progroup: null,
       },
     };
+  },
+  filters: {
+    getShape(val) {
+      if (val == 1) {
+        return "正常";
+      } else if (val == 0) {
+        return "禁用";
+      } else {
+        return "删除";
+      }
+    },
   },
   methods: {
     imgChange,
@@ -188,6 +203,13 @@ export default {
      * 弹窗打开回调
      */
     opened() {
+      this.$nextTick(() => {
+        if (this.userMemberMType == 2) {
+          this.indexData.type = "Edit";
+        } else {
+          this.indexData.type = "";
+        }
+      });
       this.editState = false;
       this.getDataList();
     },
