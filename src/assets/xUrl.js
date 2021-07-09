@@ -46,11 +46,10 @@ let isGroup = (requset, cancel) => {
 //请求拦截
 axios.interceptors.request.use(
   (config) => {
+    if (config.url.includes("/Api/mgr.ashx")) return config; //此代码是因为/Api/mgr.ashx类型的接口都会跨域，所以直接跳过请求拦截
     let token = Vue.prototype.$xStorage.getItem("token");
     config.baseURL = axios.BaseUrl; //根域名
     //config.timeout=10000 //网络超时
-    // token =
-    //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJVc2VyTmFtZSI6ImFkbWluIiwiSWQiOjEsIk5hbWUiOiLlrZnkuIDmpaAiLCJJYXQiOiIyMDIxLzYvMjIgMTc6NTk6MDMiLCJFeHAiOiIyMDIxLzYvMjkgMTc6NTk6MDMifQ.msenUE4jPtXrva8VT78fAuyq_RI_PxTRcUVec6FniWc";
     if (token) {
       config.headers.Authorization = token;
     }

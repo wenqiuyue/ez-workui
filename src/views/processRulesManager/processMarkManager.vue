@@ -486,11 +486,6 @@ export default {
       groupLoading: false,
     };
   },
-  computed: {
-    cmurl() {
-      return process.env.VUE_APP_CMURL;
-    },
-  },
   methods: {
     /**
      * 分页
@@ -548,11 +543,6 @@ export default {
       if (resp.res == 0) {
         this.options.pn = resp.data;
       }
-      // const resp = await fetch(this.cmurl + "/Api/mgr.ashx?type=GetProgress", {
-      //   method: "GET",
-      //   mode: "cors",
-      // });
-      // console.log(11111, await resp.json());
     },
     //获取表格数据
     async getData(flag) {
@@ -689,11 +679,7 @@ export default {
     },
   },
   created() {
-    if (process.env.NODE_ENV === "development") {
-      this.poxy = process.env.VUE_APP_CMURL;
-    } else {
-      this.poxy = process.env.VUE_APP_CMURL;
-    }
+    this.poxy = process.env.VUE_APP_CMURL;
     this.getData();
     setTimeout(() => {
       this.GetProgressGroup();
