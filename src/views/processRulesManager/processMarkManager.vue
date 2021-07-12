@@ -297,7 +297,7 @@ export default {
   components: {
     CPages: () => import("@/components/CPages"),
     XModel: () => import("@/components/XModal"),
-    mb: () => import("@/components/Selectors/MemberSelect"),
+    mb: () => import("@/components/Selectors/MemberSelectCopy"),
     ProRuleW: () => import("./proRuleW.vue"),
   },
   props: {
@@ -317,7 +317,7 @@ export default {
       table: [],
       requestParams: {
         p: 1, //当前页数
-        c: 50, //单页数量
+        c: 10, //单页数量
         word: null, //关键词
         g: null, //进程组ID
         t: null, //标记类型（工作，娱乐，未知）
@@ -492,6 +492,7 @@ export default {
      */
     handlePaginationChange(val) {
       this.pageData = val;
+      this.getData();
     },
     getUsers(users) {
       if (users.length) {
@@ -529,7 +530,7 @@ export default {
             this.options.g = resp.data;
             this.options.g.unshift({
               Name: "全部进程",
-              ID: null,
+              Id: null,
             });
             this.requestParams.g = null;
           }
@@ -537,8 +538,8 @@ export default {
     },
     //获取进程名
     async getProgress() {
-      const resp = await this.$http.get(
-        this.poxy + "/Api/mgr.ashx?type=GetProgress"
+      const resp = await this.$http.post(
+        "/Management/ProgressManagement/GetSystemProgress.ashx"
       );
       if (resp.res == 0) {
         this.options.pn = resp.data;
@@ -549,17 +550,22 @@ export default {
       if (flag) {
         this.searchBtn = true;
         this.requestParams.p = 1;
+      } else {
+        this.requestParams.p = this.pageData.pageIndex;
       }
+      this.requestParams.c = this.pageData.pageSize;
       console.log(this.requestParams);
-      // this.tableLoading = true;
+      this.tableLoading = true;
       axios.defaults.withCredentials = false;
-      const resp = await axios.get(this.poxy + "/Api/mgr.ashx?type=GetCsList", {
-        params: this.filterParam(this.requestParams),
-      });
+      const resp = await axios.post(
+        "/Management/ProgressManagement/GetSystemCsList.ashx",
+        this.requestParams
+      );
       if (resp.res == 0) {
         this.table = resp.data.items;
         if (this.requestParams.p == 1) {
           this.pagination.totalCount = resp.data.totalCount;
+          this.pageData.totalNum = resp.data.totalCount;
         }
       }
       this.searchBtn = false;
@@ -609,11 +615,9 @@ export default {
     },
     //标记前的检查
     async checkBeforeMark() {
-      const resp = await this.$http.get(
-        this.poxy + "/Api/mgr.ashx?type=CheckBeforeMark",
-        {
-          params: this.filterParam(this.editParams),
-        }
+      const resp = await this.$http.post(
+        "/Management/ProgressManagement/CheckBeforeSystemMark.ashx",
+        this.editParams
       );
       this.submitLoading = false;
       if (resp.res == 0) {
@@ -631,11 +635,9 @@ export default {
     },
     //提交标记
     async markProgress() {
-      const resp = await this.$http.get(
-        this.poxy + "/Api/mgr.ashx?type=MarkProgress",
-        {
-          params: this.filterParam(this.editParams),
-        }
+      const resp = await this.$http.post(
+        "/Management/ProgressManagement/MarkSystemProgress.ashx",
+        this.editParams
       );
       if (resp.res == 0) {
         this.$notify({

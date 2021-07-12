@@ -200,7 +200,7 @@
           prop="g"
           v-show="editParams.t === '成员'"
         >
-          <mb @Confirm="getUsers" :showActive="false">
+          <mb @Confirm="getUsers" :showActive="false" :teamId="teamValue">
             <div slot="button">
               <div v-if="editParams.g == null" class="mem-add">
                 <i class="el-icon-plus"></i>
@@ -297,7 +297,7 @@ export default {
   components: {
     CPages: () => import("@/components/CPages"),
     XModel: () => import("@/components/XModal"),
-    mb: () => import("@/components/Selectors/MemberSelect"),
+    mb: () => import("@/components/Selectors/MemberSelectCopy"),
     ProRuleW: () => import("./proRuleW.vue"),
   },
   props: {
@@ -496,6 +496,7 @@ export default {
      */
     handlePaginationChange(val) {
       this.pageData = val;
+      this.getData();
     },
     getUsers(users) {
       if (users.length) {
@@ -533,7 +534,7 @@ export default {
             this.options.g = resp.data;
             this.options.g.unshift({
               Name: "全部进程",
-              ID: null,
+              Id: null,
             });
             this.requestParams.g = null;
           }
@@ -541,10 +542,9 @@ export default {
     },
     //获取进程名
     async getProgress() {
-      const resp = await this.$http.get(
-        // this.poxy +
-        "http://192.168.1.120:50003/Api/mgr.ashx?type=GetProgress"
-      );
+      const resp = await this.$http.post("/Progress/GetProgress.ashx", {
+        teamId: this.teamValue,
+      });
       if (resp.res == 0) {
         this.options.pn = resp.data;
       }
@@ -554,17 +554,23 @@ export default {
       if (flag) {
         this.searchBtn = true;
         this.requestParams.p = 1;
+      } else {
+        this.requestParams.p = this.pageData.pageIndex;
       }
+      this.requestParams.c = this.pageData.pageSize;
       console.log(this.requestParams);
       // this.tableLoading = true;
       axios.defaults.withCredentials = false;
-      const resp = await axios.get(this.poxy + "/Api/mgr.ashx?type=GetCsList", {
-        params: this.filterParam(this.requestParams),
-      });
+      this.requestParams.teamId = this.teamValue;
+      const resp = await axios.post(
+        "/Progress/GetCsList.ashx",
+        this.requestParams
+      );
       if (resp.res == 0) {
         this.table = resp.data.items;
         if (this.requestParams.p == 1) {
           this.pagination.totalCount = resp.data.totalCount;
+          this.pageData.totalNum = resp.data.totalCount;
         }
       }
       this.searchBtn = false;
@@ -614,11 +620,10 @@ export default {
     },
     //标记前的检查
     async checkBeforeMark() {
-      const resp = await this.$http.get(
-        this.poxy + "/Api/mgr.ashx?type=CheckBeforeMark",
-        {
-          params: this.filterParam(this.editParams),
-        }
+      this.editParams.teamId = this.teamValue;
+      const resp = await this.$http.post(
+        "/Progress/CheckBeforeMark.ashx",
+        this.editParams
       );
       this.submitLoading = false;
       if (resp.res == 0) {
@@ -636,11 +641,10 @@ export default {
     },
     //提交标记
     async markProgress() {
-      const resp = await this.$http.get(
-        this.poxy + "/Api/mgr.ashx?type=MarkProgress",
-        {
-          params: this.filterParam(this.editParams),
-        }
+      this.editParams.teamId = this.teamValue;
+      const resp = await this.$http.post(
+        "/Progress/MarkProgress.ashx",
+        this.editParams
       );
       if (resp.res == 0) {
         this.$notify({

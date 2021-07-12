@@ -256,7 +256,11 @@ export default {
       inputSearch: null, //搜索员工
       dateType: 1, //时间查询类型
       listdateType: 1, //卡片列表显示月、周类型
-      selDate: new Date(),
+      selDate: new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        new Date().getDate() + 1
+      ),
       selDepart: [], //选择的部门
       selWorkItem: null, //点击工作状态5个分类的某一个分类
       loading: false, //加载
