@@ -23,6 +23,10 @@
       v-else-if="tabType == 3"
       :selRow="selRow"
     ></processMarkManager>
+    <windowAliasManager
+      v-else-if="tabType == 4"
+      :selRow="selRow"
+    ></windowAliasManager>
   </div>
 </template>
 
@@ -33,6 +37,7 @@ export default {
     ProgressGroup: () => import("./progressGroup"),
     processRule: () => import("./processRule"),
     processMarkManager: () => import("./processMarkManager"),
+    windowAliasManager: () => import("./windowAliasManager"),
   },
   props: {
     selRow: {
@@ -53,7 +58,11 @@ export default {
       },
       {
         value: 3,
-        label: "进程别名设置",
+        label: "进程标记",
+      },
+      {
+        value: 4,
+        label: "窗口别名",
       },
     ],
   }),

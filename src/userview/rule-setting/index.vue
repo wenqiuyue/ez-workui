@@ -32,6 +32,11 @@
       :teamValue="teamValue"
       :selRow="selRow"
     ></processMark>
+    <WindowAlias
+      v-else-if="tabType == 4"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></WindowAlias>
   </div>
 </template>
 
@@ -42,6 +47,7 @@ export default {
     ProgressGroup: () => import("./progressGroup"),
     processRule: () => import("./processRule"),
     processMark: () => import("./processMark"),
+    WindowAlias: () => import("./windowalias"),
   },
   props: {
     //规则版本信息
@@ -67,7 +73,11 @@ export default {
       },
       {
         value: 3,
-        label: "进程别名设置",
+        label: "进程标记",
+      },
+      {
+        value: 4,
+        label: "窗口别名",
       },
     ],
   }),

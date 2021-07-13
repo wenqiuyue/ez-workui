@@ -71,14 +71,13 @@
           >标记选中</el-button
         >
       </div>
-      <div class="table">
+      <div class="table" v-loading="tableLoading">
         <el-table
-          v-loading="tableLoading"
+          class="list_table"
           ref="elTable"
           border
           :data="table"
           tooltip-effect="dark"
-          style="width: 100%; height: calc(100% - 32px)"
           @selection-change="handleSelectionChange"
         >
           <el-table-column
@@ -558,8 +557,7 @@ export default {
         this.requestParams.p = this.pageData.pageIndex;
       }
       this.requestParams.c = this.pageData.pageSize;
-      console.log(this.requestParams);
-      // this.tableLoading = true;
+      this.tableLoading = true;
       axios.defaults.withCredentials = false;
       this.requestParams.teamId = this.teamValue;
       const resp = await axios.post(
@@ -752,6 +750,11 @@ export default {
     .table {
       height: calc(100% - 5rem);
       background: #ffffff;
+      .list_table {
+        width: 100%;
+        height: calc(100% - 32px);
+        overflow: auto;
+      }
     }
     .pagination {
       height: 7rem;
