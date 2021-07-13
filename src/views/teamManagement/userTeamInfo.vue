@@ -30,6 +30,14 @@
             >
             <el-col :span="12"
               ><div class="info_list">
+                <span class="info_lable">进程：</span>
+                {{
+                  selUser.ProgressGroupName ? selUser.ProgressGroupName : "无"
+                }}
+              </div></el-col
+            >
+            <el-col :span="12"
+              ><div class="info_list">
                 <span class="info_lable">注册时间：</span>
                 {{
                   selUser.CreatTime

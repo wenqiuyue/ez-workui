@@ -64,12 +64,13 @@
                   </span></span
                 >
               </h4>
-              <img
+              <el-image
+                style="max-width: 200px"
                 :src="cmurl + value.imgURL"
                 alt=""
-                style="max-width: 200px"
-                :preview="index"
-              />
+                :preview-src-list="[cmurl + value.imgURL]"
+              >
+              </el-image>
             </el-card>
           </el-timeline-item>
           <!-- <p v-if="!morePhoto && progressPhotoArr.length" class="g-loaded">
@@ -105,6 +106,10 @@ export default {
     };
   },
   props: {
+    gid: {
+      type: Number,
+      default: null,
+    },
     teamValue: {
       type: Number,
       default: null,
@@ -194,6 +199,7 @@ export default {
         pageCount: 15,
         status: this.activeBar.name,
         teamId: this.teamValue,
+        gid: this.gid,
       };
       this.$http
         .get("/General/GetProcessImg.ashx", { params: params })

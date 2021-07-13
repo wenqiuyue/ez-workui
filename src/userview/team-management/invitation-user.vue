@@ -195,9 +195,14 @@ export default {
         /deep/.el-input__inner {
           cursor: default;
         }
-        .copy {
+        /deep/.el-input-group__append {
+          background: #409eff;
           cursor: pointer;
+          .copy {
+            color: #ffffff;
+          }
         }
+
         p {
           margin-top: 5px;
           color: #e6a23c;

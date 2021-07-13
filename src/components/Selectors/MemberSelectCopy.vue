@@ -327,18 +327,16 @@ export default {
     },
     //加载数据
     beforeOpen() {
-      if (this.pageData == null) {
-        if (this.teamId) {
-          this.getTeamData();
-        } else {
-          this.getData();
-        }
-
-        this.defalutId = 0;
-        this.$nextTick(function () {
-          this.$refs.input.focus();
-        });
+      if (this.teamId) {
+        this.getTeamData();
+      } else {
+        this.getData();
       }
+
+      this.defalutId = 0;
+      this.$nextTick(function () {
+        this.$refs.input.focus();
+      });
     },
     //单选
     checkChange(val) {

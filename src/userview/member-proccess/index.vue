@@ -192,11 +192,7 @@
                                 formateShowTime(item.usInfo.WorkTime)
                               }}
                             </p>
-                            <p>
-                              加班时长：{{
-                                formateShowTime(item.usInfo.OverTime)
-                              }}
-                            </p>
+
                             <p>
                               日期：{{
                                 item.usInfo.WorkStart
@@ -236,11 +232,11 @@
                                 v-for="(pic, imgIndex) in item.ProcessImgs"
                               >
                                 <span>{{ pic.time }}</span>
-                                <img
+                                <el-image
                                   :src="$url + pic.imgUrl"
-                                  :preview="item.usInfo.UsId"
-                                  :οnerrοr="errorImg"
-                                />
+                                  :preview-src-list="[$url + pic.imgUrl]"
+                                >
+                                </el-image>
                                 <!-- <span>{{item.time.timeFormat('yyyy年MM月dd日 HH:mm')}}</span> -->
                               </div>
                             </div>

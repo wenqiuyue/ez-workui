@@ -218,6 +218,7 @@
       :etime="etime"
       :uid="clickUser"
       :teamValue="teamValue"
+      :gid="gid"
     ></progresscom>
     <!-- 关键词使用频率 -->
     <keywordfrequency
@@ -278,6 +279,7 @@ export default {
       clickKeyWord: null, //要查看的关键词
       pname: null, //选择的关键词的窗口名
       isShowTeam: false, // 是否显示团队选择
+      gid: null, //进程组id
     };
   },
   mounted() {
@@ -458,6 +460,7 @@ export default {
       this.stime = data.stime;
       this.clickUser = data.clickUser;
       this.selWorkItem = item;
+      this.gid = data.gid;
       this.$modal.show("memberDatatimeAxisPhoto");
     },
   },

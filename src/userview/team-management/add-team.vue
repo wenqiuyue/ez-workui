@@ -35,7 +35,11 @@
               placeholder="请输入团队描述"
             ></el-input>
           </el-form-item>
-          <el-form-item prop="IsAgree" label="是否允许成员操作" class="radio">
+          <el-form-item
+            prop="IsAgree"
+            label="是否允许成员邀请其他人加入团队"
+            class="radio"
+          >
             <el-radio-group v-model="ruleForm.IsAgree">
               <el-radio :label="1">允许</el-radio>
               <el-radio :label="0">禁止</el-radio>
@@ -74,7 +78,7 @@ export default {
         IsAgree: [
           {
             required: true,
-            message: "请选择是否允许成员操作",
+            message: "请选择是否允许成员邀请其他人加入团队",
             trigger: "blur",
           },
         ],

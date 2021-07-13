@@ -14,9 +14,9 @@
         <li
           :style="
             'width:' +
-              item.width +
-              '%;background:' +
-              cleartext(item.name).background
+            item.width +
+            '%;background:' +
+            cleartext(item.name).background
           "
           @click.stop="clickBar(item)"
         >
@@ -144,6 +144,7 @@ export default {
         stime: this.paramsobj.stime,
         etime: this.paramsobj.etime,
         clickUser: this.paramsobj.User.id,
+        gid: this.paramsobj.User.ProgressGroupId,
       };
       this.$emit("getBar", item, data);
     },
