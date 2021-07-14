@@ -94,7 +94,7 @@
             header-align="center"
           ></el-table-column>
           <el-table-column
-            label="进程组ID"
+            label="进程组"
             prop="ProgressGroupId"
             width="80"
             align="center"
@@ -160,12 +160,26 @@
         ref="editForm"
         :model="editParams"
         :rules="RULES"
-        label-width="120px"
+        label-width="130px"
       >
         <el-form-item label="当前选择数量："
           >{{ xmodalTip.editCount }}条</el-form-item
         >
-        <el-form-item label="标记类型：" prop="t">
+        <el-form-item label="配置的进程组：" prop="progressgroupId">
+          <el-select
+            placeholder="请选择配置的进程组"
+            v-model="editParams.progressgroupId"
+          >
+            <el-option
+              v-for="g in options.g"
+              :key="g.Id"
+              :value="g.Id"
+              :label="g.Name"
+              v-if="g.Id !== null"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <!-- <el-form-item label="标记类型：" prop="t">
           <el-select
             v-model="editParams.t"
             placeholder="请选择"
@@ -178,13 +192,17 @@
               :value="t.value"
             ></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item
-          label="进程组(多选)："
+          label="标记的进程组："
           prop="g"
           v-show="editParams.t === '进程组'"
         >
-          <el-select placeholder="请选择" multiple v-model="editParams.g">
+          <el-select
+            placeholder="请选择标记的进程组（可多选）"
+            multiple
+            v-model="editParams.g"
+          >
             <el-option
               v-for="g in options.g"
               :key="g.Id"
@@ -382,10 +400,6 @@ export default {
             label: "进程组",
             value: "进程组",
           },
-          {
-            label: "成员",
-            value: "成员",
-          },
         ],
         mk: [
           //标记结果
@@ -443,7 +457,7 @@ export default {
       },
       //标记
       editParams: {
-        t: null, //标记类型（进程组，成员）
+        t: "进程组", //标记类型（进程组，成员）
         mk: null, //标记结果（工作，娱乐，未知）
         g: null, //	进程组ID数组 或 成员姓名数组（全部就传空数组）
         word: null, //关键词
@@ -453,6 +467,7 @@ export default {
         px: null, //截图质量（1-6）越小越清晰（类型为成员时不能设置此项）
         setWk: null, //是否覆盖工作进程（默认false）
         setEt: null, //是否覆盖娱乐进程（默认false）
+        progressgroupId: null, //配置的进程组
       },
       xmodalTip: {
         editCount: 0, //修改总数
@@ -469,12 +484,18 @@ export default {
             message: "请选择",
           },
         ],
-        g: [
-          {
-            required: true,
-            message: "请选择",
-          },
-        ],
+        // progressgroupId: [
+        //   {
+        //     required: true,
+        //     message: "请选择配置的进程组",
+        //   },
+        // ],
+        // g: [
+        //   {
+        //     required: true,
+        //     message: "请选择标记的进程组",
+        //   },
+        // ],
         t: [
           {
             required: true,

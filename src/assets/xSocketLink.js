@@ -24,6 +24,10 @@ export default class xSocketLink {
         url: `${Vue.prototype.$socketUrl}/socket/ws.ashx?p=${JSON.stringify(
           wsParam
         )}`,
+        onopen: function (e) {
+          console.log("socket链接成功");
+          Vue.prototype.$toClient("client.wsConnected", undefined);
+        },
         onmessage: function (e) {
           //这里的this指向是new的xSocket对象
           const data = e.data;
@@ -78,7 +82,7 @@ export default class xSocketLink {
                 break;
               case 25:
                 //通知客户端截图
-                Vue.prototype.$toClient("ScShot", res.data);
+                Vue.prototype.$toClient("client.scShot", res.data);
                 break;
               case 70:
                 //通知客户端聊天 (WORK_CLIENT_AGENT_3698和发送消息本人不需要接收消息提示)

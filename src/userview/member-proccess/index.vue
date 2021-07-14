@@ -393,9 +393,10 @@ export default {
         this.getTask();
       }
     },
-    userID() {
-      this.imgload = false;
-    },
+    // userID() {
+    //   this.imgload = false;
+    //   console.log(this.imgload, "1111");
+    // },
   },
   methods: {
     imgChange,

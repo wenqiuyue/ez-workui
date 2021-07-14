@@ -31,7 +31,7 @@
               size="medium"
               icon="el-icon-set-up"
               v-if="iSShowApplication"
-              @click="handleCopy(1)"
+              @click="handleCopy"
               :loading="copyLoading"
               >应用系统配置组</el-button
             >
@@ -108,14 +108,14 @@
               <el-button
                 type="warning"
                 size="mini"
-                @click="handleCopy(2)"
+                @click="handleUpdate(2)"
                 v-if="scope.row.IsSystem && scope.row.IsUpdate"
                 >更新</el-button
               >
               <el-button
                 type="danger"
                 size="mini"
-                @click="handleCopy(3)"
+                @click="handleUpdate(3)"
                 v-if="scope.row.IsSystem && scope.row.IsReset"
                 >重置</el-button
               >
@@ -205,28 +205,57 @@ export default {
     /**
      * 引用系统配置组
      */
-    handleCopy(type) {
-      let name = null;
-      if (type == 1) {
-        name = "应用";
-        this.copyLoading = true;
-      } else if (type == 2) {
-        name = "更新";
-      } else {
-        name = "重置";
-      }
+    handleCopy() {
+      this.copyLoading = true;
       this.$http
         .post("/ConfigGroup/UpdateTeamConfig.ashx", { teamId: this.teamValue })
         .then((resp) => {
           if (resp.res == 0) {
             this.$message({
-              message: `${name}成功`,
+              message: `应用成功`,
               type: "success",
             });
             this.getDataList();
           }
         })
         .finally(() => (this.copyLoading = false));
+    },
+    /**
+     * 更新和重置
+     */
+    handleUpdate(type) {
+      let name = null;
+      if (type == 2) {
+        name = "更新";
+      } else {
+        name = "重置";
+      }
+      this.$confirm(`${name}后团队的进程设置将会失效, 是否继续?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$http
+            .post("/ConfigGroup/UpdateTeamConfig.ashx", {
+              teamId: this.teamValue,
+            })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  message: `${name}成功`,
+                  type: "success",
+                });
+                this.getDataList();
+              }
+            });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: `已取消${name}`,
+          });
+        });
     },
     /**
      * 获取团队

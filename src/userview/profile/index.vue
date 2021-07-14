@@ -49,7 +49,7 @@
       </div>
       <div class="warp-left" v-show="isEdit">
         <div class="head">
-          <img :src="imgChange(form.Picture, true)" />
+          <img :src="editImg(form.Picture)" />
           <div>
             <el-upload
               class="upload-demo"
@@ -280,6 +280,13 @@ export default {
   },
   methods: {
     imgChange,
+    editImg(val) {
+      if (val && val.includes("/images/head/")) {
+        return this.$url + val;
+      } else {
+        return val;
+      }
+    },
     /**
      * 分页
      */

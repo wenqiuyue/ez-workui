@@ -3,7 +3,7 @@
  */
 export function imgChange(picture, isurl) {
   if (picture) {
-    return picture;
+    return this.$url + picture;
     // if (isurl) {
     //   return picture;
     // } else {
