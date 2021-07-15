@@ -19,6 +19,8 @@ export default class xSocketLink {
       token: Vue.prototype.$xStorage.getItem("token"),
       ua: navigator.userAgent,
     };
+    //是否重连
+    let isReconnect = false;
     if (wsParam.token) {
       Vue.prototype.$xSocket = new xSocket({
         url: `${Vue.prototype.$socketUrl}/socket/ws.ashx?p=${JSON.stringify(
@@ -26,7 +28,17 @@ export default class xSocketLink {
         )}`,
         onopen: function (e) {
           console.log("socket链接成功");
-          Vue.prototype.$toClient("client.wsConnected", undefined);
+          Vue.prototype.$toClient("client.WsConnected", true);
+        },
+
+        afterReconnect() {
+          isReconnect = true;
+        },
+        onclose(e) {
+          if (!isReconnect) {
+            console.log("socket链接失败");
+            Vue.prototype.$toClient("client.WsConnected", false);
+          }
         },
         onmessage: function (e) {
           //这里的this指向是new的xSocket对象
@@ -82,7 +94,7 @@ export default class xSocketLink {
                 break;
               case 25:
                 //通知客户端截图
-                Vue.prototype.$toClient("client.scShot", res.data);
+                Vue.prototype.$toClient("client.ScShot", res.data);
                 break;
               case 70:
                 //通知客户端聊天 (WORK_CLIENT_AGENT_3698和发送消息本人不需要接收消息提示)

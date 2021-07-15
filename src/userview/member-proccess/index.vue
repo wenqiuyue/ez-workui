@@ -618,6 +618,7 @@ export default {
                 shotArr = shotArr.length > 4 ? shotArr.splice(0, 3) : shotArr;
                 shotArr.forEach((val) => {
                   console.log(val);
+                  item.ProcessImgs = [];
                   item.ProcessImgs.unshift({
                     imgUrl: val.ImgUrl,
                     time: new Date(val.Times)
@@ -626,7 +627,7 @@ export default {
                   });
                 });
                 // item.ProcessImgs.splice(-1, shotArr.length);
-                this.$previewRefresh();
+                // this.$previewRefresh();
               } else {
                 this.$notify({
                   message: "未获取到截图",

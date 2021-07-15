@@ -54,7 +54,10 @@
             <el-col :span="24" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">可见成员：</span>
-                <div v-if="selUser.VisibleUser && selUser.VisibleUser.length">
+                <span v-if="selUser.MType == 2">全部成员</span>
+                <div
+                  v-else-if="selUser.VisibleUser && selUser.VisibleUser.length"
+                >
                   <ul class="mem-imgs">
                     <li
                       v-for="(item, index) in selUser.VisibleUser"

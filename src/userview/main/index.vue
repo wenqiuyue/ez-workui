@@ -98,9 +98,6 @@ export default {
     },
   },
   mounted() {
-    // try {
-    //   window.external.WsConnected();
-    // } catch (error) {}
     //建立Socket链接
     // return;
     let _this = this;

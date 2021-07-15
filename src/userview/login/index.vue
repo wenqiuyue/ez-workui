@@ -23,7 +23,7 @@
               v-model="password"
               show-password
             ></el-input>
-            <el-select v-model="teamValue" filterable placeholder="请选择团队">
+            <!-- <el-select v-model="teamValue" filterable placeholder="请选择团队">
               <el-option
                 v-for="item in teamoptions"
                 :key="item.Id"
@@ -31,7 +31,7 @@
                 :value="item.Id"
               >
               </el-option>
-            </el-select>
+            </el-select> -->
             <div class="v-forget" @click="showLogin = false">忘记密码</div>
             <div class="hp-btn">
               <el-button class="v-button" @click="login" :loading="loading"
@@ -115,7 +115,7 @@ export default {
     };
   },
   mounted() {
-    this.getTeams();
+    // this.getTeams();
   },
   methods: {
     /**

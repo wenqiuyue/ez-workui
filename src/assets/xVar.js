@@ -670,11 +670,15 @@ export default {
      * @param data 传给客户端的数据对象
      */
     Vue.prototype.$toClient = (fname, data) => {
-      console.log(fname, window.external.fname);
       console.log(navigator.userAgent);
       if (navigator.userAgent == "WORK_CLIENT_AGENT_3699") {
         if (data == undefined) {
           eval(fname + "()");
+          return;
+        }
+        if (typeof data == "boolean" || typeof data == "Boolean") {
+          eval(fname + '("' + data + '")');
+          console.log(fname, data);
           return;
         }
         if (typeof data == "object" || typeof data == "Object") {
