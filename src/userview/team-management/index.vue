@@ -51,7 +51,7 @@
             show-overflow-tooltip
             align="center"
           />
-          <el-table-column
+          <!-- <el-table-column
             label="创建时间"
             prop="CreateTime"
             show-overflow-tooltip
@@ -63,7 +63,7 @@
                   : "--"
               }}
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column
             label="管理员"
             prop="AdminUserName"
@@ -95,7 +95,13 @@
           > -->
           <el-table-column label="服务器" align="center"
             ><template slot-scope="scope">
-              {{ scope.row.Database ? scope.row.Database.Server : "无" }}
+              {{ scope.row.Database ? scope.row.Database : "无" }}
+            </template></el-table-column
+          >
+          <el-table-column label="我的进程组" prop="gName" align="center">
+            <template slot-scope="scope">
+              <span v-if="scope.row.gName">{{ scope.row.gName }}</span>
+              <el-tag v-else size="medium" type="danger"> 暂无进程组 </el-tag>
             </template></el-table-column
           >
           <el-table-column
@@ -109,6 +115,18 @@
                 ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd")
                 : "--"
             }}</template></el-table-column
+          >
+          <el-table-column
+            label="待处理申请"
+            prop="ExpireTime"
+            show-overflow-tooltip
+            align="center"
+          >
+            <template slot-scope="scope"
+              ><span class="apply_count">{{
+                scope.row.ApplyCount
+              }}</span></template
+            ></el-table-column
           >
           <el-table-column
             fixed="right"
@@ -302,6 +320,15 @@ export default {
       flex-direction: row;
       align-items: center;
     }
+  }
+  .apply_count {
+    font-size: 1.3srem;
+    font-style: normal;
+    color: #fff;
+    padding: 0.1rem 1rem;
+    background: linear-gradient(-55deg, #448ef5, #69a4f7);
+    box-shadow: 0 2px 3px rgb(0 0 0 / 10%);
+    border-radius: 1rem 0.8rem;
   }
 }
 </style>

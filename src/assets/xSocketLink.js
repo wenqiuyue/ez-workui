@@ -31,7 +31,7 @@ export default class xSocketLink {
           Vue.prototype.$toClient("client.WsConnected", true);
         },
 
-        afterReconnect() {
+        reconnect() {
           isReconnect = true;
         },
         onclose(e) {
@@ -110,7 +110,7 @@ export default class xSocketLink {
             }
 
             if (
-              ["1", "50", "51", "53", "26", "25", "27", "70"].indexOf(
+              ["1", "50", "51", "53", "26", "25", "27", "70", "120"].indexOf(
                 res.res
               ) >= 0
             ) {

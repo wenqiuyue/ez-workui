@@ -2,7 +2,7 @@
   <!-- 李俊豪 -->
   <div class="login-wrap">
     <div>
-      <div id="banner"></div>
+     <img id="banner" src="@/assets/img/ll.jpg" />
       <div id="login">
         <div>
           <div id="title">
@@ -242,7 +242,7 @@ export default {
     background: #fff;
     width: 100%;
     height: 100%;
-    max-height: 62rem;
+    max-height: 56rem;
     max-width: 110rem;
     display: flex;
   }
@@ -250,7 +250,7 @@ export default {
 
 #banner {
   height: 100%;
-  width: 40%;
+  width: 45%;
   background: linear-gradient(
     180deg,
     rgba(80, 187, 254, 1) 0%,
@@ -265,7 +265,7 @@ export default {
   // align-items: center;
 
   & > div {
-    width: 60%;
+    width: 68%;
   }
 
   #title {
@@ -285,7 +285,7 @@ export default {
       color: rgba(60, 191, 255, 1);
       line-height: 1.7rem;
       letter-spacing: 0.3rem;
-      margin: 7rem 0;
+      margin: 7rem 0 6rem;
       text-align: center;
     }
 

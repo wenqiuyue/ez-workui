@@ -106,6 +106,13 @@
                 >编辑</el-button
               >
               <el-button
+                type="start"
+                size="mini"
+                @click="handleStart(scope.row)"
+                v-if="scope.row.IsStart"
+                >启用</el-button
+              >
+              <el-button
                 type="warning"
                 size="mini"
                 @click="handleUpdate(2)"
@@ -202,6 +209,38 @@ export default {
     });
   },
   methods: {
+    /**
+     * 启用配置组
+     */
+    handleStart(val) {
+      this.$confirm(`此操作需要重新设置成员进程组，谨慎更改`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$http
+            .post("/ConfigGroup/UpdateStart.ashx", {
+              tcId: val.Id,
+              teamId: this.teamValue,
+            })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  message: resp.msg,
+                  type: "success",
+                });
+                this.getDataList();
+              }
+            });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: `已取消${name}`,
+          });
+        });
+    },
     /**
      * 引用系统配置组
      */
@@ -374,6 +413,15 @@ export default {
     flex-direction: row;
     .el-select {
       margin-right: 12px;
+    }
+  }
+  .el-button--start {
+    color: #fff;
+    background-color: #02ce90;
+    border-color: #02ce90;
+    &:hover {
+      background-color: #02df9b;
+      border-color: #02df9b;
     }
   }
 }

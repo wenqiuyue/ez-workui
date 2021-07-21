@@ -16,10 +16,14 @@
           <el-form-item label="昵称">{{
             user.Name ? user.Name : "无"
           }}</el-form-item>
-          <el-form-item label="角色"
-            ><span v-for="(role, index) in user.RoleName" :key="index">{{
-              index == 0 ? role : `、role`
-            }}</span></el-form-item
+          <el-form-item
+            label="角色"
+            v-if="user.RoleName.filter((m) => m != '用户').length"
+            ><span
+              v-for="(role, index) in user.RoleName.filter((m) => m != '用户')"
+              :key="index"
+              >{{ index == 0 ? role : `、role` }}</span
+            ></el-form-item
           >
           <el-form-item label="性别">{{
             user.Sex == 1 ? "男" : "女"
@@ -104,80 +108,160 @@
         </el-form>
       </div>
       <div class="warp-right">
-        <div class="info-right-title">团队列表</div>
-        <div class="right-form" v-loading="tableLoading">
-          <el-table :data="tableData">
-            <el-table-column
-              label="团队名称"
-              prop="Name"
-              show-overflow-tooltip
-              align="center"
-            />
-            <el-table-column
-              label="创建人"
-              prop="UserName"
-              show-overflow-tooltip
-              align="center"
-            />
-            <el-table-column
-              label="创建时间"
-              prop="CreateTime"
-              show-overflow-tooltip
-              align="center"
-              ><template slot-scope="scope">
-                {{ scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss") }}
-              </template>
-            </el-table-column>
-            <el-table-column
-              label="管理员"
-              prop="AdminUserName"
-              show-overflow-tooltip
-              align="center"
-            >
-              <template slot-scope="scope">
-                <div
-                  v-if="
-                    scope.row.AdminUserName && scope.row.AdminUserName.length
-                  "
-                >
-                  <span
-                    v-for="(admin, index) in scope.row.AdminUserName"
-                    :key="index"
-                    >{{ index == 0 ? admin : `、${admin}` }}</span
+        <div class="warp-right-top">
+          <div class="info-right-title">团队列表</div>
+          <div class="right-form" v-loading="tableLoading">
+            <el-table :data="tableData">
+              <el-table-column
+                label="团队名称"
+                prop="Name"
+                show-overflow-tooltip
+                align="center"
+              />
+              <el-table-column
+                label="创建人"
+                prop="UserName"
+                show-overflow-tooltip
+                align="center"
+              />
+              <!-- <el-table-column
+                label="创建时间"
+                prop="CreateTime"
+                show-overflow-tooltip
+                align="center"
+                ><template slot-scope="scope">
+                  {{ scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss") }}
+                </template>
+              </el-table-column> -->
+              <el-table-column
+                label="管理员"
+                prop="AdminUserName"
+                show-overflow-tooltip
+                align="center"
+              >
+                <template slot-scope="scope">
+                  <div
+                    v-if="
+                      scope.row.AdminUserName && scope.row.AdminUserName.length
+                    "
                   >
-                </div>
-                <div v-else>无</div>
-              </template>
-            </el-table-column>
-            <el-table-column label="团队人数" prop="MemberCount" align="center"
-              ><template slot-scope="scope">
-                {{ scope.row.MemberCount }}人
-              </template></el-table-column
-            >
-            <!-- <el-table-column label="购买版本" align="center"
+                    <span
+                      v-for="(admin, index) in scope.row.AdminUserName"
+                      :key="index"
+                      >{{ index == 0 ? admin : `、${admin}` }}</span
+                    >
+                  </div>
+                  <div v-else>无</div>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="团队人数"
+                prop="MemberCount"
+                align="center"
+                ><template slot-scope="scope">
+                  {{ scope.row.MemberCount }}人
+                </template></el-table-column
+              >
+              <!-- <el-table-column label="购买版本" align="center"
               ><template slot-scope="scope">
                 {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
               </template></el-table-column
             > -->
-            <el-table-column label="服务器" align="center"
-              ><template slot-scope="scope">
-                {{ scope.row.Database ? scope.row.Database.Server : "无" }}
-              </template></el-table-column
-            >
-            <el-table-column
-              label="到期时间"
-              prop="ExpireTime"
-              show-overflow-tooltip
-              align="center"
-            >
-              <template slot-scope="scope">{{
-                scope.row.ExpireTime
-                  ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd")
-                  : "--"
-              }}</template></el-table-column
-            >
-          </el-table>
-          <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
+              <el-table-column
+                label="服务器"
+                align="center"
+                show-overflow-tooltip
+                ><template slot-scope="scope">
+                  {{ scope.row.Database ? scope.row.Database : "无" }}
+                </template></el-table-column
+              >
+              <el-table-column label="我的进程组" prop="gName" align="center">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.gName">{{ scope.row.gName }}</span>
+                  <el-tag v-else size="medium" type="danger">
+                    暂无进程组
+                  </el-tag>
+                </template></el-table-column
+              >
+              <!-- <el-table-column
+                label="到期时间"
+                prop="ExpireTime"
+                show-overflow-tooltip
+                align="center"
+              >
+                <template slot-scope="scope">{{
+                  scope.row.ExpireTime
+                    ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd")
+                    : "--"
+                }}</template></el-table-column
+              > -->
+            </el-table>
+            <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
+          </div>
+        </div>
+        <div class="warp-right-bottom">
+          <div class="info-right-title">我的申请</div>
+          <div class="right-form" v-loading="applyLoading">
+            <el-table :data="tableDataApply">
+              <el-table-column
+                label="团队名称"
+                prop="TeamName"
+                show-overflow-tooltip
+                align="center"
+              />
+              <el-table-column
+                label="邀请人"
+                prop="Inviter"
+                show-overflow-tooltip
+                align="center"
+              >
+                <template slot-scope="scope">
+                  {{ scope.row.Inviter ? scope.row.Inviter : "无" }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="处理人"
+                prop="Handler"
+                show-overflow-tooltip
+                align="center"
+              />
+              <el-table-column
+                label="邀请时间"
+                prop="CreateTime"
+                show-overflow-tooltip
+                align="center"
+                ><template slot-scope="scope">
+                  {{
+                    scope.row.CreateTime
+                      ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss")
+                      : "无"
+                  }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="结果"
+                prop="InvitedStatus"
+                show-overflow-tooltip
+                align="center"
+              >
+                <template slot-scope="scope">
+                  <el-tag
+                    size="medium"
+                    :type="`${
+                      $D.ITEM('invited_status', scope.row.InvitedStatus).color
+                    }`"
+                    >{{
+                      $D.ITEM("invited_status", scope.row.InvitedStatus).name
+                    }}</el-tag
+                  >
+                </template>
+              </el-table-column>
+            </el-table>
+            <CPages
+              v-model="pageDataApply"
+              @changeEvent="handlePaginationApplyChange"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -231,9 +315,17 @@ export default {
     };
     return {
       nowTeam: null, //当前团队
+      applyLoading: false,
       tableLoading: false,
       tableData: [], //团队列表
+      tableDataApply: [], //申请列表
       pageData: {
+        //团队分页
+        pageIndex: 1,
+        pageSize: 10,
+        totalNum: 0,
+      },
+      pageDataApply: {
         //团队分页
         pageIndex: 1,
         pageSize: 10,
@@ -277,6 +369,7 @@ export default {
   mounted() {
     this.getUserInfo();
     this.getTeamList();
+    this.getApplyList();
   },
   methods: {
     imgChange,
@@ -288,11 +381,18 @@ export default {
       }
     },
     /**
-     * 分页
+     * 团队列表分页
      */
     handlePaginationChange(val) {
       this.pageData = val;
       this.getTeamList();
+    },
+    /**
+     * 申请记录分页
+     */
+    handlePaginationApplyChange(val) {
+      this.pageDataApply = val;
+      this.getApplyList();
     },
     /**
      * 获取团队列表
@@ -317,6 +417,29 @@ export default {
           }
         })
         .finally(() => (this.tableLoading = false));
+    },
+    /**
+     * 获取申请记录
+     */
+    getApplyList() {
+      this.applyLoading = true;
+      const data = {
+        name: null,
+        pageIndex: this.pageDataApply.pageIndex,
+        pageSize: this.pageDataApply.pageSize,
+        status: null,
+        sdate: null,
+        edate: null,
+      };
+      this.$http
+        .post("/Teams/InvitedOrApply/GetMyTeamApply.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableDataApply = resp.data.data;
+            this.pageDataApply.totalNum = resp.data.total;
+          }
+        })
+        .finally(() => (this.applyLoading = false));
     },
     /**
      * 修改
@@ -353,6 +476,9 @@ export default {
         if (valid) {
           this.btnLoading = true;
           this.form.Id = this.form.UsId;
+          if (this.form.Picture.includes("/images/head/")) {
+            this.form.Picture = null;
+          }
           let resp = await this.$http.post("/User/EditUser.ashx", this.form);
           if (resp.res == 0) {
             if (this.form.UseName != this.user.UseName) {
@@ -379,6 +505,8 @@ export default {
     useDefalut() {
       if (this.form.Name) {
         this.getDefaultHead(this.form.Name);
+      } else {
+        this.$message.warning("请先输入昵称！");
       }
     },
     // 上传按钮单机后上传头像 限制图片大小
@@ -535,8 +663,15 @@ export default {
     }
     .warp-right {
       flex: 6.5;
-      background-color: #ffffff;
-      overflow-y: auto;
+      height: 100%;
+      .warp-right-top,
+      .warp-right-bottom {
+        background-color: #ffffff;
+        height: 50%;
+      }
+      .warp-right-top {
+        margin-bottom: 5px;
+      }
       .info-right-title {
         font-size: 1.6rem;
         border-bottom: 1px #eeeeee solid;
@@ -546,10 +681,17 @@ export default {
         line-height: 3.5rem;
       }
       .right-form {
-        padding: 10px;
+        padding: 0px 10px 5px;
         height: calc(100% - 3.5rem);
         .el-table {
           height: calc(100% - 33px);
+          overflow-y: auto;
+          &::before {
+            height: 0;
+          }
+          /deep/td {
+            padding: 8px 0;
+          }
         }
       }
       /deep/.set-up {

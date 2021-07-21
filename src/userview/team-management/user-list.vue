@@ -32,7 +32,9 @@
       >
       <el-table-column label="可查看成员" prop="MemberCount" align="center"
         ><template slot-scope="scope">
-          <span v-if="scope.row.MType == 2">全部成员</span>
+          <span v-if="scope.row.MType == 2 && !scope.row.VisibleUser.length"
+            >全部成员</span
+          >
           <div v-else>
             <el-popover
               trigger="hover"

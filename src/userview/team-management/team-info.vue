@@ -357,7 +357,6 @@ export default {
           }
         }
         .num_row {
-          padding: 16px 0;
           .tips {
             font-size: 12px;
             color: #e6a23c;

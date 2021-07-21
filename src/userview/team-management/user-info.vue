@@ -54,7 +54,9 @@
             <el-col :span="24" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">可见成员：</span>
-                <span v-if="selUser.MType == 2">全部成员</span>
+                <span v-if="selUser.MType == 2 && !selUser.VisibleUser.length"
+                  >全部成员</span
+                >
                 <div
                   v-else-if="selUser.VisibleUser && selUser.VisibleUser.length"
                 >
@@ -74,7 +76,7 @@
                 <span v-else>无</span>
               </div></el-col
             >
-            <el-col :span="12" v-if="editState"
+            <el-col :span="12" v-if="editState && !selUser.IsSystem"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
                 <el-radio-group v-model="formData.mType">

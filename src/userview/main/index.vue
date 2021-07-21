@@ -40,6 +40,9 @@
                 @click.native="hideMobileMenu"
               >
                 <span>{{ name }}</span>
+                <i v-if="name == '团队管理' && applyCount > 0">{{
+                  applyCount > 99 ? "+99" : applyCount
+                }}</i>
               </router-link>
               <a href="javascript:;" @click="exit" class="hiFont hi-signout">
                 <span>登出</span>
@@ -65,6 +68,7 @@ export default {
       menuIndex: this.$menuIndex,
       showBtn: true,
       layoutRoutesUser,
+      applyCount: null, //申请数量
     };
   },
   computed: {
@@ -96,8 +100,21 @@ export default {
       this.$router.push("/");
       this.$message("登出成功");
     },
+    /**
+     * 获取申请条数
+     */
+    getApplyCount() {
+      this.$http
+        .post("/Teams/InvitedOrApply/GetApplyMessage.ashx")
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.applyCount = resp.data;
+          }
+        });
+    },
   },
   mounted() {
+    this.getApplyCount();
     //建立Socket链接
     // return;
     let _this = this;
@@ -107,6 +124,8 @@ export default {
           _this.$E.$emit("loadpic", res); //发来开始进程截图
         } else if (["26"].includes(res.res)) {
           _this.$E.$emit("loadingpic", res); //发来加载进程截图
+        } else if (["120"].includes(res.res)) {
+          this.applyCount = res.data.ApplySumCount; //更新团队申请数量
         }
       },
     });

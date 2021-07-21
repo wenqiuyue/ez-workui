@@ -29,6 +29,11 @@
               {{ scope.row.Capacity ? scope.row.Capacity : 0 }}人
             </template>
           </el-table-column>
+           <el-table-column label="存储量" prop="StorageLimits" sortable>
+            <template slot-scope="scope">
+              {{ scope.row.StorageLimits }}
+            </template>
+          </el-table-column>
           <!-- <el-table-column label="购买人数" prop="m7" sortable
             ><template slot-scope="scope">
               {{ scope.row.m7 }}人

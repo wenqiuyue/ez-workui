@@ -1,5 +1,7 @@
 <template>
   <div class="memberdata">
+    <XHeader title="数据分析" titleEnglish="Data Analysis" class="baseHeader">
+    </XHeader>
     <!-- 员工周期数据详情 -->
     <staffData
       v-if="!isListPage"
@@ -28,6 +30,7 @@
                 v-model="teamValue"
                 filterable
                 placeholder="请选择团队"
+                @change="handleTeamChange"
               >
                 <el-option
                   v-for="item in teamOptions"
@@ -119,6 +122,45 @@
               @click="handleDataInfo(item)"
               >高级视图</el-button
             >
+          </div>
+          <div class="work_time">
+            <p>
+              <span>当前进程：</span>
+              <tooltip
+                :content="`${item.ProcessName ? item.ProcessName : '无'}`"
+                :ref="`memdata-${index}`"
+                width="70%"
+              ></tooltip>
+            </p>
+            <p>
+              <span>当前截图：</span
+              ><el-button
+                plain
+                size="small"
+                style="padding: 6px 15px"
+                @click="shotScreenPhoto(item.User.id)"
+                :icon="
+                  imgload && item.User.id == userID ? 'el-icon-loading' : ''
+                "
+                >{{
+                  imgload && item.User.id == userID ? "截图中..." : "立即截图"
+                }}</el-button
+              >
+            </p>
+            <template v-if="item.loadPic && item.loadPic.length">
+              <div
+                class="receive-img"
+                v-for="(pic, imgIndex) in item.loadPic"
+                :key="imgIndex"
+              >
+                <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:ss") }}</span> -->
+                <el-image
+                  :src="$url + pic.ImgUrl"
+                  :preview-src-list="[$url + pic.ImgUrl]"
+                >
+                </el-image>
+              </div>
+            </template>
           </div>
           <div class="work_status">
             <div class="card_title"><span class="title">工作状态</span></div>
@@ -239,6 +281,7 @@
 import { imgChange } from "@/commons";
 export default {
   components: {
+    XHeader: () => import("@/components/Header"),
     selMember: () => import("@/components/Selectors/MemberSelectCopy"),
     tooltip: () => import("@/components/textTooltip"),
     progresscom: () => import("./progressCom"),
@@ -249,6 +292,9 @@ export default {
   },
   data() {
     return {
+      imgload: false,
+      userID: "",
+      timer: null,
       teamOptions: [], //团队选择器
       teamValue: null, //选择的团队
       selMem: [], //选择的成员
@@ -282,6 +328,12 @@ export default {
       gid: null, //进程组id
     };
   },
+  destroyed() {
+    clearInterval(this.timer);
+    this.timer = null;
+    this.$E.$off("loadpic");
+    this.$E.$off("loadingpic");
+  },
   mounted() {
     const role = this.$xStorage.getItem("user-role");
     if (role.team) {
@@ -291,9 +343,72 @@ export default {
       this.isShowTeam = true;
     }
     this.getTeams();
+
+    this.$E.$on("loadpic", (res) => {
+      console.log("开始截图");
+    });
+    this.$E.$on("loadingpic", (res) => {
+      console.log("收到截图");
+      this.imgload = false;
+      this.memberData.forEach((m) => {
+        if (m.User.id == res.UserId) {
+          m.loadPic = JSON.parse(res.imgUrl);
+          if (!m.loadPic || !m.loadPic.length) {
+            this.$message({
+              showClose: true,
+              message: "没有接收到截图",
+              type: "warning",
+            });
+          }
+          console.log(m.loadPic);
+        }
+      });
+    });
   },
   methods: {
     imgChange,
+    /**
+     * 团队切换
+     */
+    handleTeamChange() {
+      this.selMem = [];
+    },
+    /**
+     * 截图
+     */
+    shotScreenPhoto(id) {
+      this.userID = id;
+      //屏幕截图
+      this.imgload = true;
+      this.$http
+        .get("/User/Work/NoticeUserScreenshots.ashx", {
+          params: { Id: this.userID },
+        })
+        .then((res) => {
+          if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+          }
+          this.setTimer();
+        });
+    },
+    setTimer() {
+      if (this.timer == null) {
+        let num = 0;
+        this.timer = setInterval(() => {
+          num += 1;
+          if (num == 30 && this.imgload == true) {
+            clearInterval(this.timer);
+            this.timer = null;
+            this.imgload = false;
+            this.$notify({
+              type: "error",
+              message: "请求超时",
+            });
+          }
+        }, 1000);
+      }
+    },
     /**
      * 获取团队
      */
@@ -401,6 +516,7 @@ export default {
             this.listdateType = this.dateType;
             if (resp.data.items.length) {
               resp.data.items.forEach((element) => {
+                element.loadPic = null;
                 element.KeyWordFreqs = element.KeyWordFreqs.filter(
                   (s, index) => index <= 20
                 );
@@ -647,17 +763,29 @@ export default {
         }
         .work_time {
           width: 17%;
-          padding-top: 8px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
           p {
-            font-weight: bold;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            span {
+              font-weight: bold;
+              flex-shrink: 0;
+            }
             margin-bottom: 8px;
             font-size: 1.3rem;
-            span:first-child {
-              color: #666666;
-            }
-            span:last-child {
-              color: #333333;
-              margin-left: 3px;
+          }
+          .receive-img {
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-right: 1rem;
+            .el-image {
+              width: 80px;
+              height: 46px;
             }
           }
         }

@@ -1,5 +1,7 @@
 <template>
   <div id="memberProccess" v-loading="load">
+    <XHeader title="成员实况" titleEnglish="Member Live" class="baseHeader">
+    </XHeader>
     <div class="select-conditions">
       <div class="sel_inline">
         <div class="sel" v-if="isShowTeam">
@@ -265,6 +267,7 @@ import { imgChange } from "@/commons";
 // import xSocketLink from "@/assets/xSocketLink";
 export default {
   components: {
+    XHeader: () => import("@/components/Header"),
     selMember: () => import("@/components/Selectors/MemberSelectCopy"),
   },
 
@@ -645,6 +648,8 @@ export default {
     this.timer = null;
     clearInterval(this.calcTime);
     this.calcTime = null;
+    this.$E.$off("loadpic");
+    this.$E.$off("loadingpic");
   },
 };
 </script>

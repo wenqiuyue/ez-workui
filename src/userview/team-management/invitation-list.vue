@@ -95,6 +95,16 @@
               <span @click="handleInv(scope.row, 1)">同意</span>
               <span @click="handleInv(scope.row, -1)">拒绝</span>
             </c-btn>
+            <el-tag
+              v-else
+              size="medium"
+              :type="`${
+                $D.ITEM('invited_status', scope.row.InvitedStatus).color
+              }`"
+              >{{
+                $D.ITEM("invited_status", scope.row.InvitedStatus).name
+              }}</el-tag
+            >
           </template>
         </el-table-column>
       </el-table>

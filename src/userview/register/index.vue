@@ -2,30 +2,18 @@
   <!-- 李俊豪 -->
   <div class="register-wrap">
     <div>
-      <div id="banner">
-        <div id="title">
-          <h3>
-            <img class="pc" src="@/assets/main/mainw.png" />
-            <img class="mb" src="@/assets/main/mainw_mb.png" />
-          </h3>
-        </div>
-      </div>
+      <img id="banner" src="@/assets/img/ll.jpg" />
       <div id="register">
         <div>
           <div id="registerForm" @keyup.enter="register">
+            <div class="title">
+              <img class="pc" src="@/assets/main/main.png" />
+            </div>
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm">
               <el-form-item prop="UseName">
                 <el-input
                   v-model="ruleForm.UseName"
                   placeholder="请输入你的账户"
-                  :autofocus="true"
-                  suffix-icon="el-icon-user"
-                ></el-input>
-              </el-form-item>
-              <el-form-item prop="Name">
-                <el-input
-                  v-model="ruleForm.Name"
-                  placeholder="请输入你的昵称"
                   :autofocus="true"
                   suffix-icon="el-icon-user"
                 ></el-input>
@@ -40,7 +28,7 @@
               <el-form-item prop="Phone">
                 <el-input
                   v-model="ruleForm.Phone"
-                  placeholder="请输入联系方式"
+                  placeholder="请输入电话号码"
                 ></el-input>
               </el-form-item>
               <el-form-item prop="addres">
@@ -48,17 +36,6 @@
                   v-model="ruleForm.addres"
                   placeholder="请输入邮箱"
                 ></el-input>
-              </el-form-item>
-              <el-form-item prop="Sex">
-                <el-select v-model="ruleForm.Sex" placeholder="请选择性别">
-                  <el-option
-                    v-for="item in $D.LIST('user_sex')"
-                    :key="item.value"
-                    :label="item.name"
-                    :value="item.value"
-                  >
-                  </el-option>
-                </el-select>
               </el-form-item>
             </el-form>
             <div class="hp-btn">
@@ -85,16 +62,14 @@ export default {
       ruleForm: {
         UseName: null,
         Pwd: null,
-        Name: null,
         Phone: null,
         addres: null,
-        Sex: 1,
       },
       rules: {
         UseName: [
           {
             required: true,
-            message: "请输入登录账号",
+            message: "请输入你的账户",
             trigger: "blur",
           },
         ],
@@ -105,13 +80,13 @@ export default {
             trigger: "blur",
           },
         ],
-        Name: [
-          {
-            required: true,
-            message: "请输入昵称",
-            trigger: "blur",
-          },
-        ],
+        // Name: [
+        //   {
+        //     required: true,
+        //     message: "请输入昵称",
+        //     trigger: "blur",
+        //   },
+        // ],
         Phone: [
           {
             required: true,
@@ -193,7 +168,7 @@ export default {
 
 #banner {
   height: 100%;
-  width: 40%;
+  width: 45%;
   background: linear-gradient(
     180deg,
     rgba(80, 187, 254, 1) 0%,
@@ -237,7 +212,7 @@ export default {
   // align-items: center;
 
   & > div {
-    width: 60%;
+    width: 68%;
   }
 
   #registerForm {
@@ -245,7 +220,9 @@ export default {
     width: 100%;
     text-align: center;
     transition: all 0.5s ease;
-
+    .title{
+      margin-bottom:4rem;
+    }
     /deep/ .el-input {
       .el-input__inner {
         height: 5rem;

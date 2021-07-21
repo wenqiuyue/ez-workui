@@ -40,11 +40,18 @@ const routes = [
             icon: "hi-profile",
           },
           {
-            path: "/dataAnalysis",
+            path: "/memberData",
             name: "数据分析",
-            component: () => import("@/userview/data-analysis"),
+            component: () => import("@/userview/data-analysis/member-data"),
             layout: true,
             icon: "hi-statistic",
+          },
+          {
+            path: "/memberProccess",
+            name: "成员实况",
+            component: () => import("@/userview/member-proccess"),
+            layout: true,
+            icon: "hi-overtime",
           },
           {
             path: "/teamManagement",

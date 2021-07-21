@@ -1,5 +1,5 @@
 <template>
-  <XModal name="versionModal" :width="'35%'" height="50%">
+  <XModal name="versionModal" :width="'35%'" height="60%">
     <c-win-tmp
       ref="winTmp"
       v-loading="loading"
@@ -65,6 +65,25 @@
             </el-form-item>
           </el-col>
           <el-col :sm="24" :md="24">
+            <el-form-item
+              label="存储量："
+              prop="storageLimits"
+              style="width: 100%"
+            >
+              <el-input
+                type="number"
+                v-model="formData.storageLimits"
+                placeholder="请填写存储量"
+                v-if="editState"
+                :style="{ width: comWidth }"
+                clearable
+              >
+                </el-input
+              >
+              <div v-else class="state-see">{{ formData.storageLimits }}</div>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="24" :md="24">
             <el-form-item label="价格：" prop="price" style="width: 100%">
               <el-input
                 type="number"
@@ -118,6 +137,7 @@ export default {
         price: null, //金额
         period: null, //期限
         capacity: null, //可加入人数
+        storageLimits:0, //存储量
         creatTime: null,
       },
       Rules: {
@@ -149,6 +169,13 @@ export default {
             trigger: "blur",
           },
         ],
+        storageLimits:[
+          {
+            required: true,
+            message: "请输入存储量",
+            trigger: "blur",
+          },
+        ]
       },
     };
   },
@@ -165,6 +192,7 @@ export default {
         this.formData.price = this.editObj.Price;
         this.formData.period = this.editObj.Period;
         this.formData.capacity = this.editObj.Capacity;
+        this.formData.storageLimits = this.editObj.StorageLimits;
         this.formData.creatTime = this.editObj.CreatTime;
       } else {
         Object.assign(this.$data.formData, this.$options.data().formData);
@@ -194,6 +222,7 @@ export default {
               price: this.formData.price,
               period: this.formData.period,
               capacity: this.formData.capacity,
+              storageLimits:this.formData.storageLimits,
             };
             url = "/Management/VersionManagement/AddVersion.ashx";
             tipTxt = "添加";
@@ -204,6 +233,7 @@ export default {
               price: this.formData.price,
               period: this.formData.period,
               capacity: this.formData.capacity,
+              storageLimits:this.formData.storageLimits,
             };
             url = "/Management/VersionManagement/EditVersion.ashx";
             tipTxt = "编辑";
