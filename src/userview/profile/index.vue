@@ -109,7 +109,7 @@
       </div>
       <div class="warp-right">
         <div class="warp-right-top">
-          <div class="info-right-title">团队列表</div>
+          <div class="info-right-title"><span>团队列表</span></div>
           <div class="right-form" v-loading="tableLoading">
             <el-table :data="tableData">
               <el-table-column
@@ -167,14 +167,14 @@
                 {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
               </template></el-table-column
             > -->
-              <el-table-column
+              <!-- <el-table-column
                 label="服务器"
                 align="center"
                 show-overflow-tooltip
                 ><template slot-scope="scope">
                   {{ scope.row.Database ? scope.row.Database : "无" }}
                 </template></el-table-column
-              >
+              > -->
               <el-table-column label="我的进程组" prop="gName" align="center">
                 <template slot-scope="scope">
                   <span v-if="scope.row.gName">{{ scope.row.gName }}</span>
@@ -200,7 +200,23 @@
           </div>
         </div>
         <div class="warp-right-bottom">
-          <div class="info-right-title">我的申请</div>
+          <div class="info-right-title">
+            <span>我的申请</span>
+            <el-select
+              v-model="selStatus"
+              placeholder="结果筛选"
+              @change="applyStatusChange"
+            >
+              <el-option label="所有结果" :value="null"> </el-option>
+              <el-option
+                v-for="item in $D.LIST('invited_status')"
+                :key="item.value"
+                :label="item.name"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </div>
           <div class="right-form" v-loading="applyLoading">
             <el-table :data="tableDataApply">
               <el-table-column
@@ -314,6 +330,7 @@ export default {
       callback();
     };
     return {
+      selStatus: null,
       nowTeam: null, //当前团队
       applyLoading: false,
       tableLoading: false,
@@ -381,6 +398,13 @@ export default {
       }
     },
     /**
+     * 申请记录结果切换
+     */
+    applyStatusChange() {
+      this.pageDataApply.pageIndex = 1;
+      this.getApplyList();
+    },
+    /**
      * 团队列表分页
      */
     handlePaginationChange(val) {
@@ -427,7 +451,7 @@ export default {
         name: null,
         pageIndex: this.pageDataApply.pageIndex,
         pageSize: this.pageDataApply.pageSize,
-        status: null,
+        status: this.selStatus,
         sdate: null,
         edate: null,
       };
@@ -677,8 +701,23 @@ export default {
         border-bottom: 1px #eeeeee solid;
         color: #409eff;
         font-weight: bold;
-        text-align: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         line-height: 3.5rem;
+        padding: 0 16px 0 10px;
+        /deep/.el-select {
+          .el-input__inner {
+            height: 28px;
+            line-height: 28px;
+            width: 120px;
+            background: #ffffff;
+            border: 1px solid #dcdfe6;
+            border-bottom: 1px solid #dcdfe6 !important;
+            border-radius: 4px;
+          }
+        }
       }
       .right-form {
         padding: 0px 10px 5px;

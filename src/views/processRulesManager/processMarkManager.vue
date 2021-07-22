@@ -549,7 +549,7 @@ export default {
             this.groupLoading = false;
             this.options.g = resp.data;
             this.options.g.unshift({
-              Name: "全部进程",
+              Name: "全部进程组",
               Id: null,
             });
             this.requestParams.g = null;

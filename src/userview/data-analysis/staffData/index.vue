@@ -33,7 +33,11 @@
       <div class="staffbox" slot="content" v-loading="loading">
         <div class="state">
           <div class="state_one">
-            <h3>本日工作状态占比</h3>
+            <h3>
+              本<span v-if="selActiveTime">日</span
+              ><span v-else-if="dateType == 1">周</span
+              ><span v-else>月</span>工作状态占比
+            </h3>
             <div class="info">
               <Staechart
                 :echartData="echartWorkData"
@@ -43,7 +47,11 @@
             </div>
           </div>
           <div class="state_two">
-            <h3>本日使用软件占比</h3>
+            <h3>
+              本<span v-if="selActiveTime">日</span
+              ><span v-else-if="dateType == 1">周</span
+              ><span v-else>月</span>使用软件占比
+            </h3>
             <div class="info">
               <Staechart
                 :echartData="echartSoftWearData"
@@ -247,7 +255,9 @@ export default {
         name: app.PName,
         fromList: app.fromList,
       };
-      this.$modal.show("staffDataPic");
+      this.$nextTick(() => {
+        this.$modal.show("staffDataPic");
+      });
     },
     /**
      * 获取详情数据
@@ -301,7 +311,7 @@ export default {
           .post("/User/MemberDataDetailsSummary.ashx#", data)
           .then((resp) => {
             if (resp.res == 0) {
-              //本日工作状态占比图表数据
+              //本周/月工作状态占比图表数据
               this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
                 (m) => {
                   return {
@@ -310,7 +320,7 @@ export default {
                   };
                 }
               );
-              //本日使用软件占比
+              //本周/月使用软件占比
               this.echartSoftWearData = resp.data.AppDetails.map((m) => {
                 return {
                   name: m.AppName,

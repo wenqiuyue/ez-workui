@@ -2,92 +2,103 @@
 <template>
   <div v-if="activeBar" class="progressCom">
     <XModal
-      width="60%"
-      height="80%"
+      width="70%"
+      height="90%"
       :name="name"
       :showCrossBtn="true"
       :title="
         activeBar.name +
-        `${name == 'memberDatatimeAxisPhoto' ? '类的' : '的'}截图`
+        `${name == 'memberDatatimeAxisPhoto' ? '状态的' : '的'}截图`
       "
       class="work-timeAxis"
       @beforeOpen="dataInit"
       @opened="open()"
     >
+      <div slot="sel" class="header_sel">
+        <el-date-picker
+          v-model="timeStart"
+          type="date"
+          placeholder="开始日期"
+          @change="handleChange"
+        >
+        </el-date-picker>
+        至
+        <el-date-picker
+          v-model="timeEnd"
+          type="date"
+          placeholder="结束日期"
+          @change="handleChange"
+        >
+        </el-date-picker>
+      </div>
       <div
-        style="overflow: auto; height: 100%"
-        :infinite-scroll-disabled="photoDis"
-        v-infinite-scroll="loadMoreShot"
-        v-loading="photoLoading"
-        infinite-scroll-distance="10"
+        class="content_modal"
+        v-if="progressPhotoArr && progressPhotoArr.length"
       >
-        <el-timeline>
-          <el-timeline-item
-            :timestamp="value.time.timeFormat('yyyy-MM-dd HH:mm:ss')"
-            placement="top"
-            v-for="(value, index) in progressPhotoArr"
-            :key="index"
-            color="#409eFF"
-          >
-            <el-card>
-              <h4>
-                <span>
-                  <span>进程名：{{ value.pname }} </span>
-                  <span
-                    >别名：
-                    <template
-                      v-if="value.FocusFormAlias && value.FocusFormAlias.length"
-                      ><label
-                        v-for="(nitem, index) in value.FocusFormAlias"
-                        :key="index"
-                        >{{ index == 0 ? nitem : `、${nitem}` }}</label
-                      ></template
-                    >
-                    <label v-else>无</label>
+        <div class="time_line" v-loading="loading">
+          <el-timeline>
+            <el-timeline-item
+              :timestamp="value.time.timeFormat('yyyy-MM-dd HH:mm:ss')"
+              placement="top"
+              v-for="(value, index) in progressPhotoArr"
+              :key="index"
+              color="#409eFF"
+            >
+              <el-card>
+                <h4>
+                  <span>
+                    <span>进程名：{{ value.pname }} </span>
+                    <span
+                      >别名：
+                      <template
+                        v-if="
+                          value.FocusFormAlias && value.FocusFormAlias.length
+                        "
+                        ><label
+                          v-for="(nitem, index) in value.FocusFormAlias"
+                          :key="index"
+                          >{{ index == 0 ? nitem : `、${nitem}` }}</label
+                        ></template
+                      >
+                      <label v-else>无</label>
+                    </span>
                   </span>
-                </span>
-                <span
-                  ><span>窗口名：{{ value.fname }}</span>
                   <span
-                    >状态：
-                    <template
-                      v-if="
-                        value.FocusFormStatus && value.FocusFormStatus.length
-                      "
-                      ><label
-                        v-for="(nitem, index) in value.FocusFormStatus"
-                        :key="index"
-                        >{{ index == 0 ? nitem : `、${nitem}` }}</label
-                      ></template
-                    >
-                    <label v-else>无</label>
-                  </span></span
+                    ><span>窗口名：{{ value.fname }}</span>
+                    <span
+                      >状态：
+                      <template
+                        v-if="
+                          value.FocusFormStatus && value.FocusFormStatus.length
+                        "
+                        ><label
+                          v-for="(nitem, index) in value.FocusFormStatus"
+                          :key="index"
+                          >{{ index == 0 ? nitem : `、${nitem}` }}</label
+                        ></template
+                      >
+                      <label v-else>无</label>
+                    </span></span
+                  >
+                </h4>
+                <el-image
+                  style="max-width: 200px"
+                  :src="cmurl + value.imgURL"
+                  alt=""
+                  :preview-src-list="[cmurl + value.imgURL]"
                 >
-              </h4>
-              <el-image
-                style="max-width: 200px"
-                :src="cmurl + value.imgURL"
-                alt=""
-                :preview-src-list="[cmurl + value.imgURL]"
-              >
-              </el-image>
-            </el-card>
-          </el-timeline-item>
-          <!-- <p v-if="!morePhoto && progressPhotoArr.length" class="g-loaded">
-            已加载全部
-          </p> -->
-        </el-timeline>
-        <div class="empty-proccess-list" v-if="progressPhotoArr.length == 0">
-          <img src="@/assets/img/emptyTask.png" alt="" />
-          <p>暂无进程截图</p>
+                </el-image>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
         </div>
-        <div v-if="progressPhotoArr.length > 0" class="load-status">
-          <div class="g-loading" v-if="loading">
-            <i class="el-icon-loading"></i>
-            加载中...
-          </div>
-          <div class="g-loaded" v-if="!morePhoto">已全部加载</div>
+        <div v-if="name != 'staffDataPic'">
+          <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
         </div>
+      </div>
+      <div class="empty-proccess-list" v-else>
+        <img src="../../assets/img/emptyTask.png" alt="" />
+        <p>暂无进程截图</p>
       </div>
     </XModal>
   </div>
@@ -97,12 +108,18 @@
 export default {
   data() {
     return {
+      timeStart: null,
+      timeEnd: null,
       photoDis: false,
-      photoLoading: false,
       progressPhotoArr: [],
       last: "",
       morePhoto: true,
       loading: false,
+      pageData: {
+        pageIndex: 1,
+        pageSize: 10,
+        totalNum: 0,
+      }, //分页
     };
   },
   props: {
@@ -143,21 +160,31 @@ export default {
     },
   },
   components: {
+    CPages: () => import("@/components/CPages"),
     XModal: () => import("@/components/XModal.vue"),
   },
   methods: {
-    loadMoreShot() {
-      //加载工作条截图
-      if (this.morePhoto && this.name != "staffDataPic") {
-        this.getBarData();
-      }
+    /**
+     * 时间筛选
+     */
+    handleChange() {
+      this.pageData.pageIndex = 1;
+      this.getBarData();
+    },
+    /**
+     * 分页
+     */
+    handlePaginationChange(val) {
+      this.pageData = val;
+      this.getBarData();
     },
     dataInit() {
       Object.assign(this.$data, this.$options.data());
     },
     open() {
       this.$nextTick(() => {
-        console.log(this.name);
+        this.timeStart = this.stime;
+        this.timeEnd = this.etime;
         if (this.name == "staffDataPic") {
           this.progressPhotoArr = this.activeBar.fromList.map((m) => {
             return {
@@ -167,9 +194,7 @@ export default {
               time: m.ImageTime,
             };
           });
-          console.log(this.activeBar);
         } else {
-          this.photoLoading = true;
           this.getBarData();
         }
       });
@@ -193,62 +218,47 @@ export default {
       this.loading = true;
       let params = {
         uid: this.uid,
-        stime: this.stime,
-        etime: this.etime,
-        last: this.last,
-        pageCount: 15,
+        stime: this.timeStart.timeFormat("yyyy-MM-dd"),
+        etime: this.timeEnd.timeFormat("yyyy-MM-dd"),
+        // last: this.last,
+        pageCount: this.pageData.pageSize,
         status: this.activeBar.name,
         teamId: this.teamValue,
         gid: this.gid,
+        page: this.pageData.pageIndex,
       };
       this.$http
-        .get("/General/GetProcessImg.ashx", { params: params })
+        .get("/General/GetProcessImg.ashx#", { params: params })
         .then((res) => {
           if (res.res == 0) {
-            this.photoLoading = false;
-            if (res.data.length) {
-              this.photoDis = false;
-              this.progressPhotoArr = this.progressPhotoArr.concat(res.data);
-              this.last = res.data[res.data.length - 1].time;
-            } else {
-              this.morePhoto = false;
-              this.photoDis = true;
-            }
-            this.loading = false;
+            this.progressPhotoArr = res.data.data;
+            this.pageData.totalNum = res.data.total;
           }
-        });
+        })
+        .finally(() => (this.loading = false));
     },
     getProcessImgWithFormData(val) {
       this.photoDis = true;
       this.loading = true;
       let params = {
         uid: this.uid,
-        stime: this.last ? this.last : this.stime,
-        etime: this.etime,
-        pageCount: 15,
+        // stime: this.last ? this.last : this.stime,
+        stime: this.timeStart.timeFormat("yyyy-MM-dd"),
+        etime: this.timeEnd.timeFormat("yyyy-MM-dd"),
+        pageCount: this.pageData.pageSize,
         pname: val,
         teamId: this.teamValue,
+        page: this.pageData.pageIndex,
       };
       this.$http
-        .post("/General/GetProcessImgWithForm.ashx", params)
+        .post("/General/GetProcessImgWithForm.ashx#", params)
         .then((res) => {
           if (res.res == 0) {
-            this.photoLoading = false;
-            if (
-              res.data.length > 1 ||
-              (res.data.length == 1 && !this.progressPhotoArr.length)
-            ) {
-              this.photoDis = false;
-              this.progressPhotoArr = this.progressPhotoArr.concat(res.data);
-              this.last = res.data[0].time;
-              this.morePhoto = true;
-            } else {
-              this.morePhoto = false;
-              this.photoDis = true;
-            }
-            this.loading = false;
+            this.progressPhotoArr = res.data.data;
+            this.pageData.totalNum = res.data.total;
           }
-        });
+        })
+        .finally(() => (this.loading = false));
     },
   },
 };
@@ -258,6 +268,21 @@ export default {
 .progressCom {
   /deep/.ctn {
     height: calc(100% - 6rem);
+    padding-bottom: 0px;
+  }
+  // /deep/.tit {
+  //   display: flex;
+  //   flex-direction: row;
+  //   .sel {
+  //     position: initial;
+  //   }
+  // }
+  .content_modal {
+    height: 100%;
+    .time_line {
+      overflow: auto;
+      height: calc(100% - 35px);
+    }
   }
 }
 
@@ -297,6 +322,13 @@ export default {
       margin-right: 2rem;
       line-height: 1;
       margin-bottom: 1rem;
+    }
+  }
+  .header_sel {
+    color: #606266;
+    font-size: 1.4rem;
+    .el-date-editor {
+      width: 162px;
     }
   }
 }

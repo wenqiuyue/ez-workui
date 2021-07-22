@@ -109,7 +109,7 @@
                 type="start"
                 size="mini"
                 @click="handleStart(scope.row)"
-                v-if="scope.row.IsStart"
+                v-if="!scope.row.IsStart"
                 >启用</el-button
               >
               <el-button

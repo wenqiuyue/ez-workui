@@ -93,11 +93,11 @@
               {{ scope.row.Vsersion ? scope.row.Vsersion.Name : "无" }}
             </template></el-table-column
           > -->
-          <el-table-column label="服务器" align="center"
+          <!-- <el-table-column label="服务器" align="center"
             ><template slot-scope="scope">
               {{ scope.row.Database ? scope.row.Database : "无" }}
             </template></el-table-column
-          >
+          > -->
           <el-table-column label="我的进程组" prop="gName" align="center">
             <template slot-scope="scope">
               <span v-if="scope.row.gName">{{ scope.row.gName }}</span>

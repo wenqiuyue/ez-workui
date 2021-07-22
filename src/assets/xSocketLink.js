@@ -96,6 +96,10 @@ export default class xSocketLink {
                 //通知客户端截图
                 Vue.prototype.$toClient("client.ScShot", res.data);
                 break;
+              case 121:
+                //返回进程组进程提醒客户端退出
+                Vue.prototype.$toClient("client.Restart", res.data);
+                break;
               case 70:
                 //通知客户端聊天 (WORK_CLIENT_AGENT_3698和发送消息本人不需要接收消息提示)
                 if (

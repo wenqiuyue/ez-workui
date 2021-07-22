@@ -16,7 +16,7 @@
           <el-form-item label="邀请口令" prop="inviterWord">
             <el-input
               v-model="ruleForm.inviterWord"
-              placeholder="请输入团队号"
+              placeholder="请输入邀请口令"
             ></el-input>
           </el-form-item>
         </el-form>

@@ -120,7 +120,9 @@ export default {
       this.selRow = {
         name: row.Key,
       };
-      this.$modal.show("allfoftwarepic");
+      this.$nextTick(() => {
+        this.$modal.show("allfoftwarepic");
+      });
     },
     /**
      * 打开弹窗回调

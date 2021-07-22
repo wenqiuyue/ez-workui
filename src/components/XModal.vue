@@ -32,13 +32,13 @@
     transition="nice-show"
     ref="location"
   >
-    <div class="modal" :style="issafariBrowser?'padding-bottom:7rem':''">
+    <div class="modal" :style="issafariBrowser ? 'padding-bottom:7rem' : ''">
       <!-- tit 顶部区域 -->
       <div v-if="this.title" class="tit">
         <div class="sel">
           <slot name="sel"></slot>
         </div>
-        <div>{{ this.title }}</div>
+        <div class="tit_text">{{ this.title }}</div>
         <a v-if="this.showCrossBtn">
           <i class="hiFont hi-close-thin" @click="onCancel"></i>
         </a>
@@ -336,14 +336,14 @@ export default {
 
     //打开后
     opened(e) {
-    if (process.env.NODE_ENV==="prodution") {
-    	const body = document.getElementById("app");
-    	if (body.append) {
-    	  body.append(this.$refs.location.$el);
-    	} else {
-    	  body.appendChild(this.$refs.location.$el);
-    	}
-    }
+      if (process.env.NODE_ENV === "prodution") {
+        const body = document.getElementById("app");
+        if (body.append) {
+          body.append(this.$refs.location.$el);
+        } else {
+          body.appendChild(this.$refs.location.$el);
+        }
+      }
       if (this.url) {
         history.pushState(null, "", this.url);
         this.isFirstOpen = false;
@@ -354,7 +354,7 @@ export default {
     //关闭后
     closed(e) {
       if (this.referer) {
-          history.pushState(null, "", this.referer);  
+        history.pushState(null, "", this.referer);
       }
       this.$emit("closed", e);
     },

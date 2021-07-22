@@ -148,13 +148,11 @@
               >
             </p>
             <template v-if="item.loadPic && item.loadPic.length">
-              <div
-                class="receive-img"
-                v-for="(pic, imgIndex) in item.loadPic"
-                :key="imgIndex"
-              >
+              <div class="receive-img">
                 <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:ss") }}</span> -->
                 <el-image
+                  v-for="(pic, imgIndex) in item.loadPic"
+                  :key="imgIndex"
                   :src="$url + pic.ImgUrl"
                   :preview-src-list="[$url + pic.ImgUrl]"
                 >
@@ -577,7 +575,9 @@ export default {
       this.clickUser = data.clickUser;
       this.selWorkItem = item;
       this.gid = data.gid;
-      this.$modal.show("memberDatatimeAxisPhoto");
+      this.$nextTick(() => {
+        this.$modal.show("memberDatatimeAxisPhoto");
+      });
     },
   },
 };
@@ -781,11 +781,12 @@ export default {
             width: 100%;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
-            margin-right: 1rem;
+            flex-direction: row;
+
             .el-image {
               width: 80px;
               height: 46px;
+              margin-right: 0.3rem;
             }
           }
         }
