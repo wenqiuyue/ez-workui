@@ -10,7 +10,7 @@
         ><template slot-scope="scope">
           {{
             scope.row.CreatTime
-              ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+              ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
               : ""
           }}
         </template>

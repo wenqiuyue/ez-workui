@@ -158,7 +158,7 @@
             </p>
             <template v-if="item.loadPic && item.loadPic.length">
               <div class="receive-img">
-                <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:ss") }}</span> -->
+                <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:mm") }}</span> -->
                 <el-image
                   v-for="(pic, imgIndex) in item.loadPic"
                   :key="imgIndex"

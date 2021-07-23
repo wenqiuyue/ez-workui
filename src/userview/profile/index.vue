@@ -37,11 +37,13 @@
           >
           <el-form-item label="团队数量">{{ user.TeamCount }}</el-form-item>
           <el-form-item label="注册时间">{{
-            user.SignTime ? user.SignTime.timeFormat("yyyy-MM-dd HH:ss") : "--"
+            user.SignTime
+              ? user.SignTime.timeFormat("yyyy-MM-dd HH:mm:ss")
+              : "--"
           }}</el-form-item>
           <el-form-item label="上次登录时间">{{
             user.LastClientOnline
-              ? user.LastClientOnline.timeFormat("yyyy-MM-dd HH:ss")
+              ? user.LastClientOnline.timeFormat("yyyy-MM-dd HH:mm:ss")
               : "--"
           }}</el-form-item>
           <el-form-item
@@ -130,7 +132,7 @@
                 show-overflow-tooltip
                 align="center"
                 ><template slot-scope="scope">
-                  {{ scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss") }}
+                  {{ scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:mm") }}
                 </template>
               </el-table-column> -->
               <el-table-column
@@ -249,7 +251,7 @@
                 ><template slot-scope="scope">
                   {{
                     scope.row.CreateTime
-                      ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:ss")
+                      ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:mm")
                       : "无"
                   }}
                 </template>

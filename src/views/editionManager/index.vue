@@ -29,7 +29,7 @@
               {{ scope.row.Capacity ? scope.row.Capacity : 0 }}人
             </template>
           </el-table-column>
-           <el-table-column label="存储量" prop="StorageLimits" sortable>
+          <el-table-column label="存储量" prop="StorageLimits" sortable>
             <template slot-scope="scope">
               {{ scope.row.StorageLimits }}
             </template>
@@ -48,7 +48,7 @@
             ><template slot-scope="scope">
               {{
                 scope.row.CreatTime
-                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
                   : "--"
               }}
             </template>

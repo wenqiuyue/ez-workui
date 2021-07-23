@@ -70,7 +70,7 @@
                 <span>{{
                   infoData.Teamdata.CreateTime
                     ? infoData.Teamdata.CreateTime.timeFormat(
-                        "yyyy-MM-dd HH:ss"
+                        "yyyy-MM-dd HH:mm"
                       )
                     : "无"
                 }}</span>

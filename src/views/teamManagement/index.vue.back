@@ -33,7 +33,7 @@
             show-overflow-tooltip
             align="center"
             ><template slot-scope="scope">
-              {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss") }}
+              {{ scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm") }}
             </template>
           </el-table-column>
           <el-table-column
@@ -59,7 +59,7 @@
             align="center"
           >
             <template slot-scope="scope">{{
-              scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:s")
+              scope.row.ExpireTime.timeFormat("yyyy-MM-dd HH:mm")
             }}</template></el-table-column
           >
           <el-table-column label="服务器信息" align="center"

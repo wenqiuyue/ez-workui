@@ -78,8 +78,7 @@
                 :style="{ width: comWidth }"
                 clearable
               >
-                </el-input
-              >
+              </el-input>
               <div v-else class="state-see">{{ formData.storageLimits }}</div>
             </el-form-item>
           </el-col>
@@ -107,7 +106,7 @@
               <div class="state-see">
                 {{
                   formData.creatTime
-                    ? formData.creatTime.timeFormat("yyyy-MM-dd HH:ss")
+                    ? formData.creatTime.timeFormat("yyyy-MM-dd HH:mm")
                     : "--"
                 }}
               </div>
@@ -137,7 +136,7 @@ export default {
         price: null, //金额
         period: null, //期限
         capacity: null, //可加入人数
-        storageLimits:0, //存储量
+        storageLimits: 0, //存储量
         creatTime: null,
       },
       Rules: {
@@ -169,13 +168,13 @@ export default {
             trigger: "blur",
           },
         ],
-        storageLimits:[
+        storageLimits: [
           {
             required: true,
             message: "请输入存储量",
             trigger: "blur",
           },
-        ]
+        ],
       },
     };
   },
@@ -222,7 +221,7 @@ export default {
               price: this.formData.price,
               period: this.formData.period,
               capacity: this.formData.capacity,
-              storageLimits:this.formData.storageLimits,
+              storageLimits: this.formData.storageLimits,
             };
             url = "/Management/VersionManagement/AddVersion.ashx";
             tipTxt = "添加";
@@ -233,7 +232,7 @@ export default {
               price: this.formData.price,
               period: this.formData.period,
               capacity: this.formData.capacity,
-              storageLimits:this.formData.storageLimits,
+              storageLimits: this.formData.storageLimits,
             };
             url = "/Management/VersionManagement/EditVersion.ashx";
             tipTxt = "编辑";

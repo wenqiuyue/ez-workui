@@ -103,7 +103,7 @@
                       <span class="lable">创建时间：</span>
                       <span>{{
                         verInfo.CreatTime
-                          ? verInfo.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                          ? verInfo.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
                           : "无"
                       }}</span>
                     </li>
@@ -126,7 +126,7 @@
             ><template slot-scope="scope">
               {{
                 scope.row.CreatTime
-                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:ss")
+                  ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
                   : "--"
               }}
             </template>
