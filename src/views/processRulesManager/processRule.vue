@@ -41,10 +41,10 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="进程组"
+          label="部门"
           :show-overflow-tooltip="true"
           fixed
-          v-if="activeItem == '进程组'"
+          v-if="activeItem == '部门'"
         >
           <template slot-scope="scope">
             <div
@@ -240,7 +240,7 @@ export default {
       operationName: 1,
       tableData: [],
       formParams: {
-        t: "进程组",
+        t: "部门",
         g: [],
         pn: [
           {
@@ -256,7 +256,7 @@ export default {
         mk2: "未知",
         id: "",
       },
-      activeItem: "进程组",
+      activeItem: "部门",
       cellStyle: {
         textAlign: "center",
       },

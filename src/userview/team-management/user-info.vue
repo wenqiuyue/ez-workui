@@ -35,7 +35,7 @@
             >
             <el-col :span="12" v-if="!editState"
               ><div class="info_list">
-                <span class="info_lable">进程组：</span>
+                <span class="info_lable">部门：</span>
                 {{
                   selUser.ProgressGroupName ? selUser.ProgressGroupName : "无"
                 }}
@@ -43,7 +43,7 @@
             >
             <el-col :span="12" v-if="!editState"
               ><div class="info_list">
-                <span class="info_lable">进程组状态：</span>
+                <span class="info_lable">进程状态：</span>
                 {{ selUser.IsGNameStatus ? "可用" : "不可用" }}
               </div></el-col
             >
@@ -93,11 +93,8 @@
             >
             <el-col :span="12" v-if="editState"
               ><div class="info_list">
-                <span class="info_lable">进程组：</span>
-                <el-select
-                  v-model="formData.progroup"
-                  placeholder="请选择进程组"
-                >
+                <span class="info_lable">部门：</span>
+                <el-select v-model="formData.progroup" placeholder="请选择部门">
                   <el-option
                     v-for="item in options"
                     :key="item.Id"

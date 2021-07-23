@@ -22,7 +22,7 @@
               <li>
                 <span>对象类型</span>
                 <el-select v-model="loadForm.rType">
-                  <el-option label="进程组" :value="1"></el-option>
+                  <el-option label="部门" :value="1"></el-option>
                   <el-option label="员工" :value="2"></el-option>
                 </el-select>
               </li>
@@ -35,7 +35,7 @@
                 ></mb>
               </li>
               <li v-if="loadForm.rType == 1">
-                <span>规则作用进程组</span>
+                <span>规则作用部门</span>
                 <el-select v-model="loadForm.g" multiple>
                   <el-option
                     v-for="(item, index) in processOptions"
@@ -183,7 +183,7 @@ export default {
     },
     activeItem: {
       type: String,
-      default: "进程组",
+      default: "部门",
     },
     id: {
       type: String | Number,
@@ -240,7 +240,7 @@ export default {
         .then((res) => {
           if (res.res == 0) {
             this.loading = false;
-            if (this.activeItem == "进程组") {
+            if (this.activeItem == "部门") {
               this.loadForm.rType = 1;
               this.loadForm.g = res.data.PreocessGroup.map((m) => m.ID);
             } else {

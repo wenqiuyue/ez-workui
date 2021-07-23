@@ -99,10 +99,10 @@
               {{ scope.row.Database ? scope.row.Database : "无" }}
             </template></el-table-column
           > -->
-          <el-table-column label="我的进程组" prop="gName" align="center">
+          <el-table-column label="我的部门" prop="gName" align="center">
             <template slot-scope="scope">
               <span v-if="scope.row.gName">{{ scope.row.gName }}</span>
-              <el-tag v-else size="medium" type="danger"> 暂无进程组 </el-tag>
+              <el-tag v-else size="medium" type="danger"> 暂无部门 </el-tag>
             </template></el-table-column
           >
           <el-table-column

@@ -78,6 +78,15 @@
             }}</template>
           </el-table-column>
           <el-table-column
+            label="是否启用"
+            :show-overflow-tooltip="true"
+            prop="IsSystem"
+          >
+            <template slot-scope="scope">{{
+              scope.row.IsStart ? "是" : "否"
+            }}</template>
+          </el-table-column>
+          <el-table-column
             label="创建时间"
             :show-overflow-tooltip="true"
             prop="name"
@@ -104,6 +113,9 @@
                 size="mini"
                 @click="handleEdit(scope.row)"
                 >编辑</el-button
+              >
+              <el-button type="danger" size="mini" @click="handleDel(scope.row)"
+                >删除</el-button
               >
               <el-button
                 type="start"
@@ -324,7 +336,7 @@ export default {
       this.isInfoView = true;
     },
     // 删除某一行
-    handleDelt(row) {
+    handleDel(row) {
       this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -332,7 +344,8 @@ export default {
       })
         .then(() => {
           let params = {
-            id: [row.ID],
+            Ids: [row.Id],
+            teamId: this.teamValue,
           };
           this.comDelete(params);
         })
@@ -340,7 +353,7 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post("/ProgressGroup/DelProgressGroup.ashx", params)
+        .post("/ConfigGroup/DelConfigGroup.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.$message({

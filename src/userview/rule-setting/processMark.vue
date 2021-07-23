@@ -3,16 +3,8 @@
     <div class="container">
       <div class="header">
         <div class="header_screen">
-          <el-select placeholder="标记类型" v-model="requestParams.t" clearable>
-            <el-option
-              v-for="t in options.t"
-              :key="t.value"
-              :value="t.value"
-              :label="t.label"
-            ></el-option>
-          </el-select>
           <el-select
-            placeholder="进程组"
+            placeholder="进程规则"
             v-model="requestParams.g"
             :loading="groupLoading"
             clearable
@@ -21,7 +13,7 @@
               v-for="g in options.g"
               :key="g.Id"
               :value="g.Id"
-              :label="g.Name"
+              :label="g.RuleName"
             ></el-option>
           </el-select>
           <el-select
@@ -61,9 +53,9 @@
             >搜索</el-button
           >
         </div>
-        <el-button type="primary" plain @click="$modal.show('ruleXmodal')"
+        <!-- <el-button type="primary" plain @click="$modal.show('ruleXmodal')"
           >添加规则</el-button
-        >
+        > -->
         <el-button type="primary" plain @click="editProgress('all')"
           >标记所有</el-button
         >
@@ -94,12 +86,26 @@
             header-align="center"
           ></el-table-column>
           <el-table-column
-            label="进程组"
+            label="进程规则"
             prop="ProgressGroupId"
-            width="80"
             align="center"
             header-align="center"
-          ></el-table-column>
+            show-overflow-tooltip
+            ><template slot-scope="scope">
+              <span v-if="scope.row.RuleNames && scope.row.RuleNames.length">
+                <label
+                  v-for="(ritem, rindex) in scope.row.RuleNames.length"
+                  :key="rindex"
+                  >{{
+                    rindex == 0
+                      ? scope.row.RuleNames[rindex]
+                      : `、${scope.row.RuleNames[rindex]}`
+                  }}</label
+                >
+              </span>
+              <span v-else>无</span>
+            </template></el-table-column
+          >
           <el-table-column
             label="状态"
             prop="IsGNameStatus"
@@ -124,13 +130,13 @@
             align="center"
             header-align="center"
           ></el-table-column>
-          <el-table-column
+          <!-- <el-table-column
             label="标记名"
             prop="State"
             width="80"
             align="center"
             header-align="center"
-          ></el-table-column>
+          ></el-table-column> -->
           <el-table-column
             label="截图类型"
             prop="ImageType"
@@ -175,116 +181,22 @@
         <el-form-item label="当前选择数量："
           >{{ xmodalTip.editCount }}条</el-form-item
         >
-        <el-form-item label="配置的进程组：" prop="progressgroupId">
+        <el-form-item label="标记的进程规则：" prop="g">
           <el-select
-            placeholder="请选择配置的进程组"
-            v-model="editParams.progressgroupId"
-          >
-            <el-option
-              v-for="g in options.g"
-              :key="g.Id"
-              :value="g.Id"
-              :label="g.Name"
-              v-if="g.Id !== null"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <!-- <el-form-item label="标记类型：" prop="t">
-          <el-select
-            v-model="editParams.t"
-            placeholder="请选择"
-            @change="editParams.g = null"
-          >
-            <el-option
-              v-for="t in checkOptions.t"
-              :key="t.value"
-              :label="t.label"
-              :value="t.value"
-            ></el-option>
-          </el-select>
-        </el-form-item> -->
-        <el-form-item
-          label="标记的进程组："
-          prop="g"
-          v-show="editParams.t === '进程组'"
-        >
-          <el-select
-            placeholder="请选择标记的进程组（可多选）"
+            placeholder="请选择标记的进程规则（可多选）"
             multiple
-            v-model="editParams.g"
+            v-model="editParams.rIds"
+            filterable
           >
             <el-option
-              v-for="g in options.g"
+              v-for="g in options.g.filter((m) => m.Id)"
               :key="g.Id"
               :value="g.Id"
-              :label="g.Name"
-              v-if="g.Id !== null"
+              :label="g.RuleName"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item
-          label="成员(多选)："
-          prop="g"
-          v-show="editParams.t === '成员'"
-        >
-          <mb @Confirm="getUsers" :showActive="false" :teamId="teamValue">
-            <div slot="button">
-              <div v-if="editParams.g == null" class="mem-add">
-                <i class="el-icon-plus"></i>
-              </div>
-              <p class="ttr-name">{{ showUsers }}</p>
-            </div>
-          </mb>
-        </el-form-item>
-        <el-form-item label="标记结果：" prop="mk">
-          <el-select v-model="editParams.mk" placeholder="请选择">
-            <el-option
-              v-for="mk in checkOptions.mk"
-              :key="mk.value"
-              :label="mk.label"
-              :value="mk.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="关键词：">
-          <el-input v-model="editParams.word"></el-input>
-        </el-form-item>
-        <el-form-item label="所属进程名：">
-          <el-select placeholder="请选择" v-model="editParams.pn" filterable>
-            <el-option-group
-              v-for="group in options.pn"
-              :key="group.label"
-              :label="group.label"
-            >
-              <el-option
-                v-for="item in group.options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-option-group>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="截图类型：" v-show="editParams.t === '进程组'">
-          <el-select v-model="editParams.pt" placeholder="请选择">
-            <el-option
-              v-for="pt in checkOptions.pt"
-              :key="pt.value"
-              :label="pt.label"
-              :value="pt.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="截图质量：" v-show="editParams.t === '进程组'">
-          <el-select v-model="editParams.px" placeholder="请选择">
-            <el-option
-              v-for="px in checkOptions.px"
-              :key="px.value"
-              :label="px.label"
-              :value="px.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
+
         <el-form-item>
           <el-button @click="onSubmit" :loading="submitLoading"
             >立即标记</el-button
@@ -303,12 +215,7 @@
             xmodalTip.entertain
           }}条，是否要覆盖</el-form-item
         >
-        <el-form-item label="工作记录：" v-show="xmodalTip.work > 0">
-          <el-switch v-model="editParams.setWk"></el-switch>
-        </el-form-item>
-        <el-form-item label="娱乐记录：" v-show="xmodalTip.entertain > 0">
-          <el-switch v-model="editParams.setEt"></el-switch>
-        </el-form-item>
+
         <el-form-item>
           <el-button @click="onSubmit">覆盖</el-button>
         </el-form-item>
@@ -363,21 +270,6 @@ export default {
       submitLoading: false, //标记加载
       editSelection: [], //选择数据
       options: {
-        t: [
-          //标记类型
-          {
-            label: "娱乐",
-            value: "娱乐",
-          },
-          {
-            label: "未知",
-            value: "未知",
-          },
-          {
-            label: "工作",
-            value: "工作",
-          },
-        ],
         od: [
           //排序方式
           {
@@ -471,17 +363,13 @@ export default {
       },
       //标记
       editParams: {
-        t: "进程组", //标记类型（进程组，成员）
-        mk: null, //标记结果（工作，娱乐，未知）
-        g: null, //	进程组ID数组 或 成员姓名数组（全部就传空数组）
         word: null, //关键词
-        pn: null, //所属进程名
-        cs: null, //进程记录ID数组
-        pt: null, //截图类型（黑白，彩色）（类型为成员时不能设置此项）
-        px: null, //截图质量（1-6）越小越清晰（类型为成员时不能设置此项）
-        setWk: null, //是否覆盖工作进程（默认false）
-        setEt: null, //是否覆盖娱乐进程（默认false）
-        progressgroupId: null, //配置的进程组
+        pname: null, //所属进程名
+        wordtype: null,
+        pIds: [],
+        rIds: [],
+        configId: null,
+        teamId: null,
       },
       xmodalTip: {
         editCount: 0, //修改总数
@@ -489,7 +377,7 @@ export default {
         work: 0,
         entertain: 0,
       },
-      poxy: "", //代理
+
       showUsers: "",
       RULES: {
         mk: [
@@ -528,19 +416,7 @@ export default {
       this.pageData = val;
       this.getData();
     },
-    getUsers(users) {
-      if (users.length) {
-        this.editParams.g = [];
-        this.showUsers = users
-          .map((item) => {
-            this.editParams.g.push(item.UName);
-            return item.UName;
-          })
-          .join(",");
-      } else {
-        this.editParams.g = this.showUsers = null;
-      }
-    },
+
     filterParam(params) {
       let copy = { ...params };
       for (let o in copy) {
@@ -551,19 +427,19 @@ export default {
       }
       return copy;
     },
-    //获取进程组ID
-    GetProgressGroup() {
+    //获取进程规则
+    GetProgressRule() {
       this.$http
-        .post("/User/GetProgressGroupSelected.ashx", {
-          teamId: this.teamValue,
+        .post("/Progress/GetProcessRulesSelects.ashx", {
           configId: this.selRow.Id,
+          teamId: this.teamValue,
         })
         .then((resp) => {
           if (resp.res == 0) {
             this.groupLoading = false;
             this.options.g = resp.data;
             this.options.g.unshift({
-              Name: "全部进程组",
+              RuleName: "全部进程规则",
               Id: null,
             });
             this.requestParams.g = null;
@@ -591,12 +467,22 @@ export default {
       this.tableLoading = true;
       axios.defaults.withCredentials = false;
       this.requestParams.teamId = this.teamValue;
-      const resp = await axios.post(
-        "/Progress/GetCsList.ashx",
-        this.requestParams
-      );
+      const data = {
+        pname: this.requestParams.pn,
+        wordtype: this.requestParams.od,
+        word: this.requestParams.word,
+        rIds: this.requestParams.g,
+        configId: this.selRow.Id,
+        pageIndex: this.requestParams.p,
+        pageCount: this.requestParams.c,
+        teamId: this.teamValue,
+      };
+      const resp = await axios.post("/Progress/GetCsList.ashx", data);
       if (resp.res == 0) {
         this.table = resp.data.items;
+        this.table.forEach((m) => {
+          m.RuleNames = JSON.parse(m.RuleNames);
+        });
         if (this.requestParams.p == 1) {
           this.pagination.totalCount = resp.data.totalCount;
           this.pageData.totalNum = resp.data.totalCount;
@@ -630,7 +516,6 @@ export default {
       this.showUsers = null;
       if (type === "all") {
         this.xmodalTip.editCount = this.pagination.totalCount;
-        this.editParams.cs = [];
       } else if (type === "selection") {
         if (this.editSelection.length == 0) {
           this.$notify({
@@ -639,9 +524,6 @@ export default {
           });
           return;
         } else {
-          this.editParams.cs = this.editSelection.map((item) => {
-            return item.ID;
-          });
           this.xmodalTip.editCount = this.editSelection.length;
         }
       }
@@ -649,15 +531,12 @@ export default {
     },
     //标记前的检查
     async checkBeforeMark() {
-      this.editParams.teamId = this.teamValue;
       const resp = await this.$http.post(
         "/Progress/CheckBeforeMark.ashx",
         this.editParams
       );
       this.submitLoading = false;
       if (resp.res == 0) {
-        this.editParams.setEt = false;
-        this.editParams.setWk = false;
         if (resp.data.pass) {
           //通过验证
           this.markProgress();
@@ -670,9 +549,8 @@ export default {
     },
     //提交标记
     async markProgress() {
-      this.editParams.teamId = this.teamValue;
       const resp = await this.$http.post(
-        "/Progress/MarkProgress.ashx",
+        "/Progress/MarkProgressRule.ashx",
         this.editParams
       );
       if (resp.res == 0) {
@@ -686,17 +564,13 @@ export default {
     },
     //提交标记
     onSubmit() {
-      if (this.xmodalTip.activeStep == 1) {
-        this.$refs["editForm"].validate((valid) => {
-          if (valid) {
-            this.submitLoading = true;
-            this.checkBeforeMark();
-          }
-        });
-      } else {
-        this.submitLoading = true;
-        this.markProgress();
-      }
+      this.editParams.pname = this.requestParams.pn;
+      this.editParams.wordtype = this.requestParams.od;
+      this.editParams.word = this.requestParams.word;
+      this.editParams.pIds = this.editSelection.map((m) => m.ID);
+      this.editParams.configId = this.selRow.Id;
+      this.editParams.teamId = this.teamValue;
+      this.markProgress();
     },
     //清晰度
     showPixelRatio(value) {
@@ -717,12 +591,11 @@ export default {
     },
   },
   created() {
-    this.poxy = process.env.VUE_APP_CMURL;
     this.getData();
-    setTimeout(() => {
-      this.GetProgressGroup();
-      this.getProgress();
-    }, 1000);
+  },
+  mounted() {
+    this.GetProgressRule();
+    this.getProgress();
   },
 };
 </script>

@@ -46,10 +46,10 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="进程组"
+          label="部门"
           :show-overflow-tooltip="true"
           fixed
-          v-if="activeItem == '进程组'"
+          v-if="activeItem == '部门'"
         >
           <template slot-scope="scope">
             <div
@@ -264,11 +264,11 @@ export default {
           },
         ],
       },
-      tabOptions: ["进程组", "成员组"],
+      tabOptions: ["部门", "成员组"],
       operationName: 1,
       tableData: [],
       formParams: {
-        t: "进程组",
+        t: "部门",
         g: [],
         pn: [
           {
@@ -289,7 +289,7 @@ export default {
         CSRules: [],
         MKRules: [],
       },
-      activeItem: "进程组",
+      activeItem: "部门",
       cellStyle: {
         textAlign: "center",
       },
@@ -362,7 +362,7 @@ export default {
     getDataList() {
       this.loading = true;
       const data = {
-        type: this.activeItem == "进程组" ? 1 : 2,
+        type: this.activeItem == "部门" ? 1 : 2,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
         teamId: this.teamValue,

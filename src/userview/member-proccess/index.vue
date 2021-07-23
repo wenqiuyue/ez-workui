@@ -218,24 +218,28 @@
                         <span>活动详情</span>
                       </template>
                       <div class="active-content">
-                        <p class="active-name">
+                        <!-- <p class="active-name">
                           {{
                             item.ClientStatus == 0 ? "上一次" : "正在"
                           }}运行的程序：{{
                             item.ProcessName == null ? "无" : item.ProcessName
                           }}
-                        </p>
+                        </p> -->
                         <div class="screen-shot">
                           <p @click="shotScreenPhoto(item.usInfo.UsId)">
                             <span v-if="imgload && item.usInfo.UsId == userID"
                               ><i class="el-icon-loading"></i>截图中...</span
                             ><span v-else>屏幕截图</span>
                           </p>
+                          <div v-if="item.title">
+                            当前进程：{{ item.title }}
+                          </div>
                           <div class="show-imgs">
                             <div class="imgs">
                               <div
                                 class="receive-img"
                                 v-for="(pic, imgIndex) in item.ProcessImgs"
+                                :key="imgIndex"
                               >
                                 <span>{{ pic.time }}</span>
                                 <el-image
@@ -620,6 +624,7 @@ export default {
             if (res.UserId == item.usInfo.UsId) {
               this.imgload = false;
               if (JSON.parse(res.imgUrl).length) {
+                item.title = res.title;
                 item.ProcessImgs = item.ProcessImgs.slice(0, 4);
                 let shotArr = JSON.parse(res.imgUrl);
                 shotArr = shotArr.length > 4 ? shotArr.splice(0, 3) : shotArr;

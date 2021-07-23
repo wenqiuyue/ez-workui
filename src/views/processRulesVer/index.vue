@@ -42,6 +42,15 @@
           >
           </el-table-column>
           <el-table-column
+            label="是否为默认"
+            :show-overflow-tooltip="true"
+            prop="IsSystem"
+          >
+            <template slot-scope="scope">{{
+              scope.row.IsStart ? "是" : "否"
+            }}</template>
+          </el-table-column>
+          <el-table-column
             label="创建时间"
             :show-overflow-tooltip="true"
             prop="name"
@@ -68,6 +77,16 @@
                 size="mini"
                 @click="handleEdit(scope.row)"
                 >编辑</el-button
+              >
+              <el-button type="danger" size="mini" @click="handleDel(scope.row)"
+                >删除</el-button
+              >
+              <el-button
+                type="start"
+                size="mini"
+                @click="handleStart(scope.row)"
+                v-if="!scope.row.IsStart"
+                >默认</el-button
               >
             </template>
           </el-table-column>
@@ -134,6 +153,24 @@ export default {
   },
   methods: {
     /**
+     * 启用配置组
+     */
+    handleStart(val) {
+      this.$http
+        .post("/Management/ConfigGroupManagement/UpdateSystemStart.ashx", {
+          tcId: val.Id,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              message: resp.msg,
+              type: "success",
+            });
+            this.getDataList();
+          }
+        });
+    },
+    /**
      * 返回到版本列表
      */
     handleVerList() {
@@ -147,15 +184,15 @@ export default {
       this.isInfoView = true;
     },
     // 删除某一行
-    handleDelt(row) {
-      this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
+    handleDel(row) {
+      this.$confirm("此操作将删除此版本, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
           let params = {
-            id: [row.ID],
+            Ids: [row.Id],
           };
           this.comDelete(params);
         })
@@ -163,7 +200,10 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post("/ProgressGroup/DelProgressGroup.ashx", params)
+        .post(
+          "/Management/ConfigGroupManagement/DelSystemConfigGroup.ashx",
+          params
+        )
         .then((result) => {
           if (result.res == 0) {
             this.$message({
@@ -225,6 +265,15 @@ export default {
   height: 100%;
   .ver {
     height: 100%;
+  }
+  .el-button--start {
+    color: #fff;
+    background-color: #02ce90;
+    border-color: #02ce90;
+    &:hover {
+      background-color: #02df9b;
+      border-color: #02df9b;
+    }
   }
 }
 </style>

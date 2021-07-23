@@ -27,7 +27,7 @@
             <el-form-item label="名称：" prop="name" style="width: 100%">
               <el-input
                 v-model="formData.name"
-                placeholder="请填写进程组名称"
+                placeholder="请填写部门名称"
                 v-if="editState"
                 :style="{ width: comWidth }"
                 clearable
@@ -80,7 +80,7 @@ export default {
         name: [
           {
             required: true,
-            message: "请输入进程组名称",
+            message: "请输入部门名称",
             trigger: "blur",
           },
           {

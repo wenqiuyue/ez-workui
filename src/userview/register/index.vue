@@ -31,11 +31,14 @@
                   placeholder="请输入电话号码"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="addres" class="emali">
+              <el-form-item
+                prop="addres"
+                :class="`emali ${timer ? ' notgetcode' : ''}`"
+              >
                 <el-input v-model="ruleForm.addres" placeholder="请输入邮箱"
                   ><div slot="append" @click="handleGetCode">
                     <i class="el-icon-loading" v-if="codeLoading"></i>
-                    获取验证码
+                    {{ timer ? `剩余${count}秒` : "获取验证码" }}
                   </div></el-input
                 >
               </el-form-item>
@@ -66,6 +69,9 @@
 export default {
   data() {
     return {
+      timer: null,
+      count: null,
+
       codeLoading: false, //获取验证码加载
       loading: false,
       ruleForm: {
@@ -126,11 +132,32 @@ export default {
       },
     };
   },
+  destroyed() {
+    clearInterval(this.timer);
+    this.timer = null;
+  },
   methods: {
+    getCode() {
+      const TIME_COUNT = 60;
+      if (!this.timer) {
+        this.count = TIME_COUNT;
+        this.timer = setInterval(() => {
+          if (this.count > 0 && this.count <= TIME_COUNT) {
+            this.count--;
+          } else {
+            clearInterval(this.timer);
+            this.timer = null;
+          }
+        }, 1000);
+      }
+    },
     /**
      * 获取邮箱验证码
      */
     handleGetCode() {
+      if (this.timer) {
+        return;
+      }
       this.$refs.ruleForm.validateField("addres", (email_check) => {
         if (email_check) {
           return;
@@ -147,6 +174,7 @@ export default {
                   message: "验证码发送成功",
                   type: "success",
                 });
+                this.getCode();
               }
             })
             .finally(() => (this.codeLoading = false));
@@ -290,6 +318,13 @@ export default {
         background-color: #409eff;
         color: #ffffff;
         cursor: pointer;
+      }
+    }
+    /deep/.notgetcode {
+      .el-input-group__append {
+        background-color: #ebeef5;
+        color: #909399;
+        cursor: no-drop;
       }
     }
   }

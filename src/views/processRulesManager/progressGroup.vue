@@ -29,7 +29,7 @@
           </div>
         </template>
         <el-table-column
-          label="进程组名称"
+          label="部门名称"
           :show-overflow-tooltip="true"
           fixed
           prop="Name"
@@ -115,7 +115,7 @@ export default {
         dropDown: {
           // Input组件们的：右侧共同属性
           searchInput: {
-            placeholder: "请输入进程组名称",
+            placeholder: "请输入部门名称",
           },
         },
       },
@@ -183,7 +183,7 @@ export default {
     openWin(ty, code, proName) {
       this.indexData = {
         type: ty === "ad" ? "Add" : "Edit",
-        name: ty === "ad" ? "添加进程组" : "编辑进程组",
+        name: ty === "ad" ? "添加部门" : "编辑部门",
         departmentCode: code,
         proName: proName,
         xModalName: "proGroupWindow",

@@ -25,7 +25,7 @@
           {{ scope.row.Shape | getShape }}
         </template></el-table-column
       > -->
-      <el-table-column label="进程" prop="Shape" align="center"
+      <el-table-column label="部门" prop="Shape" align="center"
         ><template slot-scope="scope">
           {{ scope.row.ProgressGroupName ? scope.row.ProgressGroupName : "无" }}
         </template></el-table-column

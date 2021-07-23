@@ -50,7 +50,7 @@ export default {
     tabList: [
       {
         value: 1,
-        label: "进程组设置",
+        label: "部门设置",
       },
       {
         value: 2,
