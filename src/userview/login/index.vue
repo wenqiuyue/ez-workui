@@ -2,7 +2,7 @@
   <!-- 李俊豪 -->
   <div class="login-wrap">
     <div>
-     <img id="banner" src="@/assets/img/ll.jpg" />
+      <img id="banner" src="@/assets/img/ll.jpg" />
       <div id="login">
         <div>
           <div id="title">
@@ -14,7 +14,7 @@
           <div id="loginForm" @keyup.enter="login" v-if="showLogin">
             <el-input
               v-model="input"
-              placeholder="请输入你的账户"
+              placeholder="请输入你的账户/邮箱"
               :autofocus="true"
               suffix-icon="el-icon-user"
             ></el-input>

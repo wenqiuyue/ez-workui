@@ -22,7 +22,7 @@
           @change="handleChange"
         >
         </el-date-picker>
-        至
+        <div style="background: #ffffff">至</div>
         <el-date-picker
           v-model="timeEnd"
           type="date"
@@ -31,74 +31,74 @@
         >
         </el-date-picker>
       </div>
-      <div
-        class="content_modal"
-        v-if="progressPhotoArr && progressPhotoArr.length"
-      >
-        <div class="time_line" v-loading="loading">
-          <el-timeline>
-            <el-timeline-item
-              :timestamp="value.time.timeFormat('yyyy-MM-dd HH:mm:ss')"
-              placement="top"
-              v-for="(value, index) in progressPhotoArr"
-              :key="index"
-              color="#409eFF"
-            >
-              <el-card>
-                <h4>
-                  <span>
-                    <span>进程名：{{ value.pname }} </span>
-                    <span
-                      >别名：
-                      <template
-                        v-if="
-                          value.FocusFormAlias && value.FocusFormAlias.length
-                        "
-                        ><label
-                          v-for="(nitem, index) in value.FocusFormAlias"
-                          :key="index"
-                          >{{ index == 0 ? nitem : `、${nitem}` }}</label
-                        ></template
-                      >
-                      <label v-else>无</label>
+      <div class="content_modal" v-loading="loading">
+        <template v-if="progressPhotoArr && progressPhotoArr.length">
+          <div class="time_line">
+            <el-timeline>
+              <el-timeline-item
+                :timestamp="value.time.timeFormat('yyyy-MM-dd HH:mm:ss')"
+                placement="top"
+                v-for="(value, index) in progressPhotoArr"
+                :key="index"
+                color="#409eFF"
+              >
+                <el-card>
+                  <h4>
+                    <span>
+                      <span>进程名：{{ value.pname }} </span>
+                      <span
+                        >别名：
+                        <template
+                          v-if="
+                            value.FocusFormAlias && value.FocusFormAlias.length
+                          "
+                          ><label
+                            v-for="(nitem, index) in value.FocusFormAlias"
+                            :key="index"
+                            >{{ index == 0 ? nitem : `、${nitem}` }}</label
+                          ></template
+                        >
+                        <label v-else>无</label>
+                      </span>
                     </span>
-                  </span>
-                  <span
-                    ><span>窗口名：{{ value.fname }}</span>
                     <span
-                      >状态：
-                      <template
-                        v-if="
-                          value.FocusFormStatus && value.FocusFormStatus.length
-                        "
-                        ><label
-                          v-for="(nitem, index) in value.FocusFormStatus"
-                          :key="index"
-                          >{{ index == 0 ? nitem : `、${nitem}` }}</label
-                        ></template
-                      >
-                      <label v-else>无</label>
-                    </span></span
+                      ><span>窗口名：{{ value.fname }}</span>
+                      <span
+                        >状态：
+                        <template
+                          v-if="
+                            value.FocusFormStatus &&
+                            value.FocusFormStatus.length
+                          "
+                          ><label
+                            v-for="(nitem, index) in value.FocusFormStatus"
+                            :key="index"
+                            >{{ index == 0 ? nitem : `、${nitem}` }}</label
+                          ></template
+                        >
+                        <label v-else>无</label>
+                      </span></span
+                    >
+                  </h4>
+                  <el-image
+                    style="max-width: 200px"
+                    :src="cmurl + value.imgURL"
+                    alt=""
+                    :preview-src-list="[cmurl + value.imgURL]"
                   >
-                </h4>
-                <el-image
-                  style="max-width: 200px"
-                  :src="cmurl + value.imgURL"
-                  alt=""
-                  :preview-src-list="[cmurl + value.imgURL]"
-                >
-                </el-image>
-              </el-card>
-            </el-timeline-item>
-          </el-timeline>
+                  </el-image>
+                </el-card>
+              </el-timeline-item>
+            </el-timeline>
+          </div>
+          <div v-if="name != 'staffDataPic'">
+            <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
+          </div>
+        </template>
+        <div class="empty-proccess-list" v-else>
+          <img src="../../assets/img/emptyTask.png" alt="" />
+          <p>暂无进程截图</p>
         </div>
-        <div v-if="name != 'staffDataPic'">
-          <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
-        </div>
-      </div>
-      <div class="empty-proccess-list" v-else>
-        <img src="../../assets/img/emptyTask.png" alt="" />
-        <p>暂无进程截图</p>
       </div>
     </XModal>
   </div>
@@ -325,6 +325,9 @@ export default {
     }
   }
   .header_sel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     color: #606266;
     font-size: 1.4rem;
     .el-date-editor {

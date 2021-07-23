@@ -101,6 +101,16 @@
             header-align="center"
           ></el-table-column>
           <el-table-column
+            label="状态"
+            prop="IsGNameStatus"
+            width="80"
+            align="center"
+            header-align="center"
+            ><template slot-scope="scope">
+              {{ scope.row.IsGNameStatus ? "可用" : "不可用" }}
+            </template></el-table-column
+          >
+          <el-table-column
             label="进程名"
             prop="Pname"
             show-overflow-tooltip

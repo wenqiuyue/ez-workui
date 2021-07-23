@@ -36,7 +36,8 @@
             <h3>
               本<span v-if="selActiveTime">日</span
               ><span v-else-if="dateType == 1">周</span
-              ><span v-else>月</span>工作状态占比
+              ><span v-else-if="dateType == 2">月</span
+              ><span v-else>时间段</span>工作状态占比
             </h3>
             <div class="info">
               <Staechart
@@ -50,7 +51,8 @@
             <h3>
               本<span v-if="selActiveTime">日</span
               ><span v-else-if="dateType == 1">周</span
-              ><span v-else>月</span>使用软件占比
+              ><span v-else-if="dateType == 2">月</span
+              ><span v-else>时间段</span>使用软件占比
             </h3>
             <div class="info">
               <Staechart
@@ -378,7 +380,7 @@ export default {
           arr.push(date.timeFormat("yyyy-MM-dd"));
         }
         this.ulTimeArr = arr;
-      } else {
+      } else if (this.dateType == 2) {
         //获取当月日期
         const curDate = new Date(this.selDate);
         //该月的天数
@@ -397,6 +399,17 @@ export default {
           }
           let date = new Date(this.selDate);
           date.setDate(i);
+          arr.push(date.timeFormat("yyyy-MM-dd"));
+        }
+        this.ulTimeArr = arr;
+      } else {
+        //按时间段
+        const time = Date.parse(new Date(this.stime));
+        const lasttime = Date.parse(new Date(this.etime));
+        const day = parseInt((lasttime - time) / (1000 * 60 * 60 * 24));
+        for (let i = 0; i <= day; i++) {
+          let date = new Date(this.stime);
+          date.setDate(date.getDate() + i);
           arr.push(date.timeFormat("yyyy-MM-dd"));
         }
         this.ulTimeArr = arr;

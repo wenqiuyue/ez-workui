@@ -76,7 +76,7 @@
                 format="yyyy 第 WW 周"
                 placeholder="选择周"
                 value-format="yyyy-MM-dd"
-                v-if="dateType == 1"
+                v-show="dateType == 1"
                 :clearable="false"
                 @change="dateChange"
                 :picker-options="{ firstDayOfWeek: 1 }"
@@ -91,7 +91,16 @@
                 :clearable="false"
                 :picker-options="pickOption"
                 @change="dateChange"
-                v-else
+                v-show="dateType == 2"
+              >
+              </el-date-picker>
+              <el-date-picker
+                v-model="DateRange"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                v-show="dateType == 3"
               >
               </el-date-picker>
             </div>
@@ -290,6 +299,14 @@ export default {
   },
   data() {
     return {
+      DateRange: [
+        new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          new Date().getDate() - 7
+        ),
+        new Date(),
+      ],
       imgload: false,
       userID: "",
       timer: null,
@@ -496,8 +513,13 @@ export default {
         wk = new Date(seldate.setDate(seldate.getDate() - 1)).timeFormat(
           "yyyy-MM-dd"
         );
-      } else {
+      } else if (this.dateType == 2) {
         wk = this.selDate;
+      } else {
+        wk =
+          this.DateRange && this.DateRange.length
+            ? this.DateRange[0].timeFormat("yyyy-MM-dd")
+            : null;
       }
       const data = {
         p: this.pageData.pageIndex,
@@ -506,6 +528,10 @@ export default {
         dt: this.dateType,
         us: this.selMem.map((m) => m.UsId),
         teamId: this.teamValue,
+        edate:
+          this.dateType == 3 && this.DateRange && this.DateRange.length
+            ? this.DateRange[1].timeFormat("yyyy-MM-dd")
+            : null,
       };
       this.$http
         .post("/User/MemberPeriod.ashx", data)
@@ -692,7 +718,7 @@ export default {
           display: flex;
 
           /deep/.el-select {
-            width: 10rem;
+            width: 13rem;
 
             /deep/.el-input__inner {
               border-radius: 4px 0 0 4px;
@@ -702,6 +728,16 @@ export default {
           /deep/.el-date-editor {
             /deep/.el-input__inner {
               border-radius: 0px 4px 4px 0px;
+            }
+          }
+          /deep/ .el-date-editor--daterange {
+            background-color: #f8f8f8;
+            border: none;
+            .el-range-input {
+              background-color: #f8f8f8;
+            }
+            .el-range-separator {
+              width: 7%;
             }
           }
         }

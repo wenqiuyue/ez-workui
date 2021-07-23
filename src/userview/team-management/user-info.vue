@@ -35,10 +35,16 @@
             >
             <el-col :span="12" v-if="!editState"
               ><div class="info_list">
-                <span class="info_lable">进程：</span>
+                <span class="info_lable">进程组：</span>
                 {{
                   selUser.ProgressGroupName ? selUser.ProgressGroupName : "无"
                 }}
+              </div></el-col
+            >
+            <el-col :span="12" v-if="!editState"
+              ><div class="info_list">
+                <span class="info_lable">进程组状态：</span>
+                {{ selUser.IsGNameStatus ? "可用" : "不可用" }}
               </div></el-col
             >
             <el-col :span="12" v-if="!editState"

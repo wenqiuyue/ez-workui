@@ -10,10 +10,10 @@
               <img class="pc" src="@/assets/main/main.png" />
             </div>
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm">
-              <el-form-item prop="UseName">
+              <el-form-item prop="Name">
                 <el-input
-                  v-model="ruleForm.UseName"
-                  placeholder="请输入你的账户"
+                  v-model="ruleForm.Name"
+                  placeholder="请输入你的姓名"
                   :autofocus="true"
                   suffix-icon="el-icon-user"
                 ></el-input>
@@ -31,10 +31,18 @@
                   placeholder="请输入电话号码"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="addres">
+              <el-form-item prop="addres" class="emali">
+                <el-input v-model="ruleForm.addres" placeholder="请输入邮箱"
+                  ><div slot="append" @click="handleGetCode">
+                    <i class="el-icon-loading" v-if="codeLoading"></i>
+                    获取验证码
+                  </div></el-input
+                >
+              </el-form-item>
+              <el-form-item prop="code">
                 <el-input
-                  v-model="ruleForm.addres"
-                  placeholder="请输入邮箱"
+                  v-model="ruleForm.code"
+                  placeholder="请输入邮箱验证码"
                 ></el-input>
               </el-form-item>
             </el-form>
@@ -58,18 +66,20 @@
 export default {
   data() {
     return {
+      codeLoading: false, //获取验证码加载
       loading: false,
       ruleForm: {
-        UseName: null,
+        Name: null,
         Pwd: null,
         Phone: null,
         addres: null,
+        code: null,
       },
       rules: {
-        UseName: [
+        Name: [
           {
             required: true,
-            message: "请输入你的账户",
+            message: "请输入你的姓名",
             trigger: "blur",
           },
         ],
@@ -90,7 +100,7 @@ export default {
         Phone: [
           {
             required: true,
-            message: "请输入联系方式",
+            message: "请输入电话号码",
             trigger: "blur",
           },
         ],
@@ -106,10 +116,43 @@ export default {
             trigger: ["blur", "change"],
           },
         ],
+        code: [
+          {
+            required: true,
+            message: "请输入邮箱验证码",
+            trigger: "blur",
+          },
+        ],
       },
     };
   },
   methods: {
+    /**
+     * 获取邮箱验证码
+     */
+    handleGetCode() {
+      this.$refs.ruleForm.validateField("addres", (email_check) => {
+        if (email_check) {
+          return;
+        } else {
+          this.codeLoading = true;
+          this.$http
+            .post("/User/SendEmailVerificationCode.ashx", {
+              email: this.ruleForm.addres,
+            })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  showClose: true,
+                  message: "验证码发送成功",
+                  type: "success",
+                });
+              }
+            })
+            .finally(() => (this.codeLoading = false));
+        }
+      });
+    },
     /**
      * 点击登录
      */
@@ -216,12 +259,15 @@ export default {
   }
 
   #registerForm {
-    margin-top: 5rem;
+    margin-top: 2rem;
     width: 100%;
     text-align: center;
     transition: all 0.5s ease;
-    .title{
-      margin-bottom:4rem;
+    .title {
+      margin-bottom: 2rem;
+      img {
+        height: 90px;
+      }
     }
     /deep/ .el-input {
       .el-input__inner {
@@ -239,11 +285,18 @@ export default {
     .el-autocomplete {
       display: block;
     }
+    /deep/.emali {
+      .el-input-group__append {
+        background-color: #409eff;
+        color: #ffffff;
+        cursor: pointer;
+      }
+    }
   }
 }
 
 .v-button {
-  margin-top: 3rem;
+  margin-top: 2rem;
   background: linear-gradient(
     90deg,
     rgba(97, 193, 254, 1) 0%,

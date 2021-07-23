@@ -26,6 +26,7 @@
           >
             <el-option label="所有团队" :value="2"> </el-option>
             <el-option label="我创建的团队" :value="3"> </el-option>
+            <el-option label="我管理的团队" :value="4"> </el-option>
           </el-select>
           <div class="search">
             <el-input

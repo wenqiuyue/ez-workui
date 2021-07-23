@@ -20,14 +20,19 @@
           {{ scope.row.MType == 1 ? "成员" : "管理员" }}
         </template></el-table-column
       >
-      <el-table-column label="状态" prop="Shape" align="center"
+      <!-- <el-table-column label="用户状态" prop="Shape" align="center"
         ><template slot-scope="scope">
           {{ scope.row.Shape | getShape }}
         </template></el-table-column
-      >
+      > -->
       <el-table-column label="进程" prop="Shape" align="center"
         ><template slot-scope="scope">
           {{ scope.row.ProgressGroupName ? scope.row.ProgressGroupName : "无" }}
+        </template></el-table-column
+      >
+      <el-table-column label="进程状态" prop="IsGNameStatus" align="center"
+        ><template slot-scope="scope">
+          {{ scope.row.IsGNameStatus ? "可用" : "不可用" }}
         </template></el-table-column
       >
       <el-table-column label="可查看成员" prop="MemberCount" align="center"

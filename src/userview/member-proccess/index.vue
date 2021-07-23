@@ -83,7 +83,9 @@
                     </div>
                     <div class="taskDes">
                       <div class="progress">
-                        正在运行进程：{{
+                        {{
+                          item.ClientStatus == 0 ? "上一次" : "正在"
+                        }}运行进程：{{
                           item.ProcessName == null ? "无" : item.ProcessName
                         }}
                       </div>
@@ -217,7 +219,9 @@
                       </template>
                       <div class="active-content">
                         <p class="active-name">
-                          正在运行的程序：{{
+                          {{
+                            item.ClientStatus == 0 ? "上一次" : "正在"
+                          }}运行的程序：{{
                             item.ProcessName == null ? "无" : item.ProcessName
                           }}
                         </p>
