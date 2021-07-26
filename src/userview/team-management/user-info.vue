@@ -175,10 +175,12 @@ export default {
     getDataList() {
       let params = {
         teamId: this.teamId,
-        configId: null,
       };
       this.$http
-        .post("/User/GetProgressGroupSelected.ashx", params)
+        .post(
+          "/Management/ProgressManagement/GetProgressGroupMeberSelected.ashx",
+          params
+        )
         .then((result) => {
           if (result.res == 0) {
             this.options = result.data;

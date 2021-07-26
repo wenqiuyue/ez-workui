@@ -170,6 +170,8 @@
       ref="xmodal"
       name="editProgressModal"
       title="标记进程"
+      width="45%"
+      @opened="GetProgressRule"
     >
       <el-form
         v-show="xmodalTip.activeStep == 1"
@@ -183,21 +185,96 @@
         >
         <el-form-item label="标记的进程规则：" prop="g">
           <el-select
-            placeholder="请选择标记的进程规则（可多选）"
-            multiple
+            placeholder="请选择标记的进程规则"
             v-model="editParams.rIds"
             filterable
+            @change="getMarkModalDataById"
           >
             <el-option
               v-for="g in options.g.filter((m) => m.Id)"
               :key="g.Id"
               :value="g.Id"
               :label="g.RuleName"
-            ></el-option>
+              ><span style="float: left">{{ g.RuleName }}</span>
+              <span
+                style="float: right; color: #67c23a; font-size: 13px"
+                v-if="g.IsLable"
+                >已标记</span
+              ></el-option
+            >
           </el-select>
         </el-form-item>
+        <el-form-item class="rule_item">
+          <div class="rule-wrapper">
+            <div class="item">
+              <ul>
+                <li class="row marginB">
+                  <div class="flex">
+                    <span>进程名</span>
+                    <div
+                      class="check-wrapper"
+                      :style="
+                        loadForm.radio
+                          ? 'borderColor:#409eff;width: 14rem;'
+                          : 'width: 14rem'
+                      "
+                    >
+                      <el-checkbox v-model="loadForm.radio"
+                        >作用于所有进程</el-checkbox
+                      >
+                    </div>
+                  </div>
+                  <div class="add" @click="addMore(1)" v-if="!loadForm.radio">
+                    <i class="el-icon-plus"></i>
+                  </div>
+                </li>
+              </ul>
 
-        <el-form-item>
+              <div
+                class="input"
+                v-for="(item, index) in loadForm.pn"
+                :key="index"
+                v-if="!loadForm.radio"
+              >
+                <el-input v-model="loadForm.pn[index]"></el-input>
+                <i
+                  class="hiFont hi-delete"
+                  @click="
+                    () => {
+                      loadForm.pn.splice(index, 1);
+                    }
+                  "
+                ></i>
+              </div>
+            </div>
+            <div class="item">
+              <ul>
+                <li class="row marginB">
+                  <span>匹配的关键词名</span>
+                  <div class="add" @click="addMore(2)">
+                    <i class="el-icon-plus"></i>
+                  </div>
+                </li>
+              </ul>
+              <div
+                class="input"
+                v-for="(item, index) in loadForm.word"
+                :key="index"
+              >
+                <el-input v-model="loadForm.word[index]"></el-input>
+                <i
+                  class="hiFont hi-delete"
+                  @click="
+                    () => {
+                      loadForm.word.splice(index, 1);
+                    }
+                  "
+                ></i>
+              </div>
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item class="btn_item">
           <el-button @click="onSubmit" :loading="submitLoading"
             >立即标记</el-button
           >
@@ -370,6 +447,14 @@ export default {
         rIds: [],
         configId: null,
         teamId: null,
+        pnames: null,
+        fnames: null,
+      },
+      //标记弹窗的进程名和关键词
+      loadForm: {
+        word: [undefined, undefined, undefined, undefined, undefined],
+        pn: [undefined, undefined, undefined, undefined, undefined],
+        radio: false,
       },
       xmodalTip: {
         editCount: 0, //修改总数
@@ -410,6 +495,53 @@ export default {
   },
   methods: {
     /**
+     * 标记弹窗根据规则id获取系统进程名和关键字
+     */
+    getMarkModalDataById() {
+      Promise.all([
+        this.$http.get("/ProcessRules/GetProcessFormNameSelect.ashx", {
+          params: { rId: this.editParams.rIds, teamId: this.teamValue },
+        }),
+        this.$http.get("/ProcessRules/GetProcessPNameSelect.ashx", {
+          params: { rId: this.editParams.rIds, teamId: this.teamValue },
+        }),
+      ]).then((resp) => {
+        if (resp[0].res == 0) {
+          if (resp[0].data && resp[0].data.length) {
+            this.loadForm.word = resp[0].data;
+          }
+        }
+        if (resp[1].res == 0) {
+          if (resp[1].data && resp[1].data.length) {
+            this.loadForm.radio = false;
+            this.loadForm.pn = resp[1].data;
+          } else {
+            this.loadForm.radio = true;
+          }
+        }
+      });
+    },
+    /**
+     * 标记弹窗，进程名和关键词的添加
+     */
+    addMore(type) {
+      if (type == 1) {
+        let arr = this.loadForm.pn.filter((item) => {
+          return item == undefined || "";
+        });
+        if (!arr.length) {
+          this.loadForm.pn.unshift(undefined);
+        }
+      } else {
+        let arr = this.loadForm.word.filter((item) => {
+          return item == undefined || "";
+        });
+        if (!arr.length) {
+          this.loadForm.word.unshift(undefined);
+        }
+      }
+    },
+    /**
      * 分页
      */
     handlePaginationChange(val) {
@@ -433,6 +565,7 @@ export default {
         .post("/Progress/GetProcessRulesSelects.ashx", {
           configId: this.selRow.Id,
           teamId: this.teamValue,
+          pIds: this.editSelection.map((m) => m.ID),
         })
         .then((resp) => {
           if (resp.res == 0) {
@@ -511,6 +644,7 @@ export default {
     //标记
     editProgress(type) {
       Object.assign(this.$data.editParams, this.$options.data().editParams);
+      Object.assign(this.$data.loadForm, this.$options.data().loadForm);
       this.xmodalTip.activeStep = 1;
       this.submitLoading = false;
       this.showUsers = null;
@@ -564,12 +698,33 @@ export default {
     },
     //提交标记
     onSubmit() {
+      let str = null;
+      if (
+        !this.loadForm.radio &&
+        this.loadForm.pn.filter((m) => m).length == 0
+      ) {
+        str = "请至少输入一个进程名称";
+      }
+      if (!this.editParams.rIds) {
+        str = "请选择标记的进程规则";
+      }
+      if (str) {
+        this.$message({
+          type: "warning",
+          message: str,
+        });
+        return;
+      }
       this.editParams.pname = this.requestParams.pn;
       this.editParams.wordtype = this.requestParams.od;
       this.editParams.word = this.requestParams.word;
       this.editParams.pIds = this.editSelection.map((m) => m.ID);
       this.editParams.configId = this.selRow.Id;
       this.editParams.teamId = this.teamValue;
+      this.editParams.pnames = this.loadForm.radio
+        ? []
+        : this.loadForm.pn.filter((m) => m);
+      this.editParams.fnames = this.loadForm.word.filter((m) => m);
       this.markProgress();
     },
     //清晰度
@@ -594,8 +749,8 @@ export default {
     this.getData();
   },
   mounted() {
-    this.GetProgressRule();
     this.getProgress();
+    this.GetProgressRule();
   },
 };
 </script>
@@ -612,6 +767,135 @@ export default {
 
   /deep/.el-input {
     width: 90%;
+  }
+  .rule_item {
+    padding: 0 8px;
+    /deep/.el-form-item__content {
+      margin-left: 0 !important;
+    }
+    .rule-wrapper {
+      display: flex;
+      border-bottom: 1px solid #ccc;
+      border-top: 1px solid #ccc;
+      height: 46rem;
+
+      .item {
+        flex: 1;
+        box-sizing: border-box;
+        padding: 1rem;
+        border-right: 1px solid #ccc;
+
+        overflow: auto;
+
+        ul {
+          li {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+
+            span {
+              font-size: 1.5rem;
+              color: #4a4a4a;
+              font-weight: bold;
+              margin-bottom: 1rem;
+            }
+          }
+
+          .row {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+
+            span {
+              margin-bottom: 0;
+            }
+
+            /deep/.el-checkbox__inner {
+              border-radius: 50%;
+            }
+
+            /deep/.el-checkbox__label {
+              top: 0.5px;
+            }
+
+            .check-wrapper {
+              width: 15rem;
+              height: 3rem;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+          }
+          .marginB {
+            margin-bottom: 1rem;
+          }
+          .flex {
+            display: flex;
+            align-items: center;
+            span {
+              margin-right: 1rem;
+            }
+          }
+
+          .add {
+            width: 3.5rem;
+            height: 2.5rem;
+            border: 1px solid #bbb;
+            border-radius: 0.4rem;
+            text-align: center;
+            cursor: pointer;
+            line-height: 2.5rem;
+            i {
+              color: #4a4a4a;
+              font-size: 2rem;
+            }
+
+            &:hover {
+              border-color: #409eff;
+
+              i {
+                color: #409eff;
+              }
+            }
+          }
+        }
+      }
+      .item:first-child {
+        border-left: 1px solid #ccc;
+      }
+
+      .input {
+        display: flex;
+        margin-bottom: 1rem;
+        align-items: center;
+
+        .el-input {
+          width: 85%;
+          // width: 22rem;
+          margin-right: 10%;
+        }
+
+        i {
+          flex: 0 0 3.5rem;
+          text-align: center;
+          font-size: 2rem;
+          color: #4a4a4a;
+          cursor: pointer;
+
+          &:hover {
+            color: #409eff;
+          }
+        }
+      }
+    }
+  }
+  .btn_item {
+    padding: 0 8px;
+    /deep/.el-form-item__content {
+      margin-left: 0 !important;
+    }
   }
 }
 
