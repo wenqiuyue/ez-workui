@@ -328,7 +328,6 @@ export default {
     color: #fff;
     padding: 0.1rem 1rem;
     background: linear-gradient(-55deg, #448ef5, #69a4f7);
-    box-shadow: 0 2px 3px rgb(0 0 0 / 10%);
     border-radius: 1rem 0.8rem;
   }
 }

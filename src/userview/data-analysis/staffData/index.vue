@@ -294,7 +294,7 @@ export default {
               });
               //高频关键词
               this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-                (m, index) => index < 30
+                (m, index) => index < 20
               );
               //时间轴与使用软件、定期截图数据
               this.softData = resp.data.TimeLine;
@@ -331,7 +331,7 @@ export default {
               });
               //高频关键词
               this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-                (m, index) => index < 30
+                (m, index) => index < 20
               );
               //时间轴与使用软件、定期截图数据
               this.softData = resp.data.TimeLine;
@@ -495,6 +495,7 @@ export default {
       .info {
         display: flex;
         flex-wrap: wrap;
+        margin-top: 10px;
         .i_text {
           cursor: pointer;
           margin: 5px 5px 5px 0;

@@ -30,18 +30,16 @@
               }}
             </template></el-table-column
           >
-          <el-table-column fixed="right" label="操作">
+          <el-table-column fixed="right" label="操作" width="170">
             <template slot-scope="scope">
               <el-button
+                v-if="!scope.row.IsSystem"
                 type="primary"
-                size="small"
+                size="mini"
                 @click="handleView(scope.row)"
                 >编辑</el-button
               >
-              <el-button
-                type="danger"
-                size="small"
-                @click="handleDel(scope.row)"
+              <el-button type="danger" size="mini" @click="handleDel(scope.row)"
                 >删除</el-button
               >
             </template>
@@ -169,5 +167,10 @@ export default {
 <style lang="less" scoped>
 #roleManagement {
   height: 100%;
+  /deep/.el-table__row {
+    td:last-child {
+      text-align: left !important;
+    }
+  }
 }
 </style>

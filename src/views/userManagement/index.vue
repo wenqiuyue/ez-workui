@@ -56,14 +56,14 @@
                 >启用</el-button
               >
               <el-button
-                v-if="scope.row.Shape == 1"
+                v-if="scope.row.Shape == 1 && !scope.row.IsSystem"
                 type="warning"
                 size="mini"
                 @click="handleDel(scope.row, 0)"
                 >禁用</el-button
               >
               <el-button
-                v-if="scope.row.Shape == 1"
+                v-if="scope.row.Shape == 1 && !scope.row.IsSystem" 
                 type="danger"
                 size="mini"
                 @click="handleDel(scope.row, -1)"
@@ -74,7 +74,7 @@
         </el-table>
       </template>
       <template #pages>
-        <CPages v-model="pageData" @eventComfirm="handlePaginationChange" />
+        <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
       </template>
     </CContent>
     <UserInfo :selRow="selRow" @success="getTableList"></UserInfo>
@@ -210,5 +210,10 @@ export default {
 <style lang="less" scoped>
 #UserManagement {
   height: 100%;
+  /deep/.el-table__row{
+    td:last-child{
+      text-align: left !important;
+    }
+  }
 }
 </style>

@@ -13,7 +13,7 @@
             <el-col :span="12"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
-                {{ selUser.MType == 1 ? "成员" : "管理人" }}
+                {{ selUser.MType == 1 ? "成员" : "管理员" }}
               </div></el-col
             >
 
@@ -49,7 +49,12 @@
             <el-col :span="24"
               ><div class="info_list">
                 <span class="info_lable">可见成员：</span>
-                <div v-if="selUser.VisibleUser && selUser.VisibleUser.length">
+                <span v-if="selUser.MType == 2 && !selUser.VisibleUser.length"
+                  >全部成员</span
+                >
+                <div
+                  v-else-if="selUser.VisibleUser && selUser.VisibleUser.length"
+                >
                   <ul class="mem-imgs">
                     <li
                       v-for="(item, index) in selUser.VisibleUser"

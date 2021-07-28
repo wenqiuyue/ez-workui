@@ -63,7 +63,7 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" min-width="110">
+          <el-table-column label="操作">
             <!-- fixed  -->
             <template slot-scope="scope">
               <el-button
@@ -273,6 +273,11 @@ export default {
     &:hover {
       background-color: #02df9b;
       border-color: #02df9b;
+    }
+  }
+  /deep/.el-table__row {
+    td:last-child {
+      text-align: left !important;
     }
   }
 }
