@@ -1,34 +1,18 @@
 <template>
   <div id="process-rulesver">
     <div class="ver" v-if="!isInfoView">
-      <Header
-        title="进程规则管理"
-        titleEnglish="Process Rules Management"
-        class="baseHeader"
-      >
-      </Header>
       <c-content v-loading="loading">
         <div slot="search" class="header_con">
-          <div>
-            <el-select
-              v-model="teamValue"
-              filterable
-              placeholder="请选择团队"
-              @change="getDataList"
+          <div class="h_left">
+            <span @click="$emit('handleViewChange')"
+              ><i class="el-icon-d-arrow-left"></i
+              >{{ team ? team.Name : "" }}</span
             >
-              <el-option
-                v-for="item in teamOptions"
-                :key="item.Id"
-                :label="item.Name"
-                :value="item.Id"
-              >
-              </el-option>
-            </el-select>
           </div>
           <div>
             <el-button
               type="primary"
-              size="medium"
+              size="small"
               icon="el-icon-set-up"
               v-if="iSShowApplication"
               @click="handleCopy"
@@ -39,7 +23,7 @@
               type="primary"
               @click="addClick"
               icon="el-icon-circle-plus-outline"
-              size="medium"
+              size="small"
               >新增</el-button
             >
           </div>
@@ -161,16 +145,25 @@
 <script>
 export default {
   components: {
-    Header: () => import("@/components/Header"),
     CContent: () => import("@/components/CContent"),
     RuleSetting: () => import("../rule-setting"),
     VerModal: () => import("./verModal"),
+  },
+  props: {
+    //选择的团队Id
+    teamValue: {
+      type: Number,
+      default: null,
+    },
+    team: {
+      type: Object,
+      default: null,
+    },
   },
   data: () => ({
     copyLoading: false,
     iSShowApplication: false,
     isShowTeam: true,
-    teamValue: null, //选择的团队
     teamOptions: [],
     selRow: null,
     isInfoView: false,
@@ -424,6 +417,23 @@ export default {
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
+    background: #ffffff;
+    padding: 5px 10px;
+    .h_left {
+      color: #303133;
+      i {
+        margin-right: 10px;
+        font-size: 16px;
+      }
+      span {
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        &:hover {
+          color: #409eff;
+        }
+      }
+    }
     .el-select {
       margin-right: 12px;
     }

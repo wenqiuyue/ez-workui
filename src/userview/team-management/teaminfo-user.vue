@@ -1,33 +1,40 @@
 <template>
   <div id="teaminfo-user">
     <!-- 列表页 -->
-    <div class="info_header">
+    <div class="info_header" v-if="viewType != 3">
       <div class="h_left">
         <span @click="$emit('viewChange')"
-          ><i class="el-icon-d-arrow-left"></i
-          >{{ selRow ? selRow.Name : "" }}</span
+          ><i class="el-icon-d-arrow-left"></i>返回</span
+        >
+        <el-divider direction="vertical"></el-divider>
+        <span
+          @click="handleViewChange(1)"
+          :class="viewType == 1 ? ' active_span' : ''"
+          >团队信息</span
+        >
+        <el-divider direction="vertical"></el-divider>
+        <span
+          @click="handleViewChange(2)"
+          :class="viewType == 2 ? ' active_span' : ''"
+          >团队成员</span
         >
       </div>
-      <div class="h_right">
-        <el-button-group>
-          <el-button
-            :type="viewType == 1 ? 'primary' : 'info'"
-            icon="el-icon-arrow-left"
-            size="small"
-            @click="handleViewChange(1)"
-            >团队信息</el-button
-          >
-          <el-button
-            :type="viewType == 2 ? 'primary' : 'info'"
-            size="small"
-            @click="handleViewChange(2)"
-            >团队成员<i class="el-icon-arrow-right el-icon--right"></i
-          ></el-button>
-        </el-button-group>
-      </div>
     </div>
+    <!-- 团队成员列表 -->
     <UserList v-if="viewType == 2" :selRow="selRow"></UserList>
-    <TeamInfo v-else :selRow="selRow"></TeamInfo>
+    <!-- 团队详情 -->
+    <TeamInfo
+      v-else-if="viewType == 1"
+      :selRow="selRow"
+      @handleViewChange="handleViewChange"
+    ></TeamInfo>
+    <!-- 规则设置 -->
+    <RuleSetting
+      v-else
+      :teamValue="selRow.Id"
+      :team="selRow"
+      @handleViewChange="handleViewChange(1)"
+    ></RuleSetting>
   </div>
 </template>
 
@@ -36,6 +43,7 @@ export default {
   components: {
     UserList: () => import("./user-list"),
     TeamInfo: () => import("./team-info"),
+    RuleSetting: () => import("@/userview/process-rulesver"),
   },
   props: {
     //选择的团队
@@ -79,12 +87,13 @@ export default {
       span {
         font-size: 16px;
         font-weight: bold;
-      }
-      span:first-child {
         cursor: pointer;
         &:hover {
           color: #409eff;
         }
+      }
+      .active_span {
+        color: #409eff;
       }
     }
   }

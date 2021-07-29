@@ -13,11 +13,6 @@
               >编辑团队基础信息</el-button
             >
           </h3>
-          <!-- <div class="info_img">
-            <el-avatar
-              src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-            ></el-avatar>
-          </div> -->
           <div class="info_form" v-if="infoData">
             <ul>
               <li>
@@ -94,6 +89,23 @@
                 <span>{{
                   infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
                 }}</span>
+              </li>
+              <li class="set_rule">
+                <span class="lable"
+                  >应用的规则：{{
+                    infoData.Teamdata.TeamConfigName
+                      ? infoData.Teamdata.TeamConfigName
+                      : "无"
+                  }}</span
+                >
+                <el-button
+                  type="primary"
+                  size="mini"
+                  icon="el-icon-setting"
+                  v-if="infoData && infoData.Teamdata.UserMemberMType == 2"
+                  @click="$emit('handleViewChange', 3)"
+                  >设置</el-button
+                >
               </li>
               <li class="num_row">
                 <p>
@@ -361,6 +373,12 @@ export default {
             font-size: 12px;
             color: #e6a23c;
           }
+        }
+        .set_rule {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
         }
         .set_row {
           display: flex;

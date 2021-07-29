@@ -39,9 +39,10 @@
                 @click="handleView(scope.row)"
                 >编辑</el-button
               >
-              <el-button type="danger" size="mini" @click="handleDel(scope.row)"
+              <el-button v-if="!scope.row.IsSystem" type="danger" size="mini" @click="handleDel(scope.row)"
                 >删除</el-button
               >
+              <el-tag type="warning" v-if="scope.row.IsSystem">无操作权限</el-tag>
             </template>
           </el-table-column>
         </el-table>
@@ -167,10 +168,5 @@ export default {
 <style lang="less" scoped>
 #roleManagement {
   height: 100%;
-  /deep/.el-table__row {
-    td:last-child {
-      text-align: left !important;
-    }
-  }
 }
 </style>
