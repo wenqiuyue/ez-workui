@@ -11,6 +11,8 @@ if (window.location.protocol === "https:") {
 }
 if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   //***** 测试 *****
+  // SocketUrl += "47.106.90.178:711";
+  // axios.BaseUrl = "http://47.106.90.178:711";
   SocketUrl += "47.106.90.178:711";
   axios.BaseUrl = "http://47.106.90.178:711";
 } else {

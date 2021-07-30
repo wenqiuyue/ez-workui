@@ -276,14 +276,14 @@ export default {
     },
     /**
      * 右边顶部更多操作
-     * 1 邀请他人  2 创建团队  3 加入团队
+     * 1 邀请他人  2 创建团队  3 加入团队 4 清理团队数据库
      */
     handleCommand(val) {
       if (val == 2) {
         this.$modal.show("addTeam");
       } else if (val == 3) {
         this.$modal.show("joinTeam");
-      } else {
+      } else if (val == 1) {
         this.$modal.show("invitation");
       }
     },

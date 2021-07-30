@@ -14,7 +14,7 @@
             >
           </h3>
           <div class="info_form" v-if="infoData">
-            <ul>
+            <ul style="padding: 0 15px">
               <li>
                 <span class="lable">团队名称：</span>
                 <span>{{ infoData.Teamdata.Name }}</span>
@@ -90,9 +90,19 @@
                   infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
                 }}</span>
               </li>
+              <li>
+                <span class="lable">存储量：</span>
+                <span
+                  >{{
+                    infoData.Teamdata.OrderData.StorageLimits
+                      ? infoData.Teamdata.OrderData.StorageLimits
+                      : 0
+                  }}M</span
+                >
+              </li>
               <li class="set_rule">
                 <span class="lable"
-                  >应用的规则：{{
+                  >应用的设置：{{
                     infoData.Teamdata.TeamConfigName
                       ? infoData.Teamdata.TeamConfigName
                       : "无"
@@ -130,8 +140,10 @@
                   }}</span>
                 </p>
               </li>
-              <template v-if="infoData.Teamdata.UserMemberMType == 2">
-                <li><span class="lable">设置：</span></li>
+            </ul>
+            <div v-if="infoData.Teamdata.UserMemberMType == 2" class="card_li">
+              <ul>
+                <li class="card_title"><span>设置</span></li>
                 <li class="set_row">
                   <span>可否通过团队号加入</span>
                   <el-switch v-model="setOne" @change="changeSet"> </el-switch>
@@ -154,17 +166,87 @@
                     @keyup.enter.native="changeSet"
                   ></el-input>
                 </li>
-              </template>
-              <li style="margin-top: 32px">
-                <el-button
-                  type="primary"
-                  style="width: 100%"
-                  size="medium"
-                  @click="handleInvit"
-                  >邀请成员加入</el-button
-                >
-              </li>
-            </ul>
+              </ul>
+            </div>
+            <div class="card_li" v-if="infoData.DataClearSeting">
+              <ul>
+                <li class="card_title">
+                  <span>团队数据库清理</span
+                  ><el-button
+                    type="text"
+                    v-if="infoData.Teamdata.UserMemberMType == 2"
+                    @click="handleDataClearSeting"
+                    >设置</el-button
+                  >
+                </li>
+                <li class="set_row">
+                  <span
+                    >清除类型：{{
+                      $D.ITEM("DBCS_Type", infoData.DataClearSeting.Type).key
+                    }}</span
+                  >
+                </li>
+                <li class="set_row" v-if="infoData.DataClearSeting.Type == 2">
+                  <span
+                    >执行时间：{{
+                      $D.ITEM(
+                        "DBCS_TimeLoopType",
+                        infoData.DataClearSeting.TimeLoopType
+                      ).key
+                    }}
+                    <label v-if="infoData.DataClearSeting.TimeLoopType == 3">
+                      {{
+                        infoData.DataClearSeting.Time1
+                          ? `${infoData.DataClearSeting.Time1}月`
+                          : ""
+                      }}{{
+                        infoData.DataClearSeting.Time2
+                          ? `${infoData.DataClearSeting.Time2}日`
+                          : ""
+                      }}</label
+                    ><label v-if="infoData.DataClearSeting.TimeLoopType == 2">
+                      {{
+                        infoData.DataClearSeting.Time1
+                          ? `${infoData.DataClearSeting.Time1}周`
+                          : ""
+                      }}
+                      {{
+                        infoData.DataClearSeting.Time2
+                          ? `周${infoData.DataClearSeting.Time2}`
+                          : ""
+                      }}</label
+                    ></span
+                  >
+                </li>
+                <li class="set_row" v-if="infoData.DataClearSeting.Type == 3">
+                  <span>存储量：{{ infoData.DataClearSeting.Storage }}M</span>
+                </li>
+                <li class="set_row" v-if="infoData.DataClearSeting.Type != 1">
+                  <span
+                    >清理模式：<label
+                      v-if="infoData.DataClearSeting.ClearType == 1"
+                      >删除{{
+                        infoData.DataClearSeting.ClearTotalDay
+                      }}天之前的数据</label
+                    ><label v-else>{{
+                      $D.ITEM(
+                        "DBCS_ClearType",
+                        infoData.DataClearSeting.ClearType
+                      ).key
+                    }}</label></span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="invi_btn">
+            <el-button
+              type="primary"
+              style="width: 100%"
+              size="medium"
+              @click="handleInvit"
+              >邀请成员加入</el-button
+            >
           </div>
         </div></el-col
       >
@@ -184,6 +266,14 @@
       :modalName="'editTeam'"
       :editData="infoData ? infoData.Teamdata : null"
     ></AddTeam>
+    <!-- 清除团队数据库数据 -->
+    <InitdataModal
+      :teamVal="selRow.Id"
+      :dataClear="
+        infoData && infoData.DataClearSeting ? infoData.DataClearSeting : null
+      "
+      @success="getData"
+    ></InitdataModal>
   </div>
 </template>
 <script>
@@ -193,6 +283,7 @@ export default {
     InvitationList: () => import("./invitation-list"),
     InvitationUser: () => import("./invitation-user"),
     AddTeam: () => import("./add-team"),
+    InitdataModal: () => import("./initdata-modal"),
   },
   props: {
     //选择的团队
@@ -204,7 +295,6 @@ export default {
   data() {
     return {
       infoData: null, //详细信息
-
       loading: false,
       setOne: true,
       setTwo: true,
@@ -217,6 +307,12 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 团队数据库清理设置
+     */
+    handleDataClearSeting() {
+      this.$modal.show("initdata");
+    },
     /**
      * 编辑团队信息
      */
@@ -284,8 +380,8 @@ export default {
 </script>
 <style lang="less" scoped>
 .team-info {
-  margin-top: 10px;
-  height: calc(100% - 50px);
+  // margin-top: 10px;
+  height: calc(100% - 80px);
   .el-row {
     height: 100%;
   }
@@ -310,7 +406,7 @@ export default {
     }
   }
   .info_left {
-    overflow-y: scroll;
+    position: relative;
     .info_img {
       text-align: center;
       .el-avatar {
@@ -319,8 +415,10 @@ export default {
       }
     }
     .info_form {
+      height: calc(100% - 98px);
+      overflow-y: scroll;
       margin-top: 12px;
-      padding: 0 15px;
+
       ul {
         li {
           margin-bottom: 12px;
@@ -394,6 +492,34 @@ export default {
           }
         }
       }
+      .card_li {
+        padding: 0 5px;
+        margin-bottom: 10px;
+        ul {
+          border: 1px solid #e4e7ed;
+          padding: 10px 10px 0;
+          border-radius: 4px;
+          .card_title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            span {
+              font-weight: bold;
+              font-size: 13px;
+            }
+            button {
+              padding: 0;
+              font-size: 13px;
+            }
+          }
+        }
+      }
+    }
+    .invi_btn {
+      padding: 0 10px;
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
     }
   }
 }

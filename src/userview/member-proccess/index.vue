@@ -226,11 +226,22 @@
                           }}
                         </p> -->
                         <div class="screen-shot">
-                          <p @click="shotScreenPhoto(item.usInfo.UsId)">
+                          <p
+                            @click="shotScreenPhoto(item.usInfo.UsId)"
+                            v-if="item.ClientStatus != 0"
+                          >
                             <span v-if="imgload && item.usInfo.UsId == userID"
                               ><i class="el-icon-loading"></i>截图中...</span
                             ><span v-else>屏幕截图</span>
                           </p>
+                          <el-tag
+                            type="info"
+                            effect="plain"
+                            v-else
+                            size="medium"
+                          >
+                            该用户当前已离线，无法截图
+                          </el-tag>
                           <div v-if="item.title">
                             当前进程：{{ item.title }}
                           </div>

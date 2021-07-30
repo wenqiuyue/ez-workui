@@ -31,6 +31,10 @@
               <a href="javascript:;" @click="exit" class="hiFont hi-signout">
                 <span>登出</span>
               </a>
+              <div class="title_bottom" @click="handleHome">
+                <img class="mb" src="@/assets/main/main_mb.png" />
+                <p>http://47.106.90.178:703/</p>
+              </div>
             </div>
           </div>
         </div>
@@ -73,6 +77,12 @@ export default {
       });
     },
     /**
+     * 官网
+     */
+    handleHome() {
+      window.open("http://47.106.90.178:703/");
+    },
+    /**
      * 退出
      */
     exit() {
@@ -90,4 +100,21 @@ export default {
 
 <style lang="less">
 @import "../../assets/menu.less";
+</style>
+<style lang="less" scoped>
+/deep/.title_bottom {
+  position: absolute;
+  bottom: 12px;
+  height: 58px !important;
+  text-align: center;
+  width: 100%;
+  cursor: pointer;
+  .mb {
+    height: 26px;
+  }
+  p {
+    color: #4078c0;
+    margin-top: 5px;
+  }
+}
 </style>

@@ -6,7 +6,10 @@
         <span @click="$emit('viewChange')"
           ><i class="el-icon-d-arrow-left"></i>返回</span
         >
-        <el-divider direction="vertical"></el-divider>
+      </div>
+    </div>
+    <div class="info_header" v-if="viewType != 3" style="margin-top: 5px">
+      <div class="h_left">
         <span
           @click="handleViewChange(1)"
           :class="viewType == 1 ? ' active_span' : ''"

@@ -192,8 +192,8 @@ export default {
 </script>
 <style lang="less" scoped>
 .user-list {
-  margin-top: 10px;
-  height: calc(100% - 50px);
+  // margin-top: 10px;
+  height: calc(100% - 90px);
   background: #ffffff;
   display: flex;
   flex-direction: column;

@@ -14,7 +14,6 @@
               type="primary"
               size="small"
               icon="el-icon-set-up"
-              v-if="iSShowApplication"
               @click="handleCopy"
               :loading="copyLoading"
               >应用系统配置组</el-button
@@ -47,7 +46,7 @@
             </div>
           </template>
           <el-table-column
-            label="进程规则版本"
+            label="版本名称"
             :show-overflow-tooltip="true"
             prop="ConfigName"
           >
@@ -111,14 +110,14 @@
               <el-button
                 type="warning"
                 size="mini"
-                @click="handleUpdate(2)"
+                @click="handleUpdate(2, scope.row)"
                 v-if="scope.row.IsSystem && scope.row.IsUpdate"
                 >更新</el-button
               >
               <el-button
                 type="danger"
                 size="mini"
-                @click="handleUpdate(3)"
+                @click="handleUpdate(3, scope.row)"
                 v-if="scope.row.IsSystem && scope.row.IsReset"
                 >重置</el-button
               >
@@ -139,6 +138,11 @@
       @eventComfirm="getDataList"
       :teamValue="teamValue"
     ></VerModal>
+    <SystemRuleverSel
+      ref="RuleverSelModal"
+      :teamValue="teamValue"
+      @success="getDataList"
+    ></SystemRuleverSel>
   </div>
 </template>
 
@@ -148,6 +152,7 @@ export default {
     CContent: () => import("@/components/CContent"),
     RuleSetting: () => import("../rule-setting"),
     VerModal: () => import("./verModal"),
+    SystemRuleverSel: () => import("./systemRuleverSel"),
   },
   props: {
     //选择的团队Id
@@ -250,28 +255,19 @@ export default {
      * 引用系统配置组
      */
     handleCopy() {
-      this.copyLoading = true;
-      this.$http
-        .post("/ConfigGroup/UpdateTeamConfig.ashx", { teamId: this.teamValue })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.$message({
-              message: `应用成功`,
-              type: "success",
-            });
-            this.getDataList();
-          }
-        })
-        .finally(() => (this.copyLoading = false));
+      this.$refs.RuleverSelModal.openModal();
     },
     /**
      * 更新和重置
      */
-    handleUpdate(type) {
+    handleUpdate(type, val) {
       let name = null;
+      let operationVal = null;
       if (type == 2) {
         name = "更新";
+        operationVal = 2;
       } else {
+        operationVal = 1;
         name = "重置";
       }
       this.$confirm(`${name}后团队的进程设置将会失效, 是否继续?`, "提示", {
@@ -283,6 +279,8 @@ export default {
           this.$http
             .post("/ConfigGroup/UpdateTeamConfig.ashx", {
               teamId: this.teamValue,
+              operation: operationVal,
+              tcId: val.Id,
             })
             .then((resp) => {
               if (resp.res == 0) {

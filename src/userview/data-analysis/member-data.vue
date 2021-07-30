@@ -124,6 +124,14 @@
               ></el-avatar>
               <span class="name">{{ item.User.name }}</span>
             </div>
+            <p>
+              客户端状态：<span
+                :style="`color:${
+                  item.ClientStatus == 1 ? '#67C23A' : '#666666'
+                }`"
+                >{{ $D.ITEM("client_status", item.ClientStatus).name }}</span
+              >
+            </p>
             <el-button
               type="primary"
               size="mini"
@@ -144,6 +152,7 @@
             <p>
               <span>当前截图：</span
               ><el-button
+                v-if="item.ClientStatus == 1"
                 plain
                 size="small"
                 style="padding: 6px 15px"
@@ -155,6 +164,9 @@
                   imgload && item.User.id == userID ? "截图中..." : "立即截图"
                 }}</el-button
               >
+              <el-tag v-else type="info" effect="plain" size="medium">
+                该用户已离线
+              </el-tag>
             </p>
             <template v-if="item.loadPic && item.loadPic.length">
               <div class="receive-img">
@@ -789,11 +801,11 @@ export default {
           p {
             color: #666666;
             margin-top: 8px;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
           }
           /deep/.view_btn {
-            margin-top: 12px;
+            margin-top: 6px;
             padding: 6px 11px;
           }
         }
