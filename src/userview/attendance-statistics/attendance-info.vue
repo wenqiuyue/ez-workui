@@ -296,7 +296,7 @@
                       class="cell-title-right"
                       v-show="Boolean(new Date() > new Date(date))"
                     >
-                      今日办公：{{
+                      当日办公：{{
                         attenceData[parseInt(data.day.split("-").slice(2)) - 1]
                           .DayTime
                       }}小时

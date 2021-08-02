@@ -124,6 +124,11 @@ export default {
 </script>
 <style lang="less" scoped>
 .timeline-modal {
+  /deep/.modal {
+    .ctn {
+      overflow-y: auto;
+    }
+  }
   .soft {
     padding: 5px;
     height: 300px;
