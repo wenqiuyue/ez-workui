@@ -220,16 +220,46 @@
               <div
                 :class="[
                   'attendance-cell',
-                  Boolean(new Date() < new Date(date)) ? 'is-rest' : '',
+                  attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                    .isRest &&
+                  !attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                    .StartTime &&
+                  !attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                    .EndTime
+                    ? 'is-rest'
+                    : '',
                   data.isSelected ? 'is-selected' : '',
                 ]"
+                @mouseover="
+                  toggleWorkStateTxt(
+                    $event,
+                    '我要申诉',
+                    'over',
+                    date,
+                    attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                      .Flag,
+                    attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                  )
+                "
+                @mouseout="
+                  toggleWorkStateTxt(
+                    $event,
+                    attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                      .Type,
+                    'out',
+                    date,
+                    attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                      .Flag,
+                    attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                  )
+                "
                 v-if="
                   data.type === 'current-month' &&
                   attenceData[parseInt(data.day.split('-').slice(2)) - 1]
                 "
                 @click="
-                  handleDateInfo(
-                    Boolean(new Date() > new Date(date)),
+                  attendanceCellMobileClick(
+                    $event,
                     attenceData[parseInt(data.day.split('-').slice(2)) - 1]
                   )
                 "
@@ -292,10 +322,7 @@
                           .Type
                       }}
                     </p> -->
-                    <p
-                      class="cell-title-right"
-                      v-show="Boolean(new Date() > new Date(date))"
-                    >
+                    <p class="cell-title-right">
                       今日办公：{{
                         attenceData[parseInt(data.day.split("-").slice(2)) - 1]
                           .DayTime
@@ -1592,8 +1619,6 @@
         v-show="childData.menuType === 'publicAttendance'"
       ></c-pages>
     </XModal>
-    <!-- 打卡时间线弹窗 -->
-    <TimeLineModal :selDateTimeLine="selDateTimeLine"></TimeLineModal>
     <!-- 申诉审核弹窗 -->
     <!-- <appeal
       :popData="popData"
@@ -1633,7 +1658,12 @@ import { imgChange } from "@/commons";
 export default {
   props: ["childLoading", "fatData", "changeTab", "activeItem"],
   components: {
-    TimeLineModal: () => import("./timeline-modal"),
+    // appeal: () => import("./appeal"),
+    // AttendanceCalendar: () => import("./attendanceCalendar"),
+    // ReimbursementModal: () => import("./reimbursementModal"),
+    // BriefingModal: () => import("./briefingModal"),
+    // MyAssessmentModal: () => import("../assessment/myAssessmentModal"),
+    // Report: () => import("../report/reportDetail"),
     CBtn: () => import("@/components/CBtn"),
     CPages: () => import("@/components/CPages"),
     XModal: () => import("@/components/XModal"),
@@ -1641,7 +1671,6 @@ export default {
   },
   data() {
     return {
-      selDateTimeLine: null, //选择的日期查看打卡时间线
       teamValue: null, //选择的团队
       teamOptions: [],
       // 请求参数
@@ -2018,13 +2047,12 @@ export default {
       this.popData = obj;
       this.$modal.show("appeal"); // 这个打开弹层的原理仔细看下
     },
-    // 点击日历,查看时间线
-    handleDateInfo(bool, obj) {
-      if (!bool) {
-        return;
+    // 平板单击cell就触发
+    attendanceCellMobileClick(e, obj) {
+      if (document.body.clientWidth <= 991) {
+        this.moblieOlData = obj; // 移动端点击先展示,要打开弹层还需要继续点新按钮,这之前先把数据存好
+        // console.log(obj);
       }
-      this.selDateTimeLine = obj;
-      this.$modal.show("timeline");
     },
     // 拆解父组件传递的参数
     showData() {

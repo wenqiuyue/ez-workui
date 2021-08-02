@@ -1,20 +1,20 @@
 <!-- 进度条截图 -->
 <template>
-  <div v-if="activeBar" class="progressCom">
+  <div class="progressCom">
     <XModal
       width="70%"
       height="90%"
       :name="name"
       :showCrossBtn="true"
-      :title="
-        activeBar.name +
-        `${name == 'memberDatatimeAxisPhoto' ? '状态的' : '的'}截图`
-      "
+      :title="`
+        ${activeBar ? activeBar.name : ''}${
+        name == 'memberDatatimeAxisPhoto' ? '状态的' : '的'
+      }截图`"
       class="work-timeAxis"
       @beforeOpen="dataInit"
       @opened="open()"
     >
-      <div slot="sel" class="header_sel">
+      <div slot="sel" class="header_sel" v-if="name != 'staffDataPic'">
         <el-date-picker
           v-model="timeStart"
           type="date"

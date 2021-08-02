@@ -149,13 +149,13 @@ export default {
 <style lang="less" scoped>
 /deep/.title_bottom {
   position: absolute;
-  bottom: 12px;
+  bottom: 16px;
   height: 58px !important;
   text-align: center;
   width: 100%;
   cursor: pointer;
   .mb {
-    height: 26px;
+    height: 32px;
   }
   p {
     color: #4078c0;
