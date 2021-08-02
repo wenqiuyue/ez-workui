@@ -49,7 +49,7 @@
               </a>
               <div class="title_bottom" @click="handleHome">
                 <img class="mb" src="@/assets/main/main_mb.png" />
-                <p>http://47.106.90.178:703/</p>
+                <p>http://www.ezteams.cn</p>
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@ export default {
      * 官网
      */
     handleHome() {
-      window.open("http://47.106.90.178:703/");
+      window.open("http://www.ezteams.cn");
     },
     /**
      * 退出
