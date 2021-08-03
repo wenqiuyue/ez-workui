@@ -27,6 +27,7 @@
       v-else-if="tabType == 4"
       :selRow="selRow"
     ></windowAliasManager>
+    <ActionRule v-else-if="tabType == 5" :selRow="selRow"></ActionRule>
   </div>
 </template>
 
@@ -38,6 +39,7 @@ export default {
     processRule: () => import("./processRule"),
     processMarkManager: () => import("./processMarkManager"),
     windowAliasManager: () => import("./windowAliasManager"),
+    ActionRule: () => import("./actionRule"),
   },
   props: {
     selRow: {
@@ -51,6 +53,10 @@ export default {
       {
         value: 1,
         label: "部门设置",
+      },
+      {
+        value: 5,
+        label: "行为规则设置",
       },
       {
         value: 2,

@@ -46,7 +46,7 @@
             </div>
           </template>
           <el-table-column
-            label="版本名称"
+            label="名称"
             :show-overflow-tooltip="true"
             prop="ConfigName"
           >

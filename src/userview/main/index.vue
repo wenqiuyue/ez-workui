@@ -48,8 +48,9 @@
                 <span>登出</span>
               </a>
               <div class="title_bottom" @click="handleHome">
-                <img class="mb" src="@/assets/main/main_mb.png" />
-                <p>http://www.ezteams.cn</p>
+                <!-- <img class="mb" src="@/assets/main/main_mb.png" />
+                <p>http://www.ezteams.cn</p> -->
+                <p>官 网</p>
               </div>
             </div>
           </div>
@@ -150,7 +151,8 @@ export default {
 /deep/.title_bottom {
   position: absolute;
   bottom: 16px;
-  height: 58px !important;
+  // height: 58px !important;
+  height: auto !important;
   text-align: center;
   width: 100%;
   cursor: pointer;
@@ -160,6 +162,7 @@ export default {
   p {
     color: #4078c0;
     margin-top: 5px;
+    font-size: 13px;
   }
 }
 </style>

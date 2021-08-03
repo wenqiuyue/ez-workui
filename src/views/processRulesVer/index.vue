@@ -36,7 +36,7 @@
             </div>
           </template>
           <el-table-column
-            label="进程规则版本"
+            label="名称"
             :show-overflow-tooltip="true"
             prop="ConfigName"
           >

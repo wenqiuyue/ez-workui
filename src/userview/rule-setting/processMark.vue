@@ -86,7 +86,7 @@
             header-align="center"
           ></el-table-column>
           <el-table-column
-            label="进程规则"
+            label="所属规则"
             prop="ProgressGroupId"
             align="center"
             header-align="center"

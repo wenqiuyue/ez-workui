@@ -1,8 +1,8 @@
 <template>
   <div>
     <XModel
-      ref="ruleXmodal"
-      name="ruleXmodal"
+      ref="actionRuleXmodal"
+      name="actionRuleXmodal"
       width="1000px"
       height="600px"
       :title="operationName == 1 ? '添加规则 ' : '编辑规则'"
@@ -16,25 +16,10 @@
           <div class="item">
             <ul class="border">
               <li>
-                <span>规则名称</span>
+                <span>行为名称</span>
                 <el-input v-model="loadForm.RuleName"></el-input>
               </li>
               <li>
-                <span>作用类型</span>
-                <el-select v-model="loadForm.rType">
-                  <el-option label="部门" :value="1"></el-option>
-                  <el-option label="员工" :value="2"></el-option>
-                </el-select>
-              </li>
-              <li v-if="loadForm.rType == 2">
-                <span>规则作用成员</span>
-                <mb
-                  @Confirm="getUser"
-                  :arrays="loadForm.member"
-                  :teamId="teamValue"
-                ></mb>
-              </li>
-              <li v-if="loadForm.rType == 1">
                 <span>规则作用部门</span>
                 <el-select v-model="loadForm.g" multiple>
                   <el-option
@@ -48,14 +33,6 @@
               <li>
                 <span>匹配的标记类型</span>
                 <el-select v-model="loadForm.mk1" placeholder="请选择">
-                  <el-option label="工作" value="工作"></el-option>
-                  <el-option label="娱乐" value="娱乐"></el-option>
-                  <el-option label="未知" value="未知"></el-option>
-                </el-select>
-              </li>
-              <li>
-                <span>不匹配的标记类型</span>
-                <el-select v-model="loadForm.mk2" placeholder="请选择">
                   <el-option label="工作" value="工作"></el-option>
                   <el-option label="娱乐" value="娱乐"></el-option>
                   <el-option label="未知" value="未知"></el-option>
@@ -146,7 +123,7 @@
               type="info"
               @click="
                 () => {
-                  $modal.hide('ruleXmodal');
+                  $modal.hide('actionRuleXmodal');
                 }
               "
               >取 消</el-button
@@ -171,10 +148,6 @@ export default {
     //规则版本信息
     selRow: {
       type: Object,
-      default: null,
-    },
-    teamValue: {
-      type: Number,
       default: null,
     },
     operationName: {
@@ -215,28 +188,36 @@ export default {
     getUser(arr) {
       this.loadForm.member = arr;
     },
-    async GetProgressGroup() {
-      const resp = await this.$http.post(
-        "/User/GetProgressGroupSelected.ashx",
-        { teamId: this.teamValue, configId: this.selRow.Id }
-      );
-      if (resp.res == 0) {
-        this.processOptions = resp.data;
-      }
+    GetProgressGroup() {
+      this.$http
+        .post(
+          "/Management/ProgressManagement/GetSystemProgressGroupSelected.ashx",
+          { configId: this.selRow.Id }
+        )
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.processOptions = resp.data;
+          }
+        });
     },
     beforeOpen() {
       this.loading = false;
-      this.GetProgressGroup();
-      if (this.operationName == 2) {
-        this.getDetail();
-      }
+      this.$nextTick(() => {
+        this.GetProgressGroup();
+        if (this.operationName == 2) {
+          this.getDetail();
+        }
+      });
     },
     getDetail() {
       this.loading = true;
       this.$http
-        .get("/ProcessRules/ProcessRulesDetail.ashx", {
-          params: { ruleId: this.id, teamId: this.teamValue },
-        })
+        .get(
+          "/Management/ProgressManagement/GetSystemProcessRulesDetail.ashx",
+          {
+            params: { Id: this.id },
+          }
+        )
         .then((res) => {
           if (res.res == 0) {
             this.loading = false;
@@ -317,7 +298,7 @@ export default {
       }
       let bool = this.copyForm == JSON.stringify(this.loadForm);
       if (bool && this.operationName == 2) {
-        this.$modal.hide("ruleXmodal");
+        this.$modal.hide("actionRuleXmodal");
         return;
       } else {
         let word = [];
@@ -364,28 +345,23 @@ export default {
         let params = {
           Id: this.id,
           RuleName: this.loadForm.RuleName,
-          ProgressGroupIds: this.loadForm.rType == 1 ? this.loadForm.g : [],
-          UserIds:
-            this.loadForm.rType == 2
-              ? this.loadForm.member.map((item) => item.UsId)
-              : [],
+          ProgressGroupIds: this.loadForm.g,
           ProgressNames: this.loadForm.radio ? [] : pn,
           FormNames: word,
           MarkOutCheck: this.loadForm.mk2,
           MarkInCheck: this.loadForm.mk1,
           Automatic: this.loadForm.Automatic,
-          teamId: this.teamValue,
           configId: this.selRow.Id,
         };
         params = this.filterParams(params);
         this.$http
-          .get("/ProcessRules/SaveProcessRules.ashx", {
+          .get("/Management/ProgressManagement/SaveSystemProcessRules.ashx", {
             params,
           })
           .then((res) => {
             this.subLoading = false;
             if (res.res == 0) {
-              this.$modal.hide("ruleXmodal");
+              this.$modal.hide("actionRuleXmodal");
               this.$emit("update");
               this.$message({
                 type: "success",

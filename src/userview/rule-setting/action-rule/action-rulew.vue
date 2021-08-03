@@ -5,7 +5,7 @@
       name="ruleXmodal"
       width="1000px"
       height="600px"
-      :title="operationName == 1 ? '添加规则 ' : '编辑规则'"
+      :title="operationName == 1 ? '添加行为规则 ' : '编辑行为规则'"
       :showCrossBtn="true"
       class="n-rule"
       @closed="init"
@@ -16,7 +16,7 @@
           <div class="item">
             <ul class="border">
               <li>
-                <span>规则名称</span>
+                <span>行为名称</span>
                 <el-input v-model="loadForm.RuleName"></el-input>
               </li>
               <li>
@@ -53,14 +53,7 @@
                   <el-option label="未知" value="未知"></el-option>
                 </el-select>
               </li>
-              <li>
-                <span>不匹配的标记类型</span>
-                <el-select v-model="loadForm.mk2" placeholder="请选择">
-                  <el-option label="工作" value="工作"></el-option>
-                  <el-option label="娱乐" value="娱乐"></el-option>
-                  <el-option label="未知" value="未知"></el-option>
-                </el-select>
-              </li>
+
               <li class="row" style="margin-top: 1rem">
                 <div
                   class="check-wrapper"

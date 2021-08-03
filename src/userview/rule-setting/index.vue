@@ -37,6 +37,11 @@
       :teamValue="teamValue"
       :selRow="selRow"
     ></WindowAlias>
+    <ActionRule
+      v-else-if="tabType == 5"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></ActionRule>
   </div>
 </template>
 
@@ -48,6 +53,7 @@ export default {
     processRule: () => import("./processRule"),
     processMark: () => import("./processMark"),
     WindowAlias: () => import("./windowalias"),
+    ActionRule: () => import("./action-rule"),
   },
   props: {
     //规则版本信息
@@ -66,6 +72,10 @@ export default {
       {
         value: 1,
         label: "部门设置",
+      },
+      {
+        value: 5,
+        label: "行为规则设置",
       },
       {
         value: 2,
