@@ -65,34 +65,17 @@ export default {
           },
         },
         legend: {
-          type: "scroll",
           orient: "vertical",
-          left: 170,
-          top: 20,
-          bottom: 20,
-          tooltip: {
-            show: true,
-          },
-          formatter: function (name) {
-            let tarValue = 0;
-            const data = that.echartData;
-            for (let i = 0; i < data.length; i++) {
-              if (data[i].name == name) {
-                tarValue = data[i].value;
-              }
-            }
-            let p = ((tarValue * that.workTime) / 100).toFixed(2);
-            return `${name}：${p}小时　(${tarValue}%)`;
-          },
+          right: 0,
+          bottom: 10,
         },
 
         series: [
           {
             name: "工作状态",
             type: "pie",
-            radius: "50%",
-            radius: ["0%", "70%"],
-            center: ["25%", "50%"], // 图表的位置 x,y方向
+            radius: ["0%", "80%"],
+            center: ["20%", "50%"], // 图表的位置 x,y方向
             data: this.echartData,
             emphasis: {
               itemStyle: {

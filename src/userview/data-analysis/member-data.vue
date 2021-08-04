@@ -58,7 +58,7 @@
             </selMember>
           </div>
         </div>
-        <div class="sel_inline">
+        <div class="sel_inline" style="justify-content: space-between">
           <div class="sel">
             <span>日期</span>
             <div class="sel-date">
@@ -104,22 +104,30 @@
               >
               </el-date-picker>
             </div>
+            <el-button
+              type="primary"
+              class="btn"
+              @click="handleGetData"
+              :loading="loading"
+              >搜 索</el-button
+            >
           </div>
-          <el-button
-            type="primary"
-            class="btn"
-            @click="handleGetData"
-            :loading="loading"
-            >搜 索</el-button
-          >
+          <el-button type="text" style="float: right">效率排名</el-button>
         </div>
       </div>
       <div class="people_list" v-if="memberData && memberData.length">
         <div class="list_card" v-for="(item, index) in memberData" :key="index">
+          <div class="tag_item_list" @click="handleDataInfo(item)">
+            <div class="tag_item t_i_bg1" style="width: 13rem"></div>
+            <div class="tag_item t_i_bg2" style="width: 12rem"></div>
+            <div class="tag_item t_i_bg3" style="width: 11rem">
+              <div>高级视图</div>
+            </div>
+          </div>
           <div class="people_info">
             <div class="name_pic">
               <el-avatar
-                size="large"
+                size="small"
                 :src="imgChange(item.User.head, true)"
               ></el-avatar>
               <span class="name">{{ item.User.name }}</span>
@@ -132,13 +140,29 @@
                 >{{ $D.ITEM("client_status", item.ClientStatus).name }}</span
               >
             </p>
-            <el-button
+            <p>
+              效率状态：<span
+                :style="`color:${
+                  item.ClientStatus == 1 ? '#67C23A' : '#666666'
+                }`"
+                >{{ $D.ITEM("client_status", item.ClientStatus).name }}</span
+              >
+            </p>
+            <p>
+              行为状态：<span
+                :style="`color:${
+                  item.ClientStatus == 1 ? '#67C23A' : '#666666'
+                }`"
+                >{{ $D.ITEM("client_status", item.ClientStatus).name }}</span
+              >
+            </p>
+            <!-- <el-button
               type="primary"
               size="mini"
               class="view_btn"
               @click="handleDataInfo(item)"
               >高级视图</el-button
-            >
+            > -->
           </div>
           <div class="work_time">
             <p>
@@ -184,18 +208,12 @@
           <div class="work_status">
             <div class="card_title"><span class="title">工作状态</span></div>
             <div class="work-calc">
-              <MemWorkProgress
-                :paramsobj="item"
-                v-if="item.ComputerUsageRecord.workRat.length > 0"
-                @getBar="getBarData"
-              ></MemWorkProgress>
-              <div v-else>
-                <div class="progress-bar"></div>
-                <div class="spans">
-                  <span>工作</span><span>空闲</span><span>未知</span
-                  ><span>离线</span>
-                </div>
-              </div>
+              <Staechart
+                :echartData="item.ComputerUsageRecord.workRat"
+                :width="220"
+                :height="90"
+                :workTime="item.WorkTime"
+              ></Staechart>
             </div>
           </div>
           <div class="work_application">
@@ -241,7 +259,16 @@
             <div class="work_appl_list_empty" v-else>暂无数据</div>
           </div>
           <div class="work_keyword">
-            <div class="card_title"><span class="title">高频关键词</span></div>
+            <div class="card_title">
+              <span class="title">高频关键词</span
+              ><el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllSoftware(item)"
+                v-if="item.KeyWordFreqs.length"
+                >查看全部</el-button
+              >
+            </div>
             <div class="keyword_list" v-if="item.KeyWordFreqs.length">
               <tooltip
                 class="word_item"
@@ -250,8 +277,36 @@
                 @handleClick="handleKeyWord(worditem, item)"
                 :content="`${worditem.Key}`"
                 :ref="`memprop-${index}-${wordind}`"
-                width="20%"
+                width="28%"
               ></tooltip>
+            </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
+          </div>
+          <div class="work_action">
+            <div class="card_title">
+              <span class="title">行为分析</span
+              ><el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllSoftware(item)"
+                v-if="item.KeyWordFreqs.length"
+                >查看全部</el-button
+              >
+            </div>
+            <div class="keyword_list" v-if="item.KeyWordFreqs.length">
+              <el-tag
+                class="word_item"
+                v-for="(worditem, wordind) in item.KeyWordFreqs"
+                :key="wordind"
+                style="width: 28%"
+                :type="getTagType(wordind)"
+                ><tooltip
+                  @handleClick="handleKeyWord(worditem, item)"
+                  :content="`${worditem.Key}`"
+                  :ref="`memprop-${index}-${wordind}`"
+                  width="100%"
+                ></tooltip
+              ></el-tag>
             </div>
             <div class="work_appl_list_empty" v-else>暂无数据</div>
           </div>
@@ -308,6 +363,7 @@ export default {
     MemWorkProgress: () => import("./memworkprogress"),
     keywordfrequency: () => import("./keywordfrequency"),
     staffData: () => import("./staffData"),
+    Staechart: () => import("./workstatus-pieecharts"),
   },
   data() {
     return {
@@ -394,6 +450,19 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 行为分析标签颜色
+     * 积极：绿  消极：红  无：白色
+     */
+    getTagType(val) {
+      if (val == 1 || val == 7) {
+        return "success";
+      } else if (val == 2 || val == 4) {
+        return "danger";
+      } else {
+        return "info";
+      }
+    },
     /**
      * 团队切换
      */
@@ -560,8 +629,7 @@ export default {
                   element.ComputerUsageRecord.workRat.map((m) => {
                     return {
                       name: m.name,
-                      width: m.value.toFixed(2),
-                      time: ((m.value * element.WorkTime) / 100).toFixed(1),
+                      value: m.value.toFixed(1),
                     };
                   });
               });
@@ -624,7 +692,7 @@ export default {
 .memberdata {
   height: 100%;
   /deep/.tooltip_text {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   .mem_content {
     padding: 0px;
@@ -759,15 +827,60 @@ export default {
       // overflow-y: auto;
       // height: calc(100% - 105px);
       .list_card {
+        position: relative;
         background: #ffffff;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        padding: 8px 12px;
+        padding: 0 12px 0 8px;
         margin-bottom: 10px;
         box-shadow: 0px 3px 6px rgba(0, 0, 0, 5%);
         // justify-content: space-around;
         // cursor: pointer;
+        .tag_item_list {
+          cursor: pointer;
+          .tag_item {
+            width: 11rem;
+            height: 2.7rem;
+            line-height: 2.8rem;
+            transform: skew(25deg);
+            -webkit-transform: skew(30deg);
+            -moz-transform: skew(30deg);
+            position: absolute;
+            left: -3rem;
+            div {
+              transform: skew(-25deg);
+              -webkit-transform: skew(-30deg);
+              -moz-transform: skew(-30deg);
+              width: calc(100% - 3rem);
+              text-align: center;
+              color: #ffffff;
+              font-size: 1.3rem;
+              float: right;
+            }
+          }
+          .t_i_bg1 {
+            background: rgb(198, 226, 255);
+          }
+          .t_i_bg2 {
+            background: rgb(140, 197, 255);
+          }
+          .t_i_bg3 {
+            background: rgb(83, 168, 255);
+          }
+          &:hover {
+            .t_i_bg1 {
+              background: rgb(228, 248, 217);
+            }
+            .t_i_bg2 {
+              background: rgb(195, 235, 176);
+            }
+            .t_i_bg3 {
+              background: rgb(103, 194, 58);
+            }
+          }
+        }
+
         .card_title {
           font-weight: bold;
           display: flex;
@@ -786,11 +899,12 @@ export default {
         }
         .people_info {
           width: 10%;
-          padding-top: 5px;
+          padding-top: 33px;
           .name_pic {
             display: flex;
             flex-direction: row;
             align-items: center;
+            margin-bottom: 8px;
             .name {
               color: #333333;
               font-size: 1.6rem;
@@ -800,7 +914,7 @@ export default {
           }
           p {
             color: #666666;
-            margin-top: 8px;
+            margin-top: 3px;
             font-size: 1.2rem;
             font-weight: bold;
           }
@@ -813,6 +927,7 @@ export default {
           width: 17%;
           display: flex;
           flex-direction: column;
+          padding-top: 33px;
           justify-content: center;
           p {
             display: flex;
@@ -839,11 +954,12 @@ export default {
           }
         }
         .work_status {
-          width: 27%;
+          width: 17%;
+          padding-top: 33px;
         }
         .work_application {
-          width: 22%;
-          padding: 0 25px;
+          width: 18%;
+          padding: 33px 10px 0;
           .work_appl_list {
             display: flex;
             flex-direction: row;
@@ -883,7 +999,8 @@ export default {
           // text-align: center;
         }
         .work_keyword {
-          width: 20%;
+          width: 16%;
+          padding: 33px 10px 0 0;
           .keyword_list {
             display: flex;
             flex-direction: row;
@@ -895,9 +1012,31 @@ export default {
               margin-right: 8px;
               margin-bottom: 4px;
               cursor: pointer;
+
               &:hover {
                 color: #448ef5;
               }
+            }
+          }
+        }
+        .work_action {
+          width: 16%;
+          padding: 33px 10px 0 0;
+          .keyword_list {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            height: 80px;
+            overflow-y: hidden;
+            // padding-left: 8px;
+            .word_item {
+              margin-right: 8px;
+              margin-bottom: 4px;
+              cursor: pointer;
+              width: 28%;
+              height: 22px;
+              line-height: 20px;
+              padding: 0 4px;
             }
           }
         }

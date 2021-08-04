@@ -330,15 +330,18 @@ export default {
     getDataList() {
       this.loading = true;
       const data = {
-        searchtext: this.searchVal,
+        name: this.searchVal,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
         configId: this.selRow.Id,
       };
       this.$http
-        .get("/Management/ProgressManagement/ProcessRuleAllList.ashx", {
-          params: data,
-        })
+        .get(
+          "/Management/SystemBehaviorAnalyse/GetSystemBehaviorAnalyse.ashx",
+          {
+            params: data,
+          }
+        )
         .then((result) => {
           if (result.res == 0) {
             this.tableData = result.data.Data;
