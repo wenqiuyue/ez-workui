@@ -3,9 +3,9 @@
     <XModel
       ref="actionRuleXmodal"
       name="actionRuleXmodal"
-      width="1000px"
+      width="800px"
       height="600px"
-      :title="operationName == 1 ? '添加规则 ' : '编辑规则'"
+      :title="operationName == 1 ? '添加行为规则 ' : '编辑行为规则'"
       :showCrossBtn="true"
       class="n-rule"
       @closed="init"
@@ -17,11 +17,11 @@
             <ul class="border">
               <li>
                 <span>行为名称</span>
-                <el-input v-model="loadForm.RuleName"></el-input>
+                <el-input v-model="loadForm.Behavior"></el-input>
               </li>
               <li>
                 <span>规则作用部门</span>
-                <el-select v-model="loadForm.g" multiple>
+                <el-select v-model="loadForm.ProgressGroupIds" multiple>
                   <el-option
                     v-for="(item, index) in processOptions"
                     :label="item.Name"
@@ -31,86 +31,41 @@
                 </el-select>
               </li>
               <li>
-                <span>匹配的标记类型</span>
-                <el-select v-model="loadForm.mk1" placeholder="请选择">
-                  <el-option label="工作" value="工作"></el-option>
-                  <el-option label="娱乐" value="娱乐"></el-option>
-                  <el-option label="未知" value="未知"></el-option>
+                <span>匹配的行为类型</span>
+                <el-select
+                  v-model="loadForm.BehaviorInCheck"
+                  placeholder="请选择"
+                >
+                  <el-option
+                    :label="item.key"
+                    :value="item.key"
+                    v-for="(item, index) in $D.LIST('Behavior_Type')"
+                    :key="index"
+                  ></el-option>
                 </el-select>
               </li>
-              <li class="row" style="margin-top: 1rem">
-                <div
-                  class="check-wrapper"
-                  :style="loadForm.Automatic ? 'borderColor:#409eff' : ''"
-                >
-                  <el-checkbox v-model="loadForm.Automatic"
-                    >自动匹配员工姓名</el-checkbox
-                  >
-                </div>
-              </li>
             </ul>
-          </div>
-          <div class="item">
-            <ul>
-              <li class="row marginB">
-                <div class="flex">
-                  <span>进程名</span>
-                  <div
-                    class="check-wrapper"
-                    :style="
-                      loadForm.radio
-                        ? 'borderColor:#409eff;width: 14rem;'
-                        : 'width: 14rem'
-                    "
-                  >
-                    <el-checkbox v-model="loadForm.radio"
-                      >作用于所有进程</el-checkbox
-                    >
-                  </div>
-                </div>
-                <div class="add" @click="addMore(1)" v-if="!loadForm.radio">
-                  <i class="el-icon-plus"></i>
-                </div>
-              </li>
-            </ul>
-
-            <div
-              class="input"
-              v-for="(item, index) in loadForm.pn"
-              :key="index"
-              v-if="!loadForm.radio"
-            >
-              <el-input v-model="loadForm.pn[index]"></el-input>
-              <i
-                class="hiFont hi-delete"
-                @click="
-                  () => {
-                    loadForm.pn.splice(index, 1);
-                  }
-                "
-              ></i>
-            </div>
           </div>
           <div class="item">
             <ul>
               <li class="row marginB">
                 <span>匹配的关键词名</span>
-                <div class="add" @click="addMore(2)">
+                <div class="add" @click="addMore">
                   <i class="el-icon-plus"></i>
                 </div>
               </li>
             </ul>
             <div
               class="input"
-              v-for="(item, index) in loadForm.word"
+              v-for="(item, index) in loadForm.Words"
               :key="index"
             >
-              <el-input v-model="loadForm.word[index]"></el-input>
+              <el-input v-model="loadForm.Words[index]"></el-input>
               <i
                 class="hiFont hi-delete"
                 @click="
                   () => {
-                    loadForm.word.splice(index, 1);
+                    loadForm.Words.splice(index, 1);
                   }
                 "
               ></i>
@@ -166,16 +121,10 @@ export default {
   data() {
     return {
       loadForm: {
-        word: [undefined, undefined, undefined, undefined, undefined],
-        pn: [undefined, undefined, undefined, undefined, undefined],
-        rType: 1,
-        mk2: "未知",
-        mk1: "未知",
-        g: [],
-        radio: false,
-        Automatic: false,
-        RuleName: "",
-        member: [],
+        Words: [undefined, undefined, undefined, undefined, undefined],
+        ProgressGroupIds: [],
+        Behavior: null,
+        BehaviorInCheck: null,
       },
       processOptions: [],
       user: [],
@@ -185,9 +134,6 @@ export default {
     };
   },
   methods: {
-    getUser(arr) {
-      this.loadForm.member = arr;
-    },
     GetProgressGroup() {
       this.$http
         .post(
@@ -213,7 +159,7 @@ export default {
       this.loading = true;
       this.$http
         .get(
-          "/Management/ProgressManagement/GetSystemProcessRulesDetail.ashx",
+          "/Management/SystemBehaviorAnalyse/GetSystemBehaviorAnalyseDetail.ashx",
           {
             params: { Id: this.id },
           }
@@ -221,63 +167,24 @@ export default {
         .then((res) => {
           if (res.res == 0) {
             this.loading = false;
-            if (this.activeItem == "部门") {
-              this.loadForm.rType = 1;
-              this.loadForm.g = res.data.PreocessGroup.map((m) => m.ID);
-            } else {
-              this.loadForm.rType = 2;
-              this.user = [];
-              this.loadForm.member = [];
-              res.data.UserData.forEach((item) => {
-                this.loadForm.member.push({
-                  Name: item.Name,
-                  UsId: item.UsId,
-                });
-              });
-            }
-            if (res.data.ProgressNames && res.data.ProgressNames.length) {
-              res.data.ProgressNames.forEach((item, index) => {
-                this.loadForm.pn[index] = item;
-              });
-              this.loadForm.radio = false;
-            } else {
-              this.loadForm.radio = true;
-            }
-            if (res.data.FormNames && res.data.FormNames.length) {
-              res.data.FormNames.forEach((item, index) => {
-                this.loadForm.word[index] = item;
-              });
-            }
-            this.loadForm.RuleName = res.data.RuleName;
-            this.loadForm.mk1 =
-              res.data.MarkInCheck == "上班" ? "工作" : res.data.MarkInCheck;
-            this.loadForm.mk2 =
-              res.data.MarkOutCheck == "上班" ? "工作" : res.data.MarkOutCheck;
-            this.loadForm.Automatic = res.data.Automatic;
-            this.loadForm.t = this.activeItem;
-            this.copyForm = JSON.stringify(this.loadForm);
-            Object.assign({}, this.loadForm);
+            this.loadForm.ProgressGroupIds = res.data.PreocessGroup.map(
+              (m) => m.ID
+            );
+            this.loadForm.Behavior = res.data.Behavior;
+            this.loadForm.BehaviorInCheck = res.data.BehaviorInCheck;
+            this.loadForm.Words = res.data.Words;
           }
         });
     },
     init() {
       Object.assign(this.$data, this.$options.data());
     },
-    addMore(type) {
-      if (type == 1) {
-        let arr = this.loadForm.pn.filter((item) => {
-          return item == undefined || "";
-        });
-        if (!arr.length) {
-          this.loadForm.pn.unshift(undefined);
-        }
-      } else {
-        let arr = this.loadForm.word.filter((item) => {
-          return item == undefined || "";
-        });
-        if (!arr.length) {
-          this.loadForm.word.unshift(undefined);
-        }
+    addMore() {
+      let arr = this.loadForm.Words.filter((item) => {
+        return item == undefined || "";
+      });
+      if (!arr.length) {
+        this.loadForm.Words.unshift(undefined);
       }
     },
     filterParams(params) {
@@ -302,36 +209,22 @@ export default {
         return;
       } else {
         let word = [];
-        this.loadForm.word.forEach((item) => {
+        this.loadForm.Words.forEach((item) => {
           //关键词
           if (item) {
             word.push(item);
           }
         });
-        let pn = [];
-        this.loadForm.pn.forEach((item) => {
-          //进程名
-          if (item) {
-            pn.push(item);
-          }
-        });
+
         let flag = false;
         let str = "";
-        if (!this.loadForm.radio && pn.length == 0) {
-          flag = true;
-          str = "请至少输入一个进程名称";
-        }
-        if (this.loadForm.g.length == 0 && this.rType == 1) {
+        if (this.loadForm.ProgressGroupIds.length == 0) {
           flag = true;
           str = "请选择作用部门";
         }
-        if (this.loadForm.member.length == 0 && this.rType == 2) {
+        if (!this.loadForm.Behavior) {
           flag = true;
-          str = "请选择成员";
-        }
-        if (!this.loadForm.RuleName) {
-          flag = true;
-          str = "请输入规则名称";
+          str = "请输入行为名称";
         }
         if (flag) {
           this.$message({
@@ -344,20 +237,20 @@ export default {
         this.subLoading = true;
         let params = {
           Id: this.id,
-          RuleName: this.loadForm.RuleName,
-          ProgressGroupIds: this.loadForm.g,
-          ProgressNames: this.loadForm.radio ? [] : pn,
-          FormNames: word,
-          MarkOutCheck: this.loadForm.mk2,
-          MarkInCheck: this.loadForm.mk1,
-          Automatic: this.loadForm.Automatic,
+          ProgressGroupIds: this.loadForm.ProgressGroupIds,
+          Behavior: this.loadForm.Behavior,
+          Words: word,
+          BehaviorInCheck: this.loadForm.BehaviorInCheck,
           configId: this.selRow.Id,
         };
         params = this.filterParams(params);
         this.$http
-          .get("/Management/ProgressManagement/SaveSystemProcessRules.ashx", {
-            params,
-          })
+          .get(
+            "/Management/SystemBehaviorAnalyse/SaveSystemBehaviorAnalyse.ashx",
+            {
+              params,
+            }
+          )
           .then((res) => {
             this.subLoading = false;
             if (res.res == 0) {

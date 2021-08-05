@@ -1,15 +1,16 @@
 <template>
   <div>
-    <div
-      ref="myChart"
-      :style="{ width: `${width}px`, height: `${height}px` }"
-    ></div>
+    <div ref="myChart" :style="{ width: `100%`, height: `${height}px` }"></div>
   </div>
 </template>
 
 <script>
 export default {
   props: {
+    paramsobj: {
+      type: Object,
+      default: null,
+    },
     echartData: {
       type: Array,
       default: () => {
@@ -66,16 +67,27 @@ export default {
         },
         legend: {
           orient: "vertical",
-          right: 0,
+          left: 83,
           bottom: 10,
+          formatter: function (name) {
+            let tarValue = 0;
+            const data = that.echartData;
+            for (let i = 0; i < data.length; i++) {
+              if (data[i].name == name) {
+                tarValue = data[i].value;
+              }
+            }
+
+            return `${name}:${tarValue}%`;
+          },
         },
 
         series: [
           {
             name: "工作状态",
             type: "pie",
-            radius: ["0%", "80%"],
-            center: ["20%", "50%"], // 图表的位置 x,y方向
+            radius: ["0%", "73%"],
+            center: ["15%", "50%"], // 图表的位置 x,y方向
             data: this.echartData,
             emphasis: {
               itemStyle: {
@@ -107,6 +119,15 @@ export default {
             },
           },
         ],
+      });
+      myChart.on("click", function (params) {
+        const data = {
+          stime: that.paramsobj.stime,
+          etime: that.paramsobj.etime,
+          clickUser: that.paramsobj.User.id,
+          gid: that.paramsobj.User.ProgressGroupId,
+        };
+        that.$emit("getBarData", params.data, data);
       });
     },
   },

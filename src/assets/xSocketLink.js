@@ -18,6 +18,7 @@ export default class xSocketLink {
     const wsParam = {
       token: Vue.prototype.$xStorage.getItem("token"),
       ua: navigator.userAgent,
+      teamId: Vue.prototype.$xStorage.getItem("client-teamId"),
     };
     //是否重连
     let isReconnect = false;

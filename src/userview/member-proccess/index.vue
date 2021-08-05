@@ -226,14 +226,20 @@
                           }}
                         </p> -->
                         <div class="screen-shot">
-                          <p
-                            @click="shotScreenPhoto(item.usInfo.UsId)"
-                            v-if="item.ClientStatus != 0"
+                          <span
+                            v-if="item.ClientStatus == 1"
+                            class="screen_check"
                           >
-                            <span v-if="imgload && item.usInfo.UsId == userID"
-                              ><i class="el-icon-loading"></i>截图中...</span
-                            ><span v-else>屏幕截图</span>
-                          </p>
+                            <el-checkbox-group v-model="screenCheck">
+                              <el-checkbox label="屏幕"></el-checkbox>
+                              <el-checkbox label="摄像头"></el-checkbox>
+                            </el-checkbox-group>
+                            <p @click="shotScreenPhoto(item.usInfo.UsId)">
+                              <span v-if="imgload && item.usInfo.UsId == userID"
+                                ><i class="el-icon-loading"></i>截图中...</span
+                              ><span v-else>屏幕截图</span>
+                            </p>
+                          </span>
                           <el-tag
                             type="info"
                             effect="plain"
@@ -292,6 +298,7 @@ export default {
 
   data() {
     return {
+      screenCheck: [], //截屏类型
       isShowTeam: false, // 是否显示团队选择
       teamOptions: [], //团队选择器
       teamValue: null, //选择的团队
@@ -562,7 +569,7 @@ export default {
       this.imgload = true;
       this.$http
         .get("/User/Work/NoticeUserScreenshots.ashx", {
-          params: { Id: this.userID },
+          params: { Id: this.userID, teamId: this.teamValue },
         })
         .then((res) => {
           if (this.timer) {
@@ -628,6 +635,9 @@ export default {
       console.log("开始截图");
     });
     this.$E.$on("loadingpic", (res) => {
+      if (res.teamId != this.teamValue) {
+        return;
+      }
       console.log("收到截图");
       for (let key in this.loadItem) {
         if (this.loadItem[key].length) {
@@ -1374,7 +1384,7 @@ export default {
         display: flex;
         font-size: 1.2rem;
         cursor: pointer;
-        margin-bottom: 1rem;
+        // margin-bottom: 1rem;
         height: 2.1rem;
         width: 7rem;
         align-items: center;
@@ -1404,7 +1414,7 @@ export default {
 
           .receive-img {
             width: 28%;
-            height: 100px;
+            // height: 100px;
             position: relative;
             overflow: hidden;
             // border-radius: 1px;
@@ -1440,6 +1450,20 @@ export default {
 
           .receive-img:last-child {
             margin-right: 0;
+          }
+        }
+      }
+      .screen_check {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        /deep/.el-checkbox-group {
+          .el-checkbox {
+            margin-right: 9px;
+            .el-checkbox__label {
+              padding-left: 5px;
+              font-size: 13px;
+            }
           }
         }
       }

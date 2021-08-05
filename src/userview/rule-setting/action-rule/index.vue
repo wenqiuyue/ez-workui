@@ -37,11 +37,11 @@
           label="行为名称"
           :show-overflow-tooltip="true"
           fixed
-          prop="RuleName"
+          prop="Behavior"
           width="200"
         >
           <template slot-scope="scope">
-            <div v-if="scope.row.RuleName">{{ scope.row.RuleName }}</div>
+            <div v-if="scope.row.Behavior">{{ scope.row.Behavior }}</div>
             <div v-else>—</div>
           </template>
         </el-table-column>
@@ -104,53 +104,25 @@
             <span v-else>全部</span>
           </template>
         </el-table-column>
-        <el-table-column
-          label="进程名称"
-          :show-overflow-tooltip="true"
-          width="300"
-        >
-          <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              trigger="hover"
-              v-if="scope.row.ProgressNames && scope.row.ProgressNames.length"
-            >
-              <p v-for="(item, index) in scope.row.ProgressNames" :key="index">
-                {{ item }}
-              </p>
-              <p slot="reference" style="cursor: pointer">
-                <span
-                  v-for="(name, index) in scope.row.ProgressNames"
-                  :key="index"
-                  v-if="index < 1"
-                  >{{ name }} </span
-                ><i v-if="scope.row.ProgressNames.length > 1"
-                  >等{{ scope.row.ProgressNames.length }}个进程</i
-                >
-              </p>
-            </el-popover>
-            <span v-else>—</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="窗体名称关键词" width="300">
+        <el-table-column label="匹配的关键词" width="300">
           <template slot-scope="scope">
             <el-popover
               placement="top"
               minwidth="100"
               trigger="hover"
-              v-if="scope.row.FormNames && scope.row.FormNames.length"
+              v-if="scope.row.Words && scope.row.Words.length"
             >
-              <p v-for="(item, index) in scope.row.FormNames" :key="index">
+              <p v-for="(item, index) in scope.row.Words" :key="index">
                 {{ item }}
               </p>
               <p slot="reference" style="cursor: pointer">
                 <span
-                  v-for="(name, index) in scope.row.FormNames"
+                  v-for="(name, index) in scope.row.Words"
                   :key="index"
                   v-if="index < 1"
                   >{{ name }} </span
-                ><i v-if="scope.row.FormNames.length > 1"
-                  >等{{ scope.row.FormNames.length }}个窗口</i
+                ><i v-if="scope.row.Words.length > 1"
+                  >等{{ scope.row.Words.length }}个窗口</i
                 >
               </p>
             </el-popover>
@@ -159,23 +131,17 @@
         </el-table-column>
         <el-table-column
           min-width="150"
-          label="标记结果"
+          label="匹配的类型"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <div v-if="scope.row.FormNames && scope.row.FormNames.length">
-              <p>匹配：{{ scope.row.MarkInCheck }}</p>
-              <p>否则：{{ scope.row.MarkOutCheck }}</p>
-            </div>
-            <div v-else>
-              <p>{{ scope.row.MarkInCheck }}</p>
-            </div>
+            {{ scope.row.BehaviorInCheck }}
           </template>
         </el-table-column>
         <el-table-column label="操作" min-width="110">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <span v-if="scope.row.IsReadOnly">
+            <span>
               <el-button
                 type="primary"
                 size="mini"
@@ -189,7 +155,6 @@
                 >删除</el-button
               >
             </span>
-            <el-tag type="info" v-else>无操作权限</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -317,15 +282,15 @@ export default {
 
     // 删除某一行
     handleDelt(row) {
-      this.$confirm("此操作将删除此规则, 是否继续?", "提示", {
+      this.$confirm("此操作将删除此行为规则, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
           this.$http
-            .post("/ProcessRules/DelProcessRules.ashx", {
-              id: [row.ID],
+            .post("/BehaviorAnalyse/DelBehaviorAnalyse.ashx", {
+              Ids: [row.Id],
               teamId: this.teamValue,
             })
             .then((res) => {
@@ -347,15 +312,15 @@ export default {
       this.id = "";
       Object.assign(this.$data.formParams, this.$options.data().formParams);
       this.formParams.t = this.activeItem;
-      this.$modal.show("ruleXmodal");
+      this.$modal.show("actionRuleXmodal");
     },
     // 编辑
     handleEdit(row) {
-      this.id = row.ID;
+      this.id = row.Id;
       // this.$refs.detail.id=row.Id
       this.operationName = 2;
       if (this.id) {
-        this.$modal.show("ruleXmodal");
+        this.$modal.show("actionRuleXmodal");
       }
     },
     // 获取表单数据
@@ -370,20 +335,12 @@ export default {
         configId: this.selRow.Id,
       };
       this.$http
-        .post("/ProcessRules/GetProcessRules.ashx", data)
+        .post("/BehaviorAnalyse/GetBehaviorAnalyse.ashx", data)
         .then((result) => {
           if (result.res == 0) {
             this.tableData = result.data.Data;
             this.pageData.totalNum = result.data.TotalCount;
             this.loading = false;
-            this.tableData.forEach((item) => {
-              if (item.MarkInCheck == "上班") {
-                item.MarkInCheck = "工作";
-              }
-              if (item.MarkOutCheck == "上班") {
-                item.MarkOutCheck = "工作";
-              }
-            });
           }
         });
     },

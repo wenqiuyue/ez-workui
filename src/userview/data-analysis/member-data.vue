@@ -112,7 +112,12 @@
               >搜 索</el-button
             >
           </div>
-          <el-button type="text" style="float: right">效率排名</el-button>
+          <el-button
+            type="text"
+            style="float: right"
+            @click="$modal.show('ranking')"
+            ><i class="hiFont hi-jiangpaipaiming"></i> 效率排名</el-button
+          >
         </div>
       </div>
       <div class="people_list" v-if="memberData && memberData.length">
@@ -173,35 +178,47 @@
                 width="70%"
               ></tooltip>
             </p>
-            <p>
-              <span>当前截图：</span
-              ><el-button
-                v-if="item.ClientStatus == 1"
-                plain
-                size="small"
-                style="padding: 6px 15px"
-                @click="shotScreenPhoto(item.User.id)"
-                :icon="
-                  imgload && item.User.id == userID ? 'el-icon-loading' : ''
-                "
-                >{{
-                  imgload && item.User.id == userID ? "截图中..." : "立即截图"
-                }}</el-button
+            <p v-if="item.ClientStatus == 1">
+              <span class="screen_check">
+                <el-checkbox-group v-model="screenCheck">
+                  <el-checkbox label="屏幕"></el-checkbox>
+                  <el-checkbox label="摄像头"></el-checkbox>
+                </el-checkbox-group>
+                <el-button
+                  plain
+                  size="small"
+                  style="padding: 6px"
+                  @click="shotScreenPhoto(item.User.id)"
+                  :icon="
+                    imgload && item.User.id == userID ? 'el-icon-loading' : ''
+                  "
+                  >{{
+                    imgload && item.User.id == userID ? "截图中..." : "立即截图"
+                  }}</el-button
+                ></span
               >
-              <el-tag v-else type="info" effect="plain" size="medium">
+            </p>
+            <p v-else>
+              <span>当前截图：</span>
+              <el-tag type="info" effect="plain" size="medium">
                 该用户已离线
               </el-tag>
             </p>
             <template v-if="item.loadPic && item.loadPic.length">
               <div class="receive-img">
                 <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:mm") }}</span> -->
-                <el-image
-                  v-for="(pic, imgIndex) in item.loadPic"
-                  :key="imgIndex"
-                  :src="$url + pic.ImgUrl"
-                  :preview-src-list="[$url + pic.ImgUrl]"
-                >
-                </el-image>
+                <el-carousel trigger="click" height="46px">
+                  <el-carousel-item
+                    v-for="(pic, imgIndex) in item.loadPic"
+                    :key="imgIndex"
+                  >
+                    <el-image
+                      :src="$url + pic.ImgUrl"
+                      :preview-src-list="[$url + pic.ImgUrl]"
+                    >
+                    </el-image>
+                  </el-carousel-item>
+                </el-carousel>
               </div>
             </template>
           </div>
@@ -209,10 +226,11 @@
             <div class="card_title"><span class="title">工作状态</span></div>
             <div class="work-calc">
               <Staechart
+                :paramsobj="item"
                 :echartData="item.ComputerUsageRecord.workRat"
-                :width="220"
                 :height="90"
                 :workTime="item.WorkTime"
+                @getBarData="getBarData"
               ></Staechart>
             </div>
           </div>
@@ -264,7 +282,7 @@
               ><el-button
                 type="text"
                 size="small"
-                @click.stop="handleAllSoftware(item)"
+                @click.stop="handleAllWords(item)"
                 v-if="item.KeyWordFreqs.length"
                 >查看全部</el-button
               >
@@ -272,7 +290,9 @@
             <div class="keyword_list" v-if="item.KeyWordFreqs.length">
               <tooltip
                 class="word_item"
-                v-for="(worditem, wordind) in item.KeyWordFreqs"
+                v-for="(worditem, wordind) in item.KeyWordFreqs.filter(
+                  (m, index) => index < 16
+                )"
                 :key="wordind"
                 @handleClick="handleKeyWord(worditem, item)"
                 :content="`${worditem.Key}`"
@@ -284,7 +304,16 @@
           </div>
           <div class="work_action">
             <div class="card_title">
-              <span class="title">行为分析</span
+              <span class="title"
+                >行为分析<el-tooltip placement="top" effect="light"
+                  ><div slot="content">
+                    <ul class="status_tooltip">
+                      <li><span style="background: #67c23a"></span>积极</li>
+                      <li><span style="background: #f56c6c"></span>消极</li>
+                      <li><span style="background: #f2f6fc"></span>无状态</li>
+                    </ul>
+                  </div>
+                  <i class="el-icon-question"></i> </el-tooltip></span
               ><el-button
                 type="text"
                 size="small"
@@ -295,8 +324,11 @@
             </div>
             <div class="keyword_list" v-if="item.KeyWordFreqs.length">
               <el-tag
+                size="mini"
                 class="word_item"
-                v-for="(worditem, wordind) in item.KeyWordFreqs"
+                v-for="(worditem, wordind) in item.KeyWordFreqs.filter(
+                  (m, index) => index < 9
+                )"
                 :key="wordind"
                 style="width: 28%"
                 :type="getTagType(wordind)"
@@ -327,6 +359,8 @@
       :uid="clickUser"
       :teamValue="teamValue"
     ></allsoftware>
+    <!-- 所有关键词 -->
+    <AllWords :selUser="selUser" @handleKeyWord="handleKeyWord"></AllWords>
     <!-- 进程截图弹窗 -->
     <progresscom
       :activeBar="selWorkItem"
@@ -349,6 +383,8 @@
       :dateType="dateType"
       :teamId="teamValue"
     ></keywordfrequency>
+    <!-- 排名 -->
+    <Ranking></Ranking>
   </div>
 </template>
 <script>
@@ -364,9 +400,13 @@ export default {
     keywordfrequency: () => import("./keywordfrequency"),
     staffData: () => import("./staffData"),
     Staechart: () => import("./workstatus-pieecharts"),
+    AllWords: () => import("./allwords"),
+    Ranking: () => import("./ranking"),
   },
   data() {
     return {
+      selUser: null, //选择的成员数据列表成员
+      screenCheck: [], //截图类型
       DateRange: [
         new Date(
           new Date().getFullYear(),
@@ -431,6 +471,9 @@ export default {
       console.log("开始截图");
     });
     this.$E.$on("loadingpic", (res) => {
+      if (res.teamId != this.teamValue) {
+        return;
+      }
       console.log("收到截图");
       this.imgload = false;
       this.memberData.forEach((m) => {
@@ -478,7 +521,7 @@ export default {
       this.imgload = true;
       this.$http
         .get("/User/Work/NoticeUserScreenshots.ashx", {
-          params: { Id: this.userID },
+          params: { Id: this.userID, teamId: this.teamValue },
         })
         .then((res) => {
           if (this.timer) {
@@ -560,7 +603,7 @@ export default {
      * 查看某个关键词
      */
     handleKeyWord(val, item) {
-      console.log(val);
+      console.log(val, item);
       this.etime = item.etime;
       this.stime = item.stime;
       this.clickUser = item.User.id;
@@ -576,6 +619,13 @@ export default {
       this.stime = item.stime;
       this.clickUser = item.User.id;
       this.$modal.show("allsoftware");
+    },
+    /**
+     * 查看全部关键词
+     */
+    handleAllWords(item) {
+      this.selUser = item;
+      this.$modal.show("allwords");
     },
     scrollLoad() {
       this.busy = true;
@@ -622,9 +672,6 @@ export default {
             if (resp.data.items.length) {
               resp.data.items.forEach((element) => {
                 element.loadPic = null;
-                element.KeyWordFreqs = element.KeyWordFreqs.filter(
-                  (s, index) => index <= 20
-                );
                 element.ComputerUsageRecord.workRat =
                   element.ComputerUsageRecord.workRat.map((m) => {
                     return {
@@ -689,6 +736,18 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+/deep/.status_tooltip {
+  li {
+    span {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+
+      display: inline-block;
+      margin-right: 5px;
+    }
+  }
+}
 .memberdata {
   height: 100%;
   /deep/.tooltip_text {
@@ -891,6 +950,11 @@ export default {
           .title {
             color: #333333;
             font-size: 1.3rem;
+            i {
+              margin-left: 3px;
+              font-size: 16px;
+              color: #e6a23c;
+            }
           }
           .el-button {
             padding-top: 0;
@@ -924,7 +988,7 @@ export default {
           }
         }
         .work_time {
-          width: 17%;
+          width: 15%;
           display: flex;
           flex-direction: column;
           padding-top: 33px;
@@ -945,21 +1009,43 @@ export default {
             overflow: hidden;
             display: flex;
             flex-direction: row;
-
+            .el-carousel {
+              width: 100%;
+              .el-carousel__item {
+                text-align: center;
+              }
+              /deep/.el-carousel__button {
+                background-color: #c0c4cc;
+              }
+            }
             .el-image {
-              width: 80px;
+              width: 80%;
               height: 46px;
               margin-right: 0.3rem;
             }
           }
+          .screen_check {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            /deep/.el-checkbox-group {
+              .el-checkbox {
+                margin-right: 9px;
+                .el-checkbox__label {
+                  padding-left: 5px;
+                  font-size: 13px;
+                }
+              }
+            }
+          }
         }
         .work_status {
-          width: 17%;
+          width: 22%;
           padding-top: 33px;
         }
         .work_application {
           width: 18%;
-          padding: 33px 10px 0;
+          padding: 33px 10px 0 0;
           .work_appl_list {
             display: flex;
             flex-direction: row;

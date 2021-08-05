@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "396059",
+      "name": "第二",
+      "font_class": "second",
+      "unicode": "e6a0",
+      "unicode_decimal": 59040
+    },
+    {
+      "icon_id": "396060",
+      "name": "第三",
+      "font_class": "third",
+      "unicode": "e6a1",
+      "unicode_decimal": 59041
+    },
+    {
+      "icon_id": "396061",
+      "name": "第一",
+      "font_class": "first",
+      "unicode": "e6a2",
+      "unicode_decimal": 59042
+    },
+    {
+      "icon_id": "13209524",
+      "name": "奖牌排名",
+      "font_class": "jiangpaipaiming",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
       "icon_id": "2423300",
       "name": "无数据",
       "font_class": "wushuju",

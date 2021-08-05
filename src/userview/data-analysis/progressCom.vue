@@ -79,6 +79,12 @@
                         <label v-else>无</label>
                       </span></span
                     >
+                    <span>
+                      <span>工作效率：好 </span>
+                      <span>行为状态：看奥运 </span>
+                      <span>点击速度：20次每分钟 </span>
+                      <span>输入速度：20次每分钟 </span>
+                    </span>
                   </h4>
                   <el-image
                     style="max-width: 200px"
