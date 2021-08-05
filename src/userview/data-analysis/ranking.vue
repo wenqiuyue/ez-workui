@@ -10,21 +10,23 @@
       ref="ranking"
     >
       <CContent>
-        <!-- <template #search>
+        <template #search>
           <div class="screen">
-            <el-select
-              v-model="teamValue"
-              filterable
-              placeholder="请选择团队"
-              @change="handleSearch"
-            >
-              <el-option label="所有团队" :value="2"> </el-option>
-              <el-option label="我创建的团队" :value="3"> </el-option>
-              <el-option label="我管理的团队" :value="4"> </el-option>
+            <el-select v-model="typeVal">
+              <el-option label="综合" :value="1"> </el-option>
+              <el-option label="鼠标" :value="2"> </el-option>
+              <el-option label="键盘" :value="3"> </el-option>
             </el-select>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
+            <el-select v-model="speedVal" placeholder="选择速度">
+              <el-option label="平均速度" :value="1"> </el-option>
+              <el-option label="最高速度" :value="2"> </el-option>
+              <el-option label="最低速度" :value="3"> </el-option>
+            </el-select>
+            <el-button type="primary" @click="handleSearch" size="medium"
+              >开始排名</el-button
+            >
           </div>
-        </template> -->
+        </template>
         <template #main>
           <el-table :data="tableData">
             <el-table-column align="center" prop="ranking" label="排名">
@@ -78,6 +80,8 @@ export default {
   },
   data() {
     return {
+      typeVal: 1,
+      speedVal: 1,
       tableData: [
         {
           ranking: 1,
@@ -142,6 +146,30 @@ export default {
 </script>
 <style lang="less" scoped>
 .ranking {
+  .screen {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 5px 5px 0 0;
+    /deep/.el-select {
+      margin-right: 8px;
+      width: 18rem;
+      .el-input {
+        border: 1px solid #dcdfe6;
+        border-radius: 4px;
+        .el-input__inner {
+          height: 34px;
+          line-height: 34px;
+          font-size: 1.3rem;
+        }
+        .el-input__icon {
+          height: 34px;
+          line-height: 34px;
+        }
+      }
+    }
+  }
   .high-table {
     /deep/.ranking {
       i {

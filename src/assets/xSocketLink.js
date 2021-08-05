@@ -97,6 +97,10 @@ export default class xSocketLink {
                 //通知客户端截图
                 Vue.prototype.$toClient("client.ScShot", res.data);
                 break;
+              case 28:
+                //通知客户端通知成员拍照
+                Vue.prototype.$toClient("client.CamShot", res.data);
+                break;
               case 121:
                 //返回进程组进程提醒客户端退出
                 Vue.prototype.$toClient("client.Restart", res.data);
@@ -115,9 +119,19 @@ export default class xSocketLink {
             }
 
             if (
-              ["1", "50", "51", "53", "26", "25", "27", "70", "120"].indexOf(
-                res.res
-              ) >= 0
+              [
+                "1",
+                "50",
+                "51",
+                "53",
+                "26",
+                "25",
+                "27",
+                "70",
+                "120",
+                "28",
+                "29",
+              ].indexOf(res.res) >= 0
             ) {
               opt.onMsg(res);
               const msgType = Vue.prototype.$D.ITEM("msg_type_pnt", res.type);

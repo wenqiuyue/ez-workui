@@ -106,6 +106,30 @@
             </template></el-table-column
           >
           <el-table-column
+            label="我的效率"
+            prop="ExpireTime"
+            show-overflow-tooltip
+            align="center"
+          >
+            <template slot-scope="scope">好</template></el-table-column
+          >
+          <el-table-column
+            label="我的行为"
+            prop="ExpireTime"
+            show-overflow-tooltip
+            align="center"
+          >
+            <template slot-scope="scope">吃零食</template></el-table-column
+          >
+          <el-table-column
+            label="团队效率"
+            prop="ExpireTime"
+            show-overflow-tooltip
+            align="center"
+          >
+            <template slot-scope="scope">积极</template></el-table-column
+          >
+          <el-table-column
             label="到期时间"
             prop="ExpireTime"
             show-overflow-tooltip

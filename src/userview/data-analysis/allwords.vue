@@ -19,20 +19,21 @@
         border
         @cell-click="cellClick"
       >
-        <el-table-column prop="Key" label="词汇名">
+        <el-table-column prop="Key" label="词汇名" show-overflow-tooltip>
           <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" placement="top">
+            <!-- <el-tooltip class="item" effect="dark" placement="top">
               <div slot="content">
                 <p
                   v-for="(con, index) in scope.row.FocusFormName"
                   :key="index"
                   style="margin-bottom: 3px"
                 >
-                  {{ con }}
+                  {{ con.FocusFormName }}
                 </p>
               </div>
               <span>{{ scope.row.Key }}</span>
-            </el-tooltip>
+            </el-tooltip> -->
+            <span>{{ scope.row.Key }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="KeywordsStatus" label="状态">

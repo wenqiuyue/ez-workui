@@ -182,7 +182,10 @@
               <span class="screen_check">
                 <el-checkbox-group v-model="screenCheck">
                   <el-checkbox label="屏幕"></el-checkbox>
-                  <el-checkbox label="摄像头"></el-checkbox>
+                  <el-checkbox
+                    label="摄像头"
+                    :disabled="!item.IsStartCamera"
+                  ></el-checkbox>
                 </el-checkbox-group>
                 <el-button
                   plain
@@ -317,25 +320,26 @@
               ><el-button
                 type="text"
                 size="small"
-                @click.stop="handleAllSoftware(item)"
-                v-if="item.KeyWordFreqs.length"
+                @click.stop="handleAllBehavior(item)"
+                v-if="item.Behaviors.length"
                 >查看全部</el-button
               >
             </div>
-            <div class="keyword_list" v-if="item.KeyWordFreqs.length">
+            <div class="keyword_list" v-if="item.Behaviors.length">
               <el-tag
                 size="mini"
                 class="word_item"
-                v-for="(worditem, wordind) in item.KeyWordFreqs.filter(
+                v-for="(bitem, bindx) in item.Behaviors.filter(
                   (m, index) => index < 9
                 )"
-                :key="wordind"
+                :key="bindx"
                 style="width: 28%"
-                :type="getTagType(wordind)"
+                :type="getTagType(bitem.BehavoirType)"
+                @click="handleBehavior(bitem, item)"
                 ><tooltip
-                  @handleClick="handleKeyWord(worditem, item)"
-                  :content="`${worditem.Key}`"
-                  :ref="`memprop-${index}-${wordind}`"
+                  @handleClick="handleBehavior(bitem, item)"
+                  :content="`${bitem.Behavoir}`"
+                  :ref="`behavoir-${index}-${bindx}`"
                   width="100%"
                 ></tooltip
               ></el-tag>
@@ -352,6 +356,12 @@
         <p class="tip_text">暂无数据</p>
       </div>
     </div>
+    <!-- 所有行为分析 -->
+    <AllBehavior
+      :selUser="selUser"
+      :teamValue="teamValue"
+      @handleBehavior="handleBehavior"
+    ></AllBehavior>
     <!-- 所有软件弹窗 -->
     <allsoftware
       :stime="stime"
@@ -361,6 +371,15 @@
     ></allsoftware>
     <!-- 所有关键词 -->
     <AllWords :selUser="selUser" @handleKeyWord="handleKeyWord"></AllWords>
+    <!-- 行为折线图弹窗 -->
+    <BehaviorEcharts
+      :teamId="teamValue"
+      :searchType="2"
+      :behavior="clickKeyWord"
+      :datestart="stime"
+      :dateend="etime"
+      :dateType="dateType"
+    ></BehaviorEcharts>
     <!-- 进程截图弹窗 -->
     <progresscom
       :activeBar="selWorkItem"
@@ -396,12 +415,13 @@ export default {
     tooltip: () => import("@/components/textTooltip"),
     progresscom: () => import("./progressCom"),
     allsoftware: () => import("./allsoftware"),
-    MemWorkProgress: () => import("./memworkprogress"),
     keywordfrequency: () => import("./keywordfrequency"),
     staffData: () => import("./staffData"),
     Staechart: () => import("./workstatus-pieecharts"),
     AllWords: () => import("./allwords"),
     Ranking: () => import("./ranking"),
+    AllBehavior: () => import("./allbehavior"),
+    BehaviorEcharts: () => import("./behavior-echarts"),
   },
   data() {
     return {
@@ -438,7 +458,7 @@ export default {
       memberData: [], //成员数据
       pageData: {
         pageIndex: 1,
-        pageSize: 20,
+        pageSize: 10,
         pageNum: 0,
       }, //分页
       clickUser: null, //点击的用户
@@ -498,9 +518,9 @@ export default {
      * 积极：绿  消极：红  无：白色
      */
     getTagType(val) {
-      if (val == 1 || val == 7) {
+      if (val == "积极") {
         return "success";
-      } else if (val == 2 || val == 4) {
+      } else if (val == "消极") {
         return "danger";
       } else {
         return "info";
@@ -516,20 +536,49 @@ export default {
      * 截图
      */
     shotScreenPhoto(id) {
+      if (!this.screenCheck.length) {
+        this.$message({
+          showClose: true,
+          message: "请选择截图类型",
+          type: "warning",
+          duration: 2000,
+        });
+        return;
+      }
       this.userID = id;
-      //屏幕截图
+      //截图
       this.imgload = true;
+      if (this.screenCheck.includes("屏幕")) {
+        this.screenShot();
+      }
+      if (this.screenCheck.includes("摄像头")) {
+        this.screenShotCamera();
+      }
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+      this.setTimer();
+    },
+    /**
+     * 屏幕截图
+     */
+    screenShot() {
       this.$http
         .get("/User/Work/NoticeUserScreenshots.ashx", {
           params: { Id: this.userID, teamId: this.teamValue },
         })
-        .then((res) => {
-          if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-          }
-          this.setTimer();
-        });
+        .then((res) => {});
+    },
+    /**
+     * 摄像头截图
+     */
+    screenShotCamera() {
+      this.$http
+        .get("/User/Work/NoticeUserPhotographs.ashx", {
+          params: { Id: this.userID, teamId: this.teamValue },
+        })
+        .then((res) => {});
     },
     setTimer() {
       if (this.timer == null) {
@@ -603,13 +652,22 @@ export default {
      * 查看某个关键词
      */
     handleKeyWord(val, item) {
-      console.log(val, item);
       this.etime = item.etime;
       this.stime = item.stime;
       this.clickUser = item.User.id;
       this.clickKeyWord = val.Key;
       this.pname = val.FocusFormName;
       this.$modal.show("meData");
+    },
+    /**
+     * 查看某个行为
+     */
+    handleBehavior(val, item) {
+      console.log(val, item);
+      this.etime = item.etime;
+      this.stime = item.stime;
+      this.clickKeyWord = val.Behavoir;
+      this.$modal.show("behaviorecharts");
     },
     /**
      * 查看全部软件
@@ -619,6 +677,13 @@ export default {
       this.stime = item.stime;
       this.clickUser = item.User.id;
       this.$modal.show("allsoftware");
+    },
+    /**
+     * 查看全部行为分析
+     */
+    handleAllBehavior(item) {
+      this.selUser = item;
+      this.$modal.show("allbehavior");
     },
     /**
      * 查看全部关键词
@@ -665,7 +730,7 @@ export default {
             : null,
       };
       this.$http
-        .post("/User/MemberPeriod.ashx", data)
+        .post("/User/MemberPeriod.ashx#", data)
         .then((resp) => {
           if (resp.res == 0) {
             this.listdateType = this.dateType;
@@ -1042,6 +1107,9 @@ export default {
         .work_status {
           width: 22%;
           padding-top: 33px;
+          .card_title {
+            margin-bottom: 0;
+          }
         }
         .work_application {
           width: 18%;

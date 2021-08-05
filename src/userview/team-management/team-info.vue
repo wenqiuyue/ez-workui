@@ -145,6 +145,10 @@
               <ul>
                 <li class="card_title"><span>设置</span></li>
                 <li class="set_row">
+                  <span>可否开启摄像头截图</span>
+                  <el-switch v-model="setFour" @change="changeSet"> </el-switch>
+                </li>
+                <li class="set_row">
                   <span>可否通过团队号加入</span>
                   <el-switch v-model="setOne" @change="changeSet"> </el-switch>
                 </li>
@@ -299,6 +303,7 @@ export default {
       setOne: true,
       setTwo: true,
       setThree: false,
+      setFour: false,
       passwordVal: null, //口令
     };
   },
@@ -338,6 +343,7 @@ export default {
         IsAgree: this.setTwo ? 1 : 0,
         IsInvitationCode: this.setThree ? 1 : 0,
         InvitationCode: this.passwordVal,
+        IsStartCamera: this.setFour ? 1 : 0,
       };
       this.$http.post("/Teams/TeamSet.ashx", data).then((resp) => {
         if (resp.res == 0) {
@@ -371,6 +377,8 @@ export default {
             this.setThree =
               this.infoData.Teamdata.IsInvitationCode == 1 ? true : false;
             this.passwordVal = this.infoData.Teamdata.InvitationCode;
+            this.setFour =
+              this.infoData.Teamdata.IsStartCamera == 1 ? true : false;
           }
         })
         .finally(() => (this.loading = false));

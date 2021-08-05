@@ -83,11 +83,20 @@
                     </div>
                     <div class="taskDes">
                       <div class="progress">
-                        {{
-                          item.ClientStatus == 0 ? "上一次" : "正在"
-                        }}运行进程：{{
-                          item.ProcessName == null ? "无" : item.ProcessName
-                        }}
+                        <span class="processname"
+                          >{{
+                            item.ClientStatus == 0 ? "上一次" : "正在"
+                          }}运行进程：{{
+                            item.ProcessName == null ? "无" : item.ProcessName
+                          }}
+                        </span>
+                        <div class="status_speed">
+                          <div>
+                            <span>当前点击速度：20次每分钟</span
+                            ><span>当前输入速度：20次每分钟</span>
+                          </div>
+                          <div><span>行为状态：看书</span></div>
+                        </div>
                       </div>
                       <div class="info">
                         <span v-if="item.ClientStatus !== 1"
@@ -232,12 +241,15 @@
                           >
                             <el-checkbox-group v-model="screenCheck">
                               <el-checkbox label="屏幕"></el-checkbox>
-                              <el-checkbox label="摄像头"></el-checkbox>
+                              <el-checkbox
+                                label="摄像头"
+                                :disabled="!item.IsStartCamera"
+                              ></el-checkbox>
                             </el-checkbox-group>
                             <p @click="shotScreenPhoto(item.usInfo.UsId)">
                               <span v-if="imgload && item.usInfo.UsId == userID"
                                 ><i class="el-icon-loading"></i>截图中...</span
-                              ><span v-else>屏幕截图</span>
+                              ><span v-else>立即截图</span>
                             </p>
                           </span>
                           <el-tag
@@ -564,20 +576,29 @@ export default {
       }
     },
     shotScreenPhoto(id) {
+      if (!this.screenCheck.length) {
+        this.$message({
+          showClose: true,
+          message: "请选择截图类型",
+          type: "warning",
+          duration: 2000,
+        });
+        return;
+      }
       this.userID = id;
       //屏幕截图
       this.imgload = true;
-      this.$http
-        .get("/User/Work/NoticeUserScreenshots.ashx", {
-          params: { Id: this.userID, teamId: this.teamValue },
-        })
-        .then((res) => {
-          if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-          }
-          this.setTimer();
-        });
+      if (this.screenCheck.includes("屏幕")) {
+        this.screenShot();
+      }
+      if (this.screenCheck.includes("摄像头")) {
+        this.screenShotCamera();
+      }
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+      this.setTimer();
     },
     setTimer() {
       if (this.timer == null) {
@@ -595,6 +616,26 @@ export default {
           }
         }, 1000);
       }
+    },
+    /**
+     * 屏幕截图
+     */
+    screenShot() {
+      this.$http
+        .get("/User/Work/NoticeUserScreenshots.ashx", {
+          params: { Id: this.userID, teamId: this.teamValue },
+        })
+        .then((res) => {});
+    },
+    /**
+     * 摄像头截图
+     */
+    screenShotCamera() {
+      this.$http
+        .get("/User/Work/NoticeUserPhotographs.ashx", {
+          params: { Id: this.userID, teamId: this.teamValue },
+        })
+        .then((res) => {});
     },
     calcWorkTime() {
       if (this.calcTime == null) {
@@ -633,6 +674,12 @@ export default {
     });
     this.$E.$on("loadpic", (res) => {
       console.log("开始截图");
+    });
+    this.$E.$on("loadcamerapic", (res) => {
+      console.log("开始摄像头拍照");
+    });
+    this.$E.$on("loadingcamerapic", (res) => {
+      console.log("收到摄像头拍照");
     });
     this.$E.$on("loadingpic", (res) => {
       if (res.teamId != this.teamValue) {
@@ -1042,6 +1089,7 @@ export default {
           border: 1px solid #eee;
           margin: 1rem;
           box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+          padding-top: 5px;
         }
       }
 
@@ -1212,14 +1260,25 @@ export default {
       // padding:1rem 0;
       .progress {
         line-height: 2.1rem;
-        font-size: 1.4rem;
         color: #6d6d6d;
-        font-weight: bold;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
         margin-top: 0.5rem;
         width: 65%;
+        .processname {
+          font-weight: bold;
+          font-size: 1.4rem;
+        }
+        .status_speed {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          flex-wrap: wrap;
+          span {
+            margin: 0 5px;
+          }
+        }
       }
       .progress-bars {
         display: flex;

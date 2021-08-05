@@ -112,7 +112,7 @@
               v-for="(item, index) in timeAttence"
               :key="index"
             >
-              <ul class="genera-info">
+              <ul class="genera-info" @click="handleDateInfo(true, item)">
                 <li>
                   <img :src="imgChange(item.Picture)" />
                   <span>{{ item.UserName }}</span>
@@ -243,7 +243,7 @@
                       : '',
                   ]"
                 >
-                  <el-col :sm="24" :md="6">
+                  <el-col :sm="24" :md="4">
                     <p
                       class="cell-title-left"
                       v-text="parseInt(data.day.split('-').slice(2))"
@@ -271,7 +271,7 @@
                       }}
                     </p>
                   </el-col>
-                  <el-col :sm="24" :md="18" class="hidden-sm-and-down">
+                  <el-col :sm="24" :md="20" class="hidden-sm-and-down">
                     <!-- <p
                       class="cell-title-right"
                       v-if="
@@ -2023,7 +2023,12 @@ export default {
       if (!bool) {
         return;
       }
-      this.selDateTimeLine = obj;
+      this.selDateTimeLine = {
+        Date: obj.Date,
+        UsId: obj.UserId,
+        teamId: this.teamValue,
+        userName: obj.UserName,
+      };
       this.$modal.show("timeline");
     },
     // 拆解父组件传递的参数

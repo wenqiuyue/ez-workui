@@ -137,6 +137,10 @@ export default {
           _this.$E.$emit("loadingpic", res); //发来加载进程截图
         } else if (["120"].includes(res.res)) {
           this.applyCount = res.data.ApplySumCount; //更新团队申请数量
+        } else if (["28"].includes(res.res)) {
+          _this.$E.$emit("loadcamerapic", res); //发来通知成员拍照
+        } else if (["29"].includes(res.res)) {
+          _this.$E.$emit("loadingcamerapic", res); //发来返回摄像头拍照图片
         }
       },
     });

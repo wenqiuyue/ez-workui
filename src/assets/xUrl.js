@@ -35,6 +35,7 @@ let cancelUrl = [
     "/Teams/MemberJob/MemberDataDetails.ashx#",
     "/General/GetProcessImg.ashx#",
     "/General/GetProcessImgWithForm.ashx#",
+    "/User/MemberPeriod.ashx#",
   ],
 ];
 let pending = [];
@@ -85,6 +86,7 @@ axios.interceptors.request.use(
  */
 const filterUrls = [
   "/User/Work/NoticeUserScreenshots.ashx",
+  "/User/Work/NoticeUserPhotographs.ashx",
   "/Handler/ChatUploadFile.ashx",
 ];
 axios.interceptors.response.use(

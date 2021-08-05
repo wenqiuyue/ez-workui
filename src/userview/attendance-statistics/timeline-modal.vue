@@ -4,80 +4,83 @@
       name="timeline"
       :title="`${
         selDateTimeLine ? selDateTimeLine.Date.timeFormat('yyyy-MM-dd') : ''
-      } 的打卡详情`"
+      } ${selDateTimeLine ? selDateTimeLine.userName : ''}的打卡详情`"
       width="85%"
       height="90%"
       :showCrossBtn="true"
+      @opened="opened"
     >
-      <div class="soft" v-if="selDateTimeLine">
-        <div class="title">时间轴与使用软件</div>
-        <div
-          class="softbox"
-          v-if="selDateTimeLine.TimeLine && selDateTimeLine.TimeLine.length"
-        >
-          <div
-            v-for="(item, softind) in selDateTimeLine.TimeLine"
-            :key="item.Line"
-            :class="{
-              speed_footer: softind % 2 == 0,
-              speed_header: softind % 2 !== 0,
-            }"
-          >
+      <div v-loading="loading">
+        <div class="soft">
+          <div class="title">时间轴与使用软件</div>
+          <div class="softbox" v-if="selDateTime && selDateTime.length">
             <div
-              :class="[
-                'left',
-                item.CheckStatus == '签到' ? 'sign_in' : '',
-                item.CheckStatus == '签退' ? 'sign_out' : '',
-              ]"
+              v-for="(item, softind) in selDateTime"
+              :key="softind"
+              :class="{
+                speed_footer: softind % 2 == 0,
+                speed_header: softind % 2 !== 0,
+              }"
             >
-              <span class="time"
-                ><label v-if="item.CheckStatus">{{ item.CheckStatus }}:</label
-                >{{ item.LineTime }}</span
+              <div
+                :class="[
+                  'left',
+                  item.CheckStatus == '签到' ? 'sign_in' : '',
+                  item.CheckStatus == '签退' ? 'sign_out' : '',
+                ]"
               >
-              <ul class="s_l_ul" v-if="item.Process && item.Process.length">
-                <li
-                  class="s_l_li"
-                  v-for="(citem, csoftind) in item.Process"
-                  :key="csoftind"
-                  @click="handleAppPic(citem)"
+                <span class="time"
+                  ><label v-if="item.CheckStatus">{{ item.CheckStatus }}:</label
+                  >{{ item.LineTime }}</span
                 >
-                  {{ citem.PName }}
-                </li>
-              </ul>
+                <ul class="s_l_ul" v-if="item.Process && item.Process.length">
+                  <li
+                    class="s_l_li"
+                    v-for="(citem, csoftind) in item.Process"
+                    :key="csoftind"
+                    @click="handleAppPic(citem)"
+                  >
+                    {{ citem.PName }}
+                  </li>
+                </ul>
+              </div>
+              <div class="right"></div>
             </div>
-            <div class="right"></div>
+          </div>
+          <div class="nodata" v-else>
+            <i class="hiFont hi-wushuju"></i>
+            <p>暂无数据</p>
           </div>
         </div>
-        <div class="nodata" v-else>
-          <i class="hiFont hi-wushuju"></i>
-          <p>暂无数据</p>
+        <div class="scree">
+          <div class="scree_title">行为热力图</div>
+          <div class="scree_echarts" v-if="true"></div>
+          <div class="nodata" v-else>
+            <i class="hiFont hi-wushuju"></i>
+            <p>暂无数据</p>
+          </div>
         </div>
-      </div>
-      <div class="scree" v-if="selDateTimeLine">
-        <div class="scree_title">定期截图</div>
-        <div
-          class="screephot"
-          v-if="selDateTimeLine.TimeLine && selDateTimeLine.TimeLine.length"
-        >
-          <div
-            class="screen"
-            v-for="(itempic, picindex) in selDateTimeLine.TimeLine.filter(
-              (m) => m.Img
-            )"
-            :key="picindex"
-          >
-            <el-image
-              style="width: 157px; height: 88px"
-              :src="cmurl + itempic.Img"
-              :preview-src-list="[`${cmurl}${itempic.Img}`]"
+        <div class="scree">
+          <div class="scree_title">定期截图</div>
+          <div class="screephot" v-if="selDateTime && selDateTime.length">
+            <div
+              class="screen"
+              v-for="(itempic, picindex) in selDateTime.filter((m) => m.Img)"
+              :key="picindex"
             >
-            </el-image>
-            <p class="time">{{ itempic.LineTime }}</p>
+              <el-image
+                style="width: 157px; height: 88px"
+                :src="cmurl + itempic.Img"
+                :preview-src-list="[`${cmurl}${itempic.Img}`]"
+              >
+              </el-image>
+              <p class="time">{{ itempic.LineTime }}</p>
+            </div>
           </div>
-        </div>
-        <div class="nodata" v-else>
-          <i class="hiFont hi-wushuju"></i>
-          <p>暂无数据</p>
+          <div class="nodata" v-else>
+            <i class="hiFont hi-wushuju"></i>
+            <p>暂无数据</p>
+          </div>
         </div>
       </div>
     </XModal>
@@ -99,6 +102,8 @@ export default {
   data() {
     return {
       selRow: null, //选择的软件
+      selDateTime: null,
+      loading: false,
     };
   },
   computed: {
@@ -107,6 +112,25 @@ export default {
     },
   },
   methods: {
+    /**
+     * 弹窗打开
+     */
+    opened() {
+      this.$nextTick(() => {
+        this.loading = true;
+        this.$http
+          .post(
+            "/Attendance/GetMyWorkStatusInHalfHour.ashx",
+            this.selDateTimeLine
+          )
+          .then((resp) => {
+            if (resp.res == 0) {
+              this.selDateTime = resp.data;
+            }
+          })
+          .finally(() => (this.loading = false));
+      });
+    },
     /**
      * 某个软件截图
      */

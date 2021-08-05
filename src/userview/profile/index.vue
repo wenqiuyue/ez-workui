@@ -183,18 +183,30 @@
                   <el-tag v-else size="medium" type="danger"> 暂无部门 </el-tag>
                 </template></el-table-column
               >
-              <!-- <el-table-column
-                label="到期时间"
+              <el-table-column
+                label="我的效率"
                 prop="ExpireTime"
                 show-overflow-tooltip
                 align="center"
               >
-                <template slot-scope="scope">{{
-                  scope.row.ExpireTime
-                    ? scope.row.ExpireTime.timeFormat("yyyy-MM-dd")
-                    : "--"
-                }}</template></el-table-column
-              > -->
+                <template slot-scope="scope">好</template></el-table-column
+              >
+              <el-table-column
+                label="我的行为"
+                prop="ExpireTime"
+                show-overflow-tooltip
+                align="center"
+              >
+                <template slot-scope="scope">吃零食</template></el-table-column
+              >
+              <el-table-column
+                label="团队效率"
+                prop="ExpireTime"
+                show-overflow-tooltip
+                align="center"
+              >
+                <template slot-scope="scope">积极</template></el-table-column
+              >
             </el-table>
             <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
           </div>

@@ -211,12 +211,17 @@ export default {
     getBarData() {
       if (this.name == "memberDatatimeAxisPhoto") {
         this.getProcessImgData();
-      } else if (this.name == "allfoftwarepic") {
+      } else if (
+        this.name == "allfoftwarepic" ||
+        this.name == "allbehaviorpic"
+      ) {
         this.getProcessImgWithFormData([this.activeBar.name]);
       } else if (this.name == "keywordfrequency") {
         this.getProcessImgWithFormData(
           this.activeBar.pname.map((m) => m.FocusFormName)
         );
+      } else if (this.name == "behaviorPicList") {
+        this.getUserBehaviorImg();
       }
     },
     getProcessImgData() {
@@ -258,6 +263,26 @@ export default {
       };
       this.$http
         .post("/General/GetProcessImgWithForm.ashx#", params)
+        .then((res) => {
+          if (res.res == 0) {
+            this.progressPhotoArr = res.data.data;
+            this.pageData.totalNum = res.data.total;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
+    getUserBehaviorImg() {
+      this.loading = true;
+      let params = {
+        behavior: this.activeBar.name,
+        stime: this.timeStart.timeFormat("yyyy-MM-dd"),
+        etime: this.timeEnd.timeFormat("yyyy-MM-dd"),
+        pageCount: this.pageData.pageSize,
+        teamId: this.teamValue,
+        page: this.pageData.pageIndex,
+      };
+      this.$http
+        .post("/User/Work/GetUserBehaviorImg.ashx", params)
         .then((res) => {
           if (res.res == 0) {
             this.progressPhotoArr = res.data.data;

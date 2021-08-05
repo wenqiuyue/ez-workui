@@ -213,6 +213,9 @@ export default {
       .window_key {
         cursor: pointer;
       }
+      &::before {
+        background-color: transparent;
+      }
     }
   }
 }
