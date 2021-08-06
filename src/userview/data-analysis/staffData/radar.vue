@@ -10,17 +10,9 @@
 <script>
 export default {
   props: {
-    echartData: {
-      type: Array,
-      default: () => {
-        return [];
-      },
-    },
-    Title: {
-      type: String,
-      default: () => {
-        return "";
-      },
+    efficiencyData: {
+      type: Object,
+      default: null,
     },
     width: {
       type: Number,
@@ -34,14 +26,10 @@ export default {
         return 250;
       },
     },
-    workTime: {
-      type: String | Number,
-      default: null,
-    },
   },
   watch: {
-    echartData() {
-      if (this.echartData) {
+    efficiencyData() {
+      if (this.efficiencyData) {
         this.drawLine();
       }
     },
@@ -62,14 +50,9 @@ export default {
           show: false,
         },
         radar: {
-          indicator: [
-            { text: "团队鼠标效率", max: 150 },
-            { text: "团队键盘效率", max: 150 },
-            { text: "部门鼠标效率", max: 150 },
-            { text: "部门键盘效率", max: 120 },
-            { text: "个人鼠标效率", max: 150 },
-            { text: "个人键盘效率", max: 120 },
-          ],
+          indicator: that.$D.LIST("Efficiency_Standard").map((m) => {
+            return { text: m.key, max: m.custom };
+          }),
           center: ["50%", "50%"],
           radius: 90,
           name: {

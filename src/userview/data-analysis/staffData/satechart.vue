@@ -90,7 +90,6 @@ export default {
           {
             name: "工作状态",
             type: "pie",
-            radius: "50%",
             radius: ["0%", "70%"],
             center: ["25%", "50%"], // 图表的位置 x,y方向
             data: this.echartData,

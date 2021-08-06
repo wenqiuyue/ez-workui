@@ -36,6 +36,8 @@ let cancelUrl = [
     "/General/GetProcessImg.ashx#",
     "/General/GetProcessImgWithForm.ashx#",
     "/User/MemberPeriod.ashx#",
+    "/User/Work/GetBehaviorThermodynamicChart.ashx#",
+    "/User/Work/WorkEfficiencyAnalysis.ashx#",
   ],
 ];
 let pending = [];

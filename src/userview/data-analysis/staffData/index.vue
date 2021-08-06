@@ -35,7 +35,7 @@
           <div class="state_one_one">
             <h3>效率雷达图</h3>
             <div class="info">
-              <Radar></Radar>
+              <Radar :efficiencyData="efficiencyData"></Radar>
             </div>
           </div>
           <div class="state_two">
@@ -235,6 +235,8 @@ export default {
   },
   data() {
     return {
+      thermodynamicData: null, //热力图
+      efficiencyData: null, //雷达图
       loading: false,
       workTime: null,
       // 高频词
@@ -304,82 +306,130 @@ export default {
      * 具体某一天
      */
     MemberDataDetails() {
-      const data = {
+      const data1 = {
         u: this.uid,
         date: this.selActiveTime,
         teamId: this.teamId,
       };
-      this.$http
-        .get("/Teams/MemberJob/MemberDataDetails.ashx#", { params: data })
-        .then((resp) => {
-          if (resp.res == 0) {
-            //本日工作状态占比图表数据
-            this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
-              (m) => {
-                return {
-                  name: m.name,
-                  value: m.value.toFixed(1),
-                };
-              }
-            );
-            //本日使用软件占比
-            this.echartSoftWearData = resp.data.AppDetails.map((m) => {
+      const data2 = {
+        UsId: this.uid,
+        datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+      };
+      const data3 = {
+        uid: this.uid,
+        datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+      };
+      Promise.all([
+        this.$http.get("/Teams/MemberJob/MemberDataDetails.ashx#", {
+          params: data1,
+        }),
+        this.$http.post(
+          "/User/Work/GetBehaviorThermodynamicChart.ashx#",
+          data2
+        ),
+        this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx#", data3),
+      ]).then((resp) => {
+        if (resp[0].res == 0) {
+          //本日工作状态占比图表数据
+          this.echartWorkData = resp[0].data.ComputerUsageRecord.workRat.map(
+            (m) => {
               return {
-                name: m.AppName,
-                value: m.ratio,
+                name: m.name,
+                value: m.value.toFixed(1),
               };
-            });
-            //高频关键词
-            this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-              (m, index) => index < 20
-            );
-            //时间轴与使用软件、定期截图数据
-            this.softData = resp.data.TimeLine;
-            this.workTime = resp.data.WorkTime;
-            this.loading = false;
-          }
-        });
+            }
+          );
+          //本日使用软件占比
+          this.echartSoftWearData = resp[0].data.AppDetails.map((m) => {
+            return {
+              name: m.AppName,
+              value: m.ratio,
+            };
+          });
+          //高频关键词
+          this.ThreeTexts = resp[0].data.KeyWordFreqs.filter(
+            (m, index) => index < 20
+          );
+          //时间轴与使用软件、定期截图数据
+          this.softData = resp[0].data.TimeLine;
+          this.workTime = resp[0].data.WorkTime;
+        }
+        if (resp[1].res == 0) {
+          this.thermodynamicData = resp[1].data.Behavior;
+        }
+        if (resp[2].res == 0) {
+          this.efficiencyData = resp[2].data;
+        }
+        this.loading = false;
+      });
     },
     /**
      * 所有时间
      */
     DataDetailsSummary() {
-      const data = {
+      const data1 = {
         u: this.uid,
         st: this.stime,
         et: this.etime,
         teamId: this.teamId,
       };
-      this.$http
-        .post("/User/MemberDataDetailsSummary.ashx#", data)
-        .then((resp) => {
-          if (resp.res == 0) {
-            //本周/月工作状态占比图表数据
-            this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
-              (m) => {
-                return {
-                  name: m.name,
-                  value: m.value.toFixed(1),
-                };
-              }
-            );
-            //本周/月使用软件占比
-            this.echartSoftWearData = resp.data.AppDetails.map((m) => {
+      const data2 = {
+        UsId: this.uid,
+        datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+      };
+      const data3 = {
+        uid: this.uid,
+        datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+      };
+      Promise.all([
+        this.$http.post("/User/MemberDataDetailsSummary.ashx#", data1),
+        this.$http.post(
+          "/User/Work/GetBehaviorThermodynamicChart.ashx#",
+          data2
+        ),
+        this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx#", data3),
+      ]).then((resp) => {
+        if (resp[0].res == 0) {
+          //本周/月工作状态占比图表数据
+          this.echartWorkData = resp[0].data.ComputerUsageRecord.workRat.map(
+            (m) => {
               return {
-                name: m.AppName,
-                value: m.ratio,
+                name: m.name,
+                value: m.value.toFixed(1),
               };
-            });
-            //高频关键词
-            this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-              (m, index) => index < 20
-            );
-            //时间轴与使用软件、定期截图数据
-            this.softData = resp.data.TimeLine;
-            this.workTime = resp.data.WorkTime;
-            this.loading = false;
-          }
-        });
+            }
+          );
+          //本周/月使用软件占比
+          this.echartSoftWearData = resp[0].data.AppDetails.map((m) => {
+            return {
+              name: m.AppName,
+              value: m.ratio,
+            };
+          });
+          //高频关键词
+          this.ThreeTexts = resp[0].data.KeyWordFreqs.filter(
+            (m, index) => index < 20
+          );
+          //时间轴与使用软件、定期截图数据
+          this.softData = resp[0].data.TimeLine;
+          this.workTime = resp[0].data.WorkTime;
+        }
+        if (resp[1].res == 0) {
+          this.thermodynamicData = resp[1].data.Behavior;
+        }
+        if (resp[2].res == 0) {
+          this.efficiencyData = resp[2].data;
+        }
+        this.loading = false;
+      });
     },
     /**
      * 查看某个关键词

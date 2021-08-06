@@ -236,7 +236,11 @@
             <div class="work-calc">
               <Staechart
                 :paramsobj="item"
-                :echartData="item.ComputerUsageRecord.workRat"
+                :echartData="
+                  item.ComputerUsageRecord
+                    ? item.ComputerUsageRecord.workRat
+                    : []
+                "
                 :height="90"
                 :workTime="item.WorkTime"
                 @getBarData="getBarData"
@@ -745,13 +749,15 @@ export default {
             if (resp.data.items.length) {
               resp.data.items.forEach((element) => {
                 element.loadPic = null;
-                element.ComputerUsageRecord.workRat =
-                  element.ComputerUsageRecord.workRat.map((m) => {
-                    return {
-                      name: m.name,
-                      value: m.value.toFixed(1),
-                    };
-                  });
+                if (element.ComputerUsageRecord) {
+                  element.ComputerUsageRecord.workRat =
+                    element.ComputerUsageRecord.workRat.map((m) => {
+                      return {
+                        name: m.name,
+                        value: m.value.toFixed(1),
+                      };
+                    });
+                }
               });
             }
             this.memberData.push(...resp.data.items);
