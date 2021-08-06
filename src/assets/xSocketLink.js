@@ -19,6 +19,7 @@ export default class xSocketLink {
       token: Vue.prototype.$xStorage.getItem("token"),
       ua: navigator.userAgent,
       teamId: Vue.prototype.$xStorage.getItem("client-teamId"),
+      address: Vue.prototype.$xStorage.getItem("user-local-iP"),
     };
     //是否重连
     let isReconnect = false;

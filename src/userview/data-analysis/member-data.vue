@@ -146,19 +146,25 @@
               >
             </p>
             <p>
-              效率状态：<span
-                :style="`color:${
-                  item.ClientStatus == 1 ? '#67C23A' : '#666666'
-                }`"
-                >{{ $D.ITEM("client_status", item.ClientStatus).name }}</span
+              鼠标点击效率：<span
+                :style="`color:${getEfficiencyColor(item.EfficiencyMStatus)}`"
+                >{{
+                  item.EfficiencyMStatus ? item.EfficiencyMStatus : "无"
+                }}</span
+              >
+            </p>
+            <p>
+              键盘输入效率：<span
+                :style="`color:${getEfficiencyColor(item.EfficiencyKStatus)}`"
+                >{{
+                  item.EfficiencyKStatus ? item.EfficiencyKStatus : "无"
+                }}</span
               >
             </p>
             <p>
               行为状态：<span
-                :style="`color:${
-                  item.ClientStatus == 1 ? '#67C23A' : '#666666'
-                }`"
-                >{{ $D.ITEM("client_status", item.ClientStatus).name }}</span
+                :style="`color:${getbehaviorColor(item.BehaviorStatus)}`"
+                >{{ item.BehaviorStatus ? item.BehaviorStatus : "无" }}</span
               >
             </p>
             <!-- <el-button
@@ -407,7 +413,7 @@
   </div>
 </template>
 <script>
-import { imgChange } from "@/commons";
+import { imgChange, getEfficiencyColor, getbehaviorColor } from "@/commons";
 export default {
   components: {
     XHeader: () => import("@/components/Header"),
@@ -513,6 +519,8 @@ export default {
   },
   methods: {
     imgChange,
+    getEfficiencyColor,
+    getbehaviorColor,
     /**
      * 行为分析标签颜色
      * 积极：绿  消极：红  无：白色
@@ -1033,7 +1041,7 @@ export default {
             display: flex;
             flex-direction: row;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             .name {
               color: #333333;
               font-size: 1.6rem;
@@ -1043,7 +1051,7 @@ export default {
           }
           p {
             color: #666666;
-            margin-top: 3px;
+            margin-top: 2px;
             font-size: 1.2rem;
             font-weight: bold;
           }

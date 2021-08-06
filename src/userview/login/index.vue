@@ -14,7 +14,7 @@
           <div id="loginForm" @keyup.enter="login" v-if="showLogin">
             <el-input
               v-model="input"
-              placeholder="请输入你的账户/邮箱"
+              placeholder="请输入你的邮箱"
               :autofocus="true"
               suffix-icon="el-icon-user"
             ></el-input>

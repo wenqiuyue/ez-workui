@@ -102,32 +102,104 @@
           <el-table-column label="我的部门" prop="gName" align="center">
             <template slot-scope="scope">
               <span v-if="scope.row.gName">{{ scope.row.gName }}</span>
-              <el-tag v-else size="medium" type="danger"> 暂无部门 </el-tag>
+              <el-tag v-else size="medium" type="danger"> 暂无部门</el-tag>
             </template></el-table-column
           >
           <el-table-column
-            label="我的效率"
-            prop="ExpireTime"
+            label="我的鼠标效率"
+            prop="EfficiencyMStatus"
             show-overflow-tooltip
             align="center"
+            width="110"
           >
-            <template slot-scope="scope">好</template></el-table-column
+            <template slot-scope="scope"
+              ><span
+                :style="`color:${getEfficiencyColor(
+                  scope.row.EfficiencyMStatus
+                )}`"
+                >{{
+                  scope.row.EfficiencyMStatus
+                    ? scope.row.EfficiencyMStatus
+                    : "无"
+                }}</span
+              ></template
+            ></el-table-column
           >
           <el-table-column
-            label="我的行为"
-            prop="ExpireTime"
+            label="我的键盘效率"
+            prop="EfficiencyKStatus"
             show-overflow-tooltip
             align="center"
+            width="110"
           >
-            <template slot-scope="scope">吃零食</template></el-table-column
+            <template slot-scope="scope"
+              ><span
+                :style="`color:${getEfficiencyColor(
+                  scope.row.EfficiencyKStatus
+                )}`"
+                >{{
+                  scope.row.EfficiencyKStatus
+                    ? scope.row.EfficiencyKStatus
+                    : "无"
+                }}</span
+              ></template
+            ></el-table-column
           >
           <el-table-column
-            label="团队效率"
-            prop="ExpireTime"
+            label="我的行为状态"
+            prop="BehaviorStatus"
             show-overflow-tooltip
             align="center"
+            width="110"
           >
-            <template slot-scope="scope">积极</template></el-table-column
+            <template slot-scope="scope"
+              ><span
+                :style="`color:${getbehaviorColor(scope.row.BehaviorStatus)}`"
+                >{{
+                  scope.row.BehaviorStatus ? scope.row.BehaviorStatus : "无"
+                }}</span
+              ></template
+            ></el-table-column
+          >
+          <el-table-column
+            label="团队鼠标效率"
+            prop="TeamEfficiencyMStatus"
+            show-overflow-tooltip
+            align="center"
+            width="110"
+          >
+            <template slot-scope="scope"
+              ><span
+                :style="`color:${getEfficiencyColor(
+                  scope.row.TeamEfficiencyMStatus
+                )}`"
+                >{{
+                  scope.row.TeamEfficiencyMStatus
+                    ? scope.row.TeamEfficiencyMStatus
+                    : "无"
+                }}</span
+              ></template
+            ></el-table-column
+          >
+          <el-table-column
+            label="团队键盘效率"
+            prop="TeamEfficiencyKStatus"
+            show-overflow-tooltip
+            align="center"
+            width="110"
+          >
+            <template slot-scope="scope"
+              ><span
+                :style="`color:${getEfficiencyColor(
+                  scope.row.TeamEfficiencyKStatus
+                )}`"
+                >{{
+                  scope.row.TeamEfficiencyKStatus
+                    ? scope.row.TeamEfficiencyKStatus
+                    : "无"
+                }}</span
+              ></template
+            ></el-table-column
           >
           <el-table-column
             label="到期时间"
@@ -156,7 +228,7 @@
           <el-table-column
             fixed="right"
             label="操作"
-            width="210"
+            width="150"
             align="center"
           >
             <template slot-scope="scope">
@@ -203,7 +275,7 @@
 
 <script>
 import _ from "lodash";
-
+import { getEfficiencyColor, getbehaviorColor } from "@/commons";
 export default {
   components: {
     Header: () => import("@/components/Header"),
@@ -233,6 +305,8 @@ export default {
     this.getTeamList();
   },
   methods: {
+    getEfficiencyColor,
+    getbehaviorColor,
     /**
      * 搜索
      */

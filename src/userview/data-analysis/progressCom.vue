@@ -60,9 +60,6 @@
                         >
                         <label v-else>无</label>
                       </span>
-                    </span>
-                    <span
-                      ><span>窗口名：{{ value.fname }}</span>
                       <span
                         >状态：
                         <template
@@ -77,8 +74,11 @@
                           ></template
                         >
                         <label v-else>无</label>
-                      </span></span
-                    >
+                      </span>
+                    </span>
+                    <span
+                      ><span>窗口名：{{ value.fname }}</span>
+                    </span>
                     <span>
                       <span>工作效率：好 </span>
                       <span>行为状态：看奥运 </span>

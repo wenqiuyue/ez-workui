@@ -32,13 +32,40 @@
 			-->
       <div class="staffbox" slot="content" v-loading="loading">
         <div class="state">
+          <div class="state_one_one">
+            <h3>效率雷达图</h3>
+            <div class="info">
+              <Radar></Radar>
+            </div>
+          </div>
+          <div class="state_two">
+            <h3>行为热力图</h3>
+            <div class="info">
+              <Staechart
+                :echartData="echartSoftWearData"
+                :width="400"
+                :workTime="workTime"
+              ></Staechart>
+            </div>
+          </div>
+          <div class="state_three">
+            <h3>高频关键词</h3>
+            <div class="info">
+              <tooltip
+                class="i_text"
+                v-for="(item, wordindex) in ThreeTexts"
+                :key="wordindex"
+                @handleClick="handleKeyWord(item, item)"
+                :content="item.Key"
+                :ref="`demandLeftMenu-${wordindex}`"
+                width="62px"
+              ></tooltip>
+            </div>
+          </div>
+        </div>
+        <div class="state">
           <div class="state_one">
-            <h3>
-              本<span v-if="selActiveTime">日</span
-              ><span v-else-if="dateType == 1">周</span
-              ><span v-else-if="dateType == 2">月</span
-              ><span v-else>时间段</span>工作状态占比
-            </h3>
+            <h3>常用应用</h3>
             <div class="info">
               <Staechart
                 :echartData="echartWorkData"
@@ -164,6 +191,7 @@ export default {
   components: {
     BaseView: () => import("@/components/BaseView"),
     Staechart: () => import("./satechart.vue"),
+    Radar: () => import("./radar"),
     tooltip: () => import("@/components/textTooltip"),
     keywordfrequency: () => import("../keywordfrequency"),
     progresscom: () => import("../progressCom"),
@@ -267,79 +295,91 @@ export default {
     getDataInfo() {
       this.loading = true;
       if (this.selActiveTime) {
-        const data = {
-          u: this.uid,
-          date: this.selActiveTime,
-          teamId: this.teamId,
-        };
-        this.$http
-          .get("/Teams/MemberJob/MemberDataDetails.ashx#", { params: data })
-          .then((resp) => {
-            if (resp.res == 0) {
-              //本日工作状态占比图表数据
-              this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
-                (m) => {
-                  return {
-                    name: m.name,
-                    value: m.value.toFixed(1),
-                  };
-                }
-              );
-              //本日使用软件占比
-              this.echartSoftWearData = resp.data.AppDetails.map((m) => {
-                return {
-                  name: m.AppName,
-                  value: m.ratio,
-                };
-              });
-              //高频关键词
-              this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-                (m, index) => index < 20
-              );
-              //时间轴与使用软件、定期截图数据
-              this.softData = resp.data.TimeLine;
-              this.workTime = resp.data.WorkTime;
-              this.loading = false;
-            }
-          });
+        this.MemberDataDetails();
       } else {
-        const data = {
-          u: this.uid,
-          st: this.stime,
-          et: this.etime,
-          teamId: this.teamId,
-        };
-        this.$http
-          .post("/User/MemberDataDetailsSummary.ashx#", data)
-          .then((resp) => {
-            if (resp.res == 0) {
-              //本周/月工作状态占比图表数据
-              this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
-                (m) => {
-                  return {
-                    name: m.name,
-                    value: m.value.toFixed(1),
-                  };
-                }
-              );
-              //本周/月使用软件占比
-              this.echartSoftWearData = resp.data.AppDetails.map((m) => {
-                return {
-                  name: m.AppName,
-                  value: m.ratio,
-                };
-              });
-              //高频关键词
-              this.ThreeTexts = resp.data.KeyWordFreqs.filter(
-                (m, index) => index < 20
-              );
-              //时间轴与使用软件、定期截图数据
-              this.softData = resp.data.TimeLine;
-              this.workTime = resp.data.WorkTime;
-              this.loading = false;
-            }
-          });
+        this.DataDetailsSummary();
       }
+    },
+    /**
+     * 具体某一天
+     */
+    MemberDataDetails() {
+      const data = {
+        u: this.uid,
+        date: this.selActiveTime,
+        teamId: this.teamId,
+      };
+      this.$http
+        .get("/Teams/MemberJob/MemberDataDetails.ashx#", { params: data })
+        .then((resp) => {
+          if (resp.res == 0) {
+            //本日工作状态占比图表数据
+            this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
+              (m) => {
+                return {
+                  name: m.name,
+                  value: m.value.toFixed(1),
+                };
+              }
+            );
+            //本日使用软件占比
+            this.echartSoftWearData = resp.data.AppDetails.map((m) => {
+              return {
+                name: m.AppName,
+                value: m.ratio,
+              };
+            });
+            //高频关键词
+            this.ThreeTexts = resp.data.KeyWordFreqs.filter(
+              (m, index) => index < 20
+            );
+            //时间轴与使用软件、定期截图数据
+            this.softData = resp.data.TimeLine;
+            this.workTime = resp.data.WorkTime;
+            this.loading = false;
+          }
+        });
+    },
+    /**
+     * 所有时间
+     */
+    DataDetailsSummary() {
+      const data = {
+        u: this.uid,
+        st: this.stime,
+        et: this.etime,
+        teamId: this.teamId,
+      };
+      this.$http
+        .post("/User/MemberDataDetailsSummary.ashx#", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            //本周/月工作状态占比图表数据
+            this.echartWorkData = resp.data.ComputerUsageRecord.workRat.map(
+              (m) => {
+                return {
+                  name: m.name,
+                  value: m.value.toFixed(1),
+                };
+              }
+            );
+            //本周/月使用软件占比
+            this.echartSoftWearData = resp.data.AppDetails.map((m) => {
+              return {
+                name: m.AppName,
+                value: m.ratio,
+              };
+            });
+            //高频关键词
+            this.ThreeTexts = resp.data.KeyWordFreqs.filter(
+              (m, index) => index < 20
+            );
+            //时间轴与使用软件、定期截图数据
+            this.softData = resp.data.TimeLine;
+            this.workTime = resp.data.WorkTime;
+            this.loading = false;
+          }
+        });
     },
     /**
      * 查看某个关键词
@@ -464,6 +504,17 @@ export default {
     display: flex;
     height: 100%;
     overflow-x: scroll;
+    margin-bottom: 10px;
+    .state_one_one {
+      padding: 5px;
+      flex: 1;
+      background: #fff;
+      h3 {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+      }
+    }
     .state_one {
       padding: 5px;
       flex: 1;
@@ -531,7 +582,7 @@ export default {
     padding: 5px;
     height: 300px;
     background-color: #fff;
-    margin: 15px 0;
+    margin-bottom: 15px;
 
     .title {
       font-size: 14px;

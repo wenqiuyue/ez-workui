@@ -92,10 +92,27 @@
                         </span>
                         <div class="status_speed">
                           <div>
-                            <span>当前点击速度：20次每分钟</span
-                            ><span>当前输入速度：20次每分钟</span>
+                            <span
+                              >鼠标点击效率：{{
+                                item.EfficiencyMStatus
+                                  ? item.EfficiencyMStatus
+                                  : "无"
+                              }}</span
+                            ><span
+                              >键盘输入效率：{{
+                                item.EfficiencyKStatus
+                                  ? item.EfficiencyKStatus
+                                  : "无"
+                              }}</span
+                            >
                           </div>
-                          <div><span>行为状态：看书</span></div>
+                          <div>
+                            <span
+                              >行为状态：{{
+                                item.BehaviorStatus ? item.BehaviorStatus : "无"
+                              }}</span
+                            >
+                          </div>
                         </div>
                       </div>
                       <div class="info">

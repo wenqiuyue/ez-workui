@@ -54,7 +54,14 @@
         </div>
         <div class="scree">
           <div class="scree_title">行为热力图</div>
-          <div class="scree_echarts" v-if="true"></div>
+          <div
+            class="scree_echarts"
+            v-if="thermodynamicData && thermodynamicData.length"
+          >
+            <ThermodynamicChart
+              :thermodynamicData="thermodynamicData"
+            ></ThermodynamicChart>
+          </div>
           <div class="nodata" v-else>
             <i class="hiFont hi-wushuju"></i>
             <p>暂无数据</p>
@@ -62,7 +69,10 @@
         </div>
         <div class="scree">
           <div class="scree_title">定期截图</div>
-          <div class="screephot" v-if="selDateTime && selDateTime.length">
+          <div
+            class="screephot"
+            v-if="selDateTime && selDateTime.filter((m) => m.Img).length"
+          >
             <div
               class="screen"
               v-for="(itempic, picindex) in selDateTime.filter((m) => m.Img)"
@@ -91,6 +101,7 @@
 export default {
   components: {
     XModal: () => import("@/components/XModal"),
+    ThermodynamicChart: () => import("@/components/ThermodynamicChart"),
     progresscom: () => import("@/userview/data-analysis/progressCom"),
   },
   props: {
@@ -104,6 +115,7 @@ export default {
       selRow: null, //选择的软件
       selDateTime: null,
       loading: false,
+      thermodynamicData: null, //热力图数据
     };
   },
   computed: {
@@ -118,14 +130,28 @@ export default {
     opened() {
       this.$nextTick(() => {
         this.loading = true;
-        this.$http
-          .post(
+        Promise.all([
+          this.$http.post(
             "/Attendance/GetMyWorkStatusInHalfHour.ashx",
             this.selDateTimeLine
-          )
+          ),
+          this.$http.post("/User/Work/GetBehaviorThermodynamicChart.ashx", {
+            UsId: this.selDateTimeLine.UsId,
+            datestart: this.selDateTimeLine.Date.timeFormat(
+              "yyyy-MM-dd 00:00:01"
+            ),
+            dateend: this.selDateTimeLine.Date.timeFormat(
+              "yyyy-MM-dd 23:59:59"
+            ),
+            teamId: this.selDateTimeLine.teamId,
+          }),
+        ])
           .then((resp) => {
-            if (resp.res == 0) {
-              this.selDateTime = resp.data;
+            if (resp[0].res == 0) {
+              this.selDateTime = resp[0].data;
+            }
+            if (resp[1].res == 0) {
+              this.thermodynamicData = resp[1].data.Behavior;
             }
           })
           .finally(() => (this.loading = false));

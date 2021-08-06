@@ -184,28 +184,62 @@
                 </template></el-table-column
               >
               <el-table-column
-                label="我的效率"
-                prop="ExpireTime"
+                label="我的鼠标效率"
+                prop="EfficiencyMStatus"
                 show-overflow-tooltip
                 align="center"
+                width="110"
               >
-                <template slot-scope="scope">好</template></el-table-column
+                <template slot-scope="scope"
+                  ><span
+                    :style="`color:${getEfficiencyColor(
+                      scope.row.EfficiencyMStatus
+                    )}`"
+                    >{{
+                      scope.row.EfficiencyMStatus
+                        ? scope.row.EfficiencyMStatus
+                        : "无"
+                    }}</span
+                  ></template
+                ></el-table-column
               >
               <el-table-column
-                label="我的行为"
-                prop="ExpireTime"
+                label="我的键盘效率"
+                prop="EfficiencyKStatus"
                 show-overflow-tooltip
                 align="center"
+                width="110"
               >
-                <template slot-scope="scope">吃零食</template></el-table-column
+                <template slot-scope="scope"
+                  ><span
+                    :style="`color:${getEfficiencyColor(
+                      scope.row.EfficiencyKStatus
+                    )}`"
+                    >{{
+                      scope.row.EfficiencyKStatus
+                        ? scope.row.EfficiencyKStatus
+                        : "无"
+                    }}</span
+                  ></template
+                ></el-table-column
               >
               <el-table-column
-                label="团队效率"
-                prop="ExpireTime"
+                label="我的行为状态"
+                prop="BehaviorStatus"
                 show-overflow-tooltip
                 align="center"
+                width="110"
               >
-                <template slot-scope="scope">积极</template></el-table-column
+                <template slot-scope="scope"
+                  ><span
+                    :style="`color:${getbehaviorColor(
+                      scope.row.BehaviorStatus
+                    )}`"
+                    >{{
+                      scope.row.BehaviorStatus ? scope.row.BehaviorStatus : "无"
+                    }}</span
+                  ></template
+                ></el-table-column
               >
             </el-table>
             <CPages v-model="pageData" @changeEvent="handlePaginationChange" />
@@ -321,7 +355,7 @@
   </div>
 </template>
 <script>
-import { imgChange } from "@/commons";
+import { imgChange, getEfficiencyColor, getbehaviorColor } from "@/commons";
 export default {
   components: {
     Header: () => import("@/components/Header"),
@@ -402,6 +436,8 @@ export default {
   },
   methods: {
     imgChange,
+    getEfficiencyColor,
+    getbehaviorColor,
     editImg(val) {
       if (val && val.includes("/images/head/")) {
         return this.$url + val;
