@@ -27,9 +27,16 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      radarData: [],
+    };
+  },
   watch: {
     efficiencyData() {
       if (this.efficiencyData) {
+        let { UserName, ...data } = this.efficiencyData;
+        this.radarData = Object.values(data);
         this.drawLine();
       }
     },
@@ -50,9 +57,32 @@ export default {
           show: false,
         },
         radar: {
-          indicator: that.$D.LIST("Efficiency_Standard").map((m) => {
-            return { text: m.key, max: m.custom };
-          }),
+          indicator: [
+            {
+              text: "团队鼠标效率",
+              max: that.$D.ITEM("Efficiency_Standard", 4).custom,
+            },
+            {
+              text: "团队键盘效率",
+              max: that.$D.ITEM("Efficiency_Standard", 4).custom,
+            },
+            {
+              text: "部门鼠标效率",
+              max: that.$D.ITEM("Efficiency_Standard", 5).custom,
+            },
+            {
+              text: "部门键盘效率",
+              max: that.$D.ITEM("Efficiency_Standard", 5).custom,
+            },
+            {
+              text: "个人鼠标效率",
+              max: that.$D.ITEM("Efficiency_Standard", 6).custom,
+            },
+            {
+              text: "个人键盘效率",
+              max: that.$D.ITEM("Efficiency_Standard", 6).custom,
+            },
+          ],
           center: ["50%", "50%"],
           radius: 90,
           name: {
@@ -70,7 +100,7 @@ export default {
             type: "radar",
             data: [
               {
-                value: [120, 118, 130, 100, 99, 70],
+                value: that.radarData,
                 name: "效率",
                 symbol: "rect",
                 symbolSize: 12,
@@ -89,9 +119,6 @@ export default {
         ],
       });
     },
-  },
-  mounted() {
-    this.drawLine();
   },
 };
 </script>

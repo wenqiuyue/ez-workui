@@ -13,6 +13,11 @@
       :stime="stime"
       :etime="etime"
       :teamId="teamValue"
+      @handleAllSoftware="handleAllSoftware"
+      @handleAllWords="handleAllWords"
+      @handleKeyWord="handleKeyWord"
+      @handleAllBehavior="handleAllBehavior"
+      @handleBehavior="handleBehavior"
     ></staffData>
     <div
       class="mem_content"
@@ -384,7 +389,7 @@
     <!-- 行为折线图弹窗 -->
     <BehaviorEcharts
       :teamId="teamValue"
-      :searchType="2"
+      :searchType="isTimeSearch ? 1 : 2"
       :behavior="clickKeyWord"
       :datestart="stime"
       :dateend="etime"
@@ -401,8 +406,7 @@
     ></progresscom>
     <!-- 关键词使用频率 -->
     <keywordfrequency
-      v-if="isListPage"
-      :searchType="1"
+      :searchType="isTimeSearch ? 2 : 1"
       :datestart="stime"
       :dateend="etime"
       :uid="clickUser"
@@ -435,6 +439,7 @@ export default {
   },
   data() {
     return {
+      isTimeSearch: false, //是否按时间查询
       selUser: null, //选择的成员数据列表成员
       screenCheck: [], //截图类型
       DateRange: [
@@ -664,11 +669,13 @@ export default {
      * 查看某个关键词
      */
     handleKeyWord(val, item) {
+      console.log(val, item);
       this.etime = item.etime;
       this.stime = item.stime;
       this.clickUser = item.User.id;
       this.clickKeyWord = val.Key;
       this.pname = val.FocusFormName;
+      this.isTimeSearch = item.selActiveTime ? true : false;
       this.$modal.show("meData");
     },
     /**
@@ -679,6 +686,7 @@ export default {
       this.etime = item.etime;
       this.stime = item.stime;
       this.clickKeyWord = val.Behavoir;
+      this.isTimeSearch = item.selActiveTime ? true : false;
       this.$modal.show("behaviorecharts");
     },
     /**

@@ -32,76 +32,162 @@
 			-->
       <div class="staffbox" slot="content" v-loading="loading">
         <div class="state">
-          <div class="state_one_one">
+          <div class="state_one">
             <h3>效率雷达图</h3>
             <div class="info">
               <Radar :efficiencyData="efficiencyData"></Radar>
             </div>
           </div>
-          <div class="state_two">
+          <div class="state_one">
             <h3>行为热力图</h3>
             <div class="info">
-              <Staechart
-                :echartData="echartSoftWearData"
-                :width="400"
-                :workTime="workTime"
-              ></Staechart>
+              <ThermodynamicChart
+                :thermodynamicData="thermodynamicData"
+                :isColumn="true"
+                :height="'260px'"
+                :column="12"
+                :row="10"
+              ></ThermodynamicChart>
             </div>
           </div>
-          <div class="state_three">
-            <h3>高频关键词</h3>
-            <div class="info">
-              <tooltip
-                class="i_text"
-                v-for="(item, wordindex) in ThreeTexts"
-                :key="wordindex"
-                @handleClick="handleKeyWord(item, item)"
-                :content="item.Key"
-                :ref="`demandLeftMenu-${wordindex}`"
-                width="62px"
-              ></tooltip>
+          <div class="state_one state_one_three">
+            <div>
+              <h3>常用应用占比图</h3>
+              <div class="info">
+                <Staechart
+                  :echartData="echartWorkData"
+                  :width="350"
+                  :height="120"
+                  :workTime="workTime"
+                ></Staechart>
+              </div>
+            </div>
+            <div>
+              <h3>
+                本<span v-if="selActiveTime">日</span
+                ><span v-else-if="dateType == 1">周</span
+                ><span v-else-if="dateType == 2">月</span
+                ><span v-else>时间段</span>使用软件占比
+              </h3>
+              <div class="info">
+                <Staechart
+                  :echartData="echartSoftWearData"
+                  :width="350"
+                  :height="120"
+                  :workTime="workTime"
+                ></Staechart>
+              </div>
             </div>
           </div>
         </div>
         <div class="state">
-          <div class="state_one">
-            <h3>常用应用</h3>
-            <div class="info">
-              <Staechart
-                :echartData="echartWorkData"
-                :width="350"
-                :workTime="workTime"
-              ></Staechart>
+          <div class="state_two">
+            <div class="card_title">
+              <h3>常用应用</h3>
+              <el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllSoftware"
+                v-if="AppDetails.length"
+                >查看全部</el-button
+              >
             </div>
+            <div class="work_appl_list" v-if="AppDetails.length">
+              <div
+                class="w_a_l_card"
+                v-for="(appitem, ind) in AppDetails"
+                :key="ind"
+              >
+                <p class="time">{{ appitem.StayTime }}H</p>
+                <div class="card_proportion">
+                  <div
+                    class="proportion"
+                    :style="`height:${
+                      workTime > 0
+                        ? (appitem.StayTime / workTime) * 100 >= 100
+                          ? 100
+                          : (appitem.StayTime / workTime) * 100
+                        : (5 - ind) * 20
+                    }%`"
+                  ></div>
+                </div>
+                <p class="card_name">
+                  <tooltip
+                    :content="`${appitem.AppName}`"
+                    :ref="`memprop-${ind}`"
+                    width="98%"
+                  ></tooltip>
+                </p>
+              </div>
+            </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
           </div>
           <div class="state_two">
-            <h3>
-              本<span v-if="selActiveTime">日</span
-              ><span v-else-if="dateType == 1">周</span
-              ><span v-else-if="dateType == 2">月</span
-              ><span v-else>时间段</span>使用软件占比
-            </h3>
-            <div class="info">
-              <Staechart
-                :echartData="echartSoftWearData"
-                :width="400"
-                :workTime="workTime"
-              ></Staechart>
+            <div class="card_title">
+              <h3>高频关键词</h3>
+              <el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllWords"
+                v-if="ThreeTexts.length"
+                >查看全部</el-button
+              >
             </div>
-          </div>
-          <div class="state_three">
-            <h3>高频关键词</h3>
-            <div class="info">
+            <div class="info" v-if="ThreeTexts && ThreeTexts.length">
               <tooltip
                 class="i_text"
                 v-for="(item, wordindex) in ThreeTexts"
                 :key="wordindex"
-                @handleClick="handleKeyWord(item, item)"
+                @handleClick="handleKeyWord(item)"
                 :content="item.Key"
                 :ref="`demandLeftMenu-${wordindex}`"
                 width="62px"
               ></tooltip>
             </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
+          </div>
+          <div class="state_two">
+            <div class="card_title">
+              <h3>
+                行为分析<el-tooltip placement="top" effect="light"
+                  ><div slot="content">
+                    <ul class="status_tooltip">
+                      <li><span style="background: #67c23a"></span>积极</li>
+                      <li><span style="background: #f56c6c"></span>消极</li>
+                      <li><span style="background: #f2f6fc"></span>无状态</li>
+                    </ul>
+                  </div>
+                  <i class="el-icon-question"></i>
+                </el-tooltip>
+              </h3>
+              <el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllBehavior"
+                v-if="behaviorArray.length"
+                >查看全部</el-button
+              >
+            </div>
+            <div class="keyword_list" v-if="behaviorArray.length">
+              <el-tag
+                size="mini"
+                class="word_item"
+                v-for="(bitem, bindx) in behaviorArray.filter(
+                  (m, index) => index < 16
+                )"
+                :key="bindx"
+                style="width: 22%"
+                :type="getTagType(bitem.BehavoirType)"
+                @click="handleBehavior(bitem)"
+                ><tooltip
+                  @handleClick="handleBehavior(bitem)"
+                  :content="`${bitem.Behavoir}`"
+                  :ref="`behavoir-${bindx}`"
+                  width="100%"
+                ></tooltip
+              ></el-tag>
+            </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
           </div>
         </div>
         <div class="soft">
@@ -165,7 +251,7 @@
       </div>
     </BaseView>
     <!-- 关键词使用频率 -->
-    <keywordfrequency
+    <!-- <keywordfrequency
       :searchType="selActiveTime ? 2 : 1"
       :datestart="selActiveTime ? selActiveTime : stime"
       :dateend="etime"
@@ -174,7 +260,7 @@
       :pname="pname"
       :name="'staffDataWord'"
       :teamId="teamId"
-    ></keywordfrequency>
+    ></keywordfrequency> -->
     <progresscom
       :name="'staffDataPic'"
       :activeBar="selRow"
@@ -195,6 +281,7 @@ export default {
     tooltip: () => import("@/components/textTooltip"),
     keywordfrequency: () => import("../keywordfrequency"),
     progresscom: () => import("../progressCom"),
+    ThermodynamicChart: () => import("@/components/ThermodynamicChart"),
   },
   props: {
     //团队id
@@ -235,6 +322,9 @@ export default {
   },
   data() {
     return {
+      dataDetails: null,
+      behaviorArray: [],
+      AppDetails: [],
       thermodynamicData: null, //热力图
       efficiencyData: null, //雷达图
       loading: false,
@@ -280,6 +370,57 @@ export default {
   },
   methods: {
     /**
+     * 行为分析标签颜色
+     * 积极：绿  消极：红  无：白色
+     */
+    getTagType(val) {
+      if (val == "积极") {
+        return "success";
+      } else if (val == "消极") {
+        return "danger";
+      } else {
+        return "info";
+      }
+    },
+    /**
+     * 查看某个行为
+     */
+    handleBehavior(val) {
+      this.dataDetails.Behaviors = this.behaviorArray;
+      this.$emit("handleBehavior", val, this.dataDetails);
+    },
+    /**
+     * 查看全部行为
+     */
+    handleAllBehavior() {
+      this.dataDetails.Behaviors = this.behaviorArray;
+      this.$emit("handleAllBehavior", this.dataDetails);
+    },
+    /**
+     * 查看全部关键词
+     */
+    handleAllWords() {
+      this.$emit("handleAllWords", this.dataDetails);
+    },
+    /**
+     * 查看全部软件
+     */
+    handleAllSoftware() {
+      const data = {
+        etime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+          : this.etime,
+        stime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+          : this.stime,
+        User: {
+          id: this.uid,
+        },
+      };
+      this.$emit("handleAllSoftware", data);
+      // this.$modal.show("allsoftware");
+    },
+    /**
      * 某个软件截图
      */
     handleAppPic(app) {
@@ -323,17 +464,33 @@ export default {
         dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
         teamId: this.teamId,
       };
+      const data4 = {
+        Ids: JSON.stringify([this.uid]),
+        datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+        type: 1,
+      };
       Promise.all([
         this.$http.get("/Teams/MemberJob/MemberDataDetails.ashx#", {
           params: data1,
         }),
-        this.$http.post(
-          "/User/Work/GetBehaviorThermodynamicChart.ashx#",
-          data2
-        ),
-        this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx#", data3),
+        this.$http.post("/User/Work/GetBehaviorThermodynamicChart.ashx", data2),
+        this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx", data3),
+        this.$http.get("/User/Work/GetBehaviorAnalyse.ashx", { params: data4 }),
       ]).then((resp) => {
         if (resp[0].res == 0) {
+          this.dataDetails = resp[0].data;
+          this.dataDetails.stime = this.selActiveTime
+            ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+            : this.stime;
+          this.dataDetails.etime = this.selActiveTime
+            ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+            : this.etime;
+          this.dataDetails.User = {
+            id: this.uid,
+          };
+          this.dataDetails.selActiveTime = this.selActiveTime;
           //本日工作状态占比图表数据
           this.echartWorkData = resp[0].data.ComputerUsageRecord.workRat.map(
             (m) => {
@@ -344,6 +501,9 @@ export default {
             }
           );
           //本日使用软件占比
+          this.AppDetails = resp[0].data.AppDetails.filter(
+            (m, index) => index < 5
+          );
           this.echartSoftWearData = resp[0].data.AppDetails.map((m) => {
             return {
               name: m.AppName,
@@ -363,6 +523,9 @@ export default {
         }
         if (resp[2].res == 0) {
           this.efficiencyData = resp[2].data;
+        }
+        if (resp[3].res == 0) {
+          this.behaviorArray = resp[3].data.Behavior;
         }
         this.loading = false;
       });
@@ -377,27 +540,48 @@ export default {
         et: this.etime,
         teamId: this.teamId,
       };
+      const seldate = new Date(this.etime);
+      const wk = new Date(seldate.setDate(seldate.getDate() - 1)).timeFormat(
+        "yyyy-MM-dd 23:59:59"
+      );
       const data2 = {
         UsId: this.uid,
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
+        dateend: wk,
         teamId: this.teamId,
       };
       const data3 = {
         uid: this.uid,
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
+        dateend: wk,
         teamId: this.teamId,
+      };
+      const data4 = {
+        Ids: JSON.stringify([this.uid]),
+        datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: wk,
+        teamId: this.teamId,
+        type: 1,
       };
       Promise.all([
         this.$http.post("/User/MemberDataDetailsSummary.ashx#", data1),
-        this.$http.post(
-          "/User/Work/GetBehaviorThermodynamicChart.ashx#",
-          data2
-        ),
-        this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx#", data3),
+        this.$http.post("/User/Work/GetBehaviorThermodynamicChart.ashx", data2),
+        this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx", data3),
+        this.$http.get("/User/Work/GetBehaviorAnalyse.ashx", { params: data4 }),
       ]).then((resp) => {
+        console.log(resp);
         if (resp[0].res == 0) {
+          this.dataDetails = resp[0].data;
+          this.dataDetails.stime = this.selActiveTime
+            ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+            : this.stime;
+          this.dataDetails.etime = this.selActiveTime
+            ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+            : this.etime;
+          this.dataDetails.User = {
+            id: this.uid,
+          };
+          this.dataDetails.selActiveTime = this.selActiveTime;
           //本周/月工作状态占比图表数据
           this.echartWorkData = resp[0].data.ComputerUsageRecord.workRat.map(
             (m) => {
@@ -408,6 +592,9 @@ export default {
             }
           );
           //本周/月使用软件占比
+          this.AppDetails = resp[0].data.AppDetails.filter(
+            (m, index) => index < 5
+          );
           this.echartSoftWearData = resp[0].data.AppDetails.map((m) => {
             return {
               name: m.AppName,
@@ -428,16 +615,20 @@ export default {
         if (resp[2].res == 0) {
           this.efficiencyData = resp[2].data;
         }
+        if (resp[3].res == 0) {
+          this.behaviorArray = resp[3].data.Behavior;
+        }
         this.loading = false;
       });
     },
     /**
      * 查看某个关键词
      */
-    handleKeyWord(val, item) {
-      this.clickKeyWord = val.Key;
-      this.pname = val.FocusFormName;
-      this.$modal.show("staffDataWord");
+    handleKeyWord(val) {
+      this.$emit("handleKeyWord", val, this.dataDetails);
+      // this.clickKeyWord = val.Key;
+      // this.pname = val.FocusFormName;
+      // this.$modal.show("staffDataWord");
     },
     endSoftData() {
       this.softData.forEach((item) => {
@@ -449,7 +640,6 @@ export default {
       });
     },
     liClick(time) {
-      console.log(time);
       if (time) {
         this.selActiveTime = time;
       } else {
@@ -515,12 +705,23 @@ export default {
     });
     // 过滤奇数偶数
     this.endSoftData();
-    console.log(this.odd);
   },
 };
 </script>
 
 <style lang="less" scoped>
+/deep/.status_tooltip {
+  li {
+    span {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+
+      display: inline-block;
+      margin-right: 5px;
+    }
+  }
+}
 .baseViewPage {
   height: calc(100% - 1rem) !important;
   .name_title {
@@ -555,38 +756,120 @@ export default {
     height: 100%;
     overflow-x: scroll;
     margin-bottom: 10px;
-    .state_one_one {
-      padding: 5px;
-      flex: 1;
-      background: #fff;
-      h3 {
-        font-size: 14px;
-        font-weight: bold;
-        color: #333;
-      }
-    }
     .state_one {
       padding: 5px;
       flex: 1;
       background: #fff;
+      margin-right: 8px;
       h3 {
         font-size: 14px;
         font-weight: bold;
         color: #333;
-      }
-      .info {
       }
     }
+    .state_one:last-child {
+      margin-right: 0px;
+    }
+    // .state_one_three{
+    //   display: flex;
+
+    // }
     .state_two {
       padding: 5px;
-      margin: 0 10px;
-      flex: 2;
+      // padding: 5px 0;
+      margin-right: 8px;
       background: #fff;
-      h3 {
-        font-size: 14px;
-        font-weight: bold;
-        color: #333;
+      height: 160px;
+      width: 34%;
+      .card_title {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        h3 {
+          font-size: 14px;
+          font-weight: bold;
+          color: #333;
+          i {
+            margin-left: 3px;
+            font-size: 16px;
+            color: #e6a23c;
+          }
+        }
+        .el-button {
+          padding: 0;
+        }
       }
+      .info {
+        display: flex;
+        flex-wrap: wrap;
+        .i_text {
+          cursor: pointer;
+          margin: 5px 5px 5px 0;
+          &:hover {
+            color: #448ef5;
+          }
+        }
+      }
+      .keyword_list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        height: 80px;
+        overflow-y: hidden;
+        // padding-left: 8px;
+        .word_item {
+          margin-right: 8px;
+          margin-bottom: 4px;
+          cursor: pointer;
+          width: 28%;
+          height: 22px;
+          line-height: 20px;
+          padding: 0 4px;
+        }
+      }
+      .work_appl_list {
+        display: flex;
+        flex-direction: row;
+
+        .w_a_l_card {
+          width: 20%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          .time {
+            color: #666666;
+            font-weight: bold;
+            font-size: 1.3rem;
+          }
+          .card_proportion {
+            height: 75px;
+            position: relative;
+            width: 8px;
+            .proportion {
+              background: #448ef5;
+              width: 8px;
+              position: absolute;
+              bottom: 0;
+            }
+          }
+          .card_name {
+            color: #333333;
+            font-weight: bold;
+            width: 100%;
+            text-align: center;
+            font-size: 1.3rem;
+          }
+        }
+      }
+      .work_appl_list_empty {
+        margin-top: 10px;
+        // text-align: center;
+      }
+    }
+    .state_two:last-child {
+      margin-right: 0px;
     }
     .state_three {
       padding: 5px;

@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     cellClick(row) {
-      console.log(row);
+      console.log(row, this.selUser);
       this.$emit("handleKeyWord", row, this.selUser);
     },
   },

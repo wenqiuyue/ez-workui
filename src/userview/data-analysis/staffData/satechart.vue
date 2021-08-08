@@ -67,9 +67,8 @@ export default {
         legend: {
           type: "scroll",
           orient: "vertical",
-          left: 170,
-          top: 20,
-          bottom: 20,
+          left: 130,
+          // bottom: 10,
           tooltip: {
             show: true,
           },
@@ -91,7 +90,7 @@ export default {
             name: "工作状态",
             type: "pie",
             radius: ["0%", "70%"],
-            center: ["25%", "50%"], // 图表的位置 x,y方向
+            center: ["17%", "50%"], // 图表的位置 x,y方向
             data: this.echartData,
             emphasis: {
               itemStyle: {
