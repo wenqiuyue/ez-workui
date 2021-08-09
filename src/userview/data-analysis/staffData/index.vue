@@ -4,7 +4,7 @@
  -->
   <div class="baseViewPage">
     <div class="name_title">
-      <span @click="$emit('pageChange', true)"
+      <span @click="handleBackPage"
         ><i class="el-icon-arrow-left"></i>{{ clickUserName }}</span
       >
     </div>
@@ -69,7 +69,10 @@
                 ><span v-else-if="dateType == 2">月</span
                 ><span v-else>时间段</span>使用软件占比
               </h3>
-              <div class="info">
+              <div
+                class="info"
+                v-if="echartSoftWearData && echartSoftWearData.length"
+              >
                 <Staechart
                   :echartData="echartSoftWearData"
                   :width="350"
@@ -77,6 +80,7 @@
                   :workTime="workTime"
                 ></Staechart>
               </div>
+              <div class="work_appl_list_empty" v-else>暂无数据</div>
             </div>
           </div>
         </div>
@@ -369,6 +373,10 @@ export default {
     });
   },
   methods: {
+    handleBackPage() {
+      this.selActiveTime = null;
+      this.$emit("pageChange", true);
+    },
     /**
      * 行为分析标签颜色
      * 积极：绿  消极：红  无：白色
@@ -406,16 +414,12 @@ export default {
      * 查看全部软件
      */
     handleAllSoftware() {
+      console.log(this.selActiveTime);
       const data = {
-        etime: this.selActiveTime
-          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
-          : this.etime,
-        stime: this.selActiveTime
-          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
-          : this.stime,
         User: {
           id: this.uid,
         },
+        selActiveTime: this.selActiveTime,
       };
       this.$emit("handleAllSoftware", data);
       // this.$modal.show("allsoftware");
@@ -481,12 +485,6 @@ export default {
       ]).then((resp) => {
         if (resp[0].res == 0) {
           this.dataDetails = resp[0].data;
-          this.dataDetails.stime = this.selActiveTime
-            ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
-            : this.stime;
-          this.dataDetails.etime = this.selActiveTime
-            ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
-            : this.etime;
           this.dataDetails.User = {
             id: this.uid,
           };
@@ -540,26 +538,22 @@ export default {
         et: this.etime,
         teamId: this.teamId,
       };
-      const seldate = new Date(this.etime);
-      const wk = new Date(seldate.setDate(seldate.getDate() - 1)).timeFormat(
-        "yyyy-MM-dd 23:59:59"
-      );
       const data2 = {
         UsId: this.uid,
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: wk,
+        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
         teamId: this.teamId,
       };
       const data3 = {
         uid: this.uid,
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: wk,
+        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
         teamId: this.teamId,
       };
       const data4 = {
         Ids: JSON.stringify([this.uid]),
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: wk,
+        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
         teamId: this.teamId,
         type: 1,
       };
@@ -572,12 +566,6 @@ export default {
         console.log(resp);
         if (resp[0].res == 0) {
           this.dataDetails = resp[0].data;
-          this.dataDetails.stime = this.selActiveTime
-            ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
-            : this.stime;
-          this.dataDetails.etime = this.selActiveTime
-            ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
-            : this.etime;
           this.dataDetails.User = {
             id: this.uid,
           };
@@ -756,6 +744,10 @@ export default {
     height: 100%;
     overflow-x: scroll;
     margin-bottom: 10px;
+    .work_appl_list_empty {
+      margin-top: 10px;
+      // text-align: center;
+    }
     .state_one {
       padding: 5px;
       flex: 1;
@@ -863,36 +855,9 @@ export default {
           }
         }
       }
-      .work_appl_list_empty {
-        margin-top: 10px;
-        // text-align: center;
-      }
     }
     .state_two:last-child {
       margin-right: 0px;
-    }
-    .state_three {
-      padding: 5px;
-      width: 335px;
-      flex-shrink: 0;
-      background: #fff;
-      .info {
-        display: flex;
-        flex-wrap: wrap;
-        margin-top: 10px;
-        .i_text {
-          cursor: pointer;
-          margin: 5px 5px 5px 0;
-          &:hover {
-            color: #448ef5;
-          }
-        }
-      }
-      h3 {
-        font-size: 14px;
-        font-weight: bold;
-        color: #333;
-      }
     }
   }
   .state::-webkit-scrollbar-thumb {

@@ -80,10 +80,19 @@
                       ><span>窗口名：{{ value.fname }}</span>
                     </span>
                     <span>
-                      <span>工作效率：好 </span>
-                      <span>行为状态：看奥运 </span>
-                      <span>点击速度：20次每分钟 </span>
-                      <span>输入速度：20次每分钟 </span>
+                      <span
+                        >行为状态：{{
+                          value.BehaviorStatus ? value.BehaviorStatus : "未知"
+                        }}
+                      </span>
+                      <span
+                        >鼠标点击速度：{{ value.MouseClickAverage }}次每分钟
+                      </span>
+                      <span>鼠标点击效率：{{ value.EfficiencyMStatus }}</span>
+                      <span
+                        >键盘输入速度：{{ value.KeysAverage }}次每分钟
+                      </span>
+                      <span>键盘输入效率：{{ value.EfficiencyKStatus }}</span>
                     </span>
                   </h4>
                   <el-image
@@ -129,6 +138,10 @@ export default {
     };
   },
   props: {
+    selActiveTime: {
+      type: String,
+      default: null,
+    },
     gid: {
       type: Number,
       default: null,
@@ -189,8 +202,14 @@ export default {
     },
     open() {
       this.$nextTick(() => {
-        this.timeStart = this.stime;
-        this.timeEnd = this.etime;
+        if (this.selActiveTime) {
+          this.timeStart = this.selActiveTime;
+          this.timeEnd = this.selActiveTime;
+        } else {
+          this.timeStart = this.stime;
+          this.timeEnd = this.etime;
+        }
+
         if (this.name == "staffDataPic") {
           this.progressPhotoArr = this.activeBar.fromList.map((m) => {
             return {
@@ -254,8 +273,12 @@ export default {
       let params = {
         uid: this.uid,
         // stime: this.last ? this.last : this.stime,
-        stime: this.timeStart.timeFormat("yyyy-MM-dd"),
-        etime: this.timeEnd.timeFormat("yyyy-MM-dd"),
+        stime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+          : this.timeStart.timeFormat("yyyy-MM-dd"),
+        etime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+          : this.timeEnd.timeFormat("yyyy-MM-dd"),
         pageCount: this.pageData.pageSize,
         pname: val,
         teamId: this.teamValue,
@@ -275,8 +298,12 @@ export default {
       this.loading = true;
       let params = {
         behavior: this.activeBar.name,
-        stime: this.timeStart.timeFormat("yyyy-MM-dd"),
-        etime: this.timeEnd.timeFormat("yyyy-MM-dd"),
+        stime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+          : this.timeStart.timeFormat("yyyy-MM-dd 00:00:01"),
+        etime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+          : this.timeEnd.timeFormat("yyyy-MM-dd 23:59:59"),
         pageCount: this.pageData.pageSize,
         teamId: this.teamValue,
         page: this.pageData.pageIndex,

@@ -121,6 +121,7 @@
             type="text"
             style="float: right"
             @click="$modal.show('ranking')"
+            v-if="memberData && memberData.length"
             ><i class="hiFont hi-jiangpaipaiming"></i> 效率排名</el-button
           >
         </div>
@@ -202,7 +203,7 @@
                   plain
                   size="small"
                   style="padding: 6px"
-                  @click="shotScreenPhoto(item.User.id)"
+                  @click="shotScreenPhoto(item.User.id, item)"
                   :icon="
                     imgload && item.User.id == userID ? 'el-icon-loading' : ''
                   "
@@ -238,7 +239,7 @@
           </div>
           <div class="work_status">
             <div class="card_title"><span class="title">工作状态</span></div>
-            <div class="work-calc">
+            <div class="work-calc" v-if="item.ComputerUsageRecord">
               <Staechart
                 :paramsobj="item"
                 :echartData="
@@ -251,6 +252,7 @@
                 @getBarData="getBarData"
               ></Staechart>
             </div>
+            <div v-else style="margin: 10px">无数据</div>
           </div>
           <div class="work_application">
             <div class="card_title">
@@ -383,6 +385,7 @@
       :etime="etime"
       :uid="clickUser"
       :teamValue="teamValue"
+      :selActiveTime="selActiveTime"
     ></allsoftware>
     <!-- 所有关键词 -->
     <AllWords :selUser="selUser" @handleKeyWord="handleKeyWord"></AllWords>
@@ -394,6 +397,7 @@
       :datestart="stime"
       :dateend="etime"
       :dateType="dateType"
+      :selActiveTime="selActiveTime"
     ></BehaviorEcharts>
     <!-- 进程截图弹窗 -->
     <progresscom
@@ -407,6 +411,7 @@
     <!-- 关键词使用频率 -->
     <keywordfrequency
       :searchType="isTimeSearch ? 2 : 1"
+      :selActiveTime="selActiveTime"
       :datestart="stime"
       :dateend="etime"
       :uid="clickUser"
@@ -417,7 +422,14 @@
       :teamId="teamValue"
     ></keywordfrequency>
     <!-- 排名 -->
-    <Ranking></Ranking>
+    <Ranking
+      v-if="memberData && memberData.length"
+      :teamId="teamValue"
+      :uids="selMem"
+      :datestart="memberData[0].stime"
+      :dateend="memberData[0].etime"
+      :dateType="dateType"
+    ></Ranking>
   </div>
 </template>
 <script>
@@ -439,6 +451,7 @@ export default {
   },
   data() {
     return {
+      selActiveTime: null,
       isTimeSearch: false, //是否按时间查询
       selUser: null, //选择的成员数据列表成员
       screenCheck: [], //截图类型
@@ -505,31 +518,46 @@ export default {
     this.$E.$on("loadpic", (res) => {
       console.log("开始截图");
     });
+    this.$E.$on("loadcamerapic", (res) => {
+      console.log("开始摄像头拍照");
+    });
+    this.$E.$on("loadingcamerapic", (res) => {
+      this.socketPic(res, "摄像头拍照");
+    });
     this.$E.$on("loadingpic", (res) => {
-      if (res.teamId != this.teamValue) {
-        return;
-      }
-      console.log("收到截图");
-      this.imgload = false;
-      this.memberData.forEach((m) => {
-        if (m.User.id == res.UserId) {
-          m.loadPic = JSON.parse(res.imgUrl);
-          if (!m.loadPic || !m.loadPic.length) {
-            this.$message({
-              showClose: true,
-              message: "没有接收到截图",
-              type: "warning",
-            });
-          }
-          console.log(m.loadPic);
-        }
-      });
+      this.socketPic(res, "屏幕截图");
     });
   },
   methods: {
     imgChange,
     getEfficiencyColor,
     getbehaviorColor,
+    /**
+     * websocket截图回调
+     */
+    socketPic(res, type) {
+      if (res.teamId != this.teamValue) {
+        return;
+      }
+      console.log(`收到${type}`);
+      this.imgload = false;
+      this.memberData.forEach((m) => {
+        if (m.User.id == res.UserId) {
+          let shotArr = JSON.parse(res.imgUrl);
+          if (shotArr && shotArr.length) {
+            shotArr.forEach((val) => {
+              m.loadPic.push(val);
+            });
+          } else {
+            this.$message({
+              showClose: true,
+              message: `没有接收到${type}`,
+              type: "warning",
+            });
+          }
+        }
+      });
+    },
     /**
      * 行为分析标签颜色
      * 积极：绿  消极：红  无：白色
@@ -552,7 +580,7 @@ export default {
     /**
      * 截图
      */
-    shotScreenPhoto(id) {
+    shotScreenPhoto(id, item) {
       if (!this.screenCheck.length) {
         this.$message({
           showClose: true,
@@ -562,6 +590,7 @@ export default {
         });
         return;
       }
+      item.loadPic = [];
       this.userID = id;
       //截图
       this.imgload = true;
@@ -653,8 +682,8 @@ export default {
      * 查看数据详情
      */
     handleDataInfo(val) {
-      this.etime = val.etime;
-      this.stime = val.stime;
+      // this.etime = val.etime;
+      // this.stime = val.stime;
       this.clickUserName = val.User.name;
       this.clickUser = val.User.id;
       this.pageChange(false);
@@ -670,12 +699,11 @@ export default {
      */
     handleKeyWord(val, item) {
       console.log(val, item);
-      this.etime = item.etime;
-      this.stime = item.stime;
       this.clickUser = item.User.id;
       this.clickKeyWord = val.Key;
       this.pname = val.FocusFormName;
       this.isTimeSearch = item.selActiveTime ? true : false;
+      this.selActiveTime = item.selActiveTime;
       this.$modal.show("meData");
     },
     /**
@@ -683,19 +711,19 @@ export default {
      */
     handleBehavior(val, item) {
       console.log(val, item);
-      this.etime = item.etime;
-      this.stime = item.stime;
       this.clickKeyWord = val.Behavoir;
       this.isTimeSearch = item.selActiveTime ? true : false;
+      this.selActiveTime = item.selActiveTime;
       this.$modal.show("behaviorecharts");
     },
     /**
      * 查看全部软件
      */
     handleAllSoftware(item) {
-      this.etime = item.etime;
-      this.stime = item.stime;
+      // this.etime = item.etime;
+      // this.stime = item.stime;
       this.clickUser = item.User.id;
+      this.selActiveTime = item.selActiveTime;
       this.$modal.show("allsoftware");
     },
     /**
@@ -755,8 +783,21 @@ export default {
           if (resp.res == 0) {
             this.listdateType = this.dateType;
             if (resp.data.items.length) {
+              //获取开始时间和结束时间，用于其他功能的查询
+              this.stime = resp.data.items[0].stime;
+              if (this.dateType == 1) {
+                const seldate = new Date(resp.data.items[0].etime);
+                this.etime = new Date(
+                  seldate.setDate(seldate.getDate() - 1)
+                ).timeFormat("yyyy-MM-dd 23:59:59");
+              } else {
+                this.etime = resp.data.items[0].etime.timeFormat(
+                  "yyyy-MM-dd 23:59:59"
+                );
+              }
+              console.log(this.stime, this.etime);
               resp.data.items.forEach((element) => {
-                element.loadPic = null;
+                element.loadPic = [];
                 if (element.ComputerUsageRecord) {
                   element.ComputerUsageRecord.workRat =
                     element.ComputerUsageRecord.workRat.map((m) => {
@@ -810,8 +851,8 @@ export default {
         });
         return;
       }
-      this.etime = data.etime;
-      this.stime = data.stime;
+      // this.etime = data.etime;
+      // this.stime = data.stime;
       this.clickUser = data.clickUser;
       this.selWorkItem = item;
       this.gid = data.gid;
@@ -1106,7 +1147,7 @@ export default {
               }
             }
             .el-image {
-              width: 80%;
+              width: 50%;
               height: 46px;
               margin-right: 0.3rem;
             }

@@ -263,7 +263,7 @@
                                 :disabled="!item.IsStartCamera"
                               ></el-checkbox>
                             </el-checkbox-group>
-                            <p @click="shotScreenPhoto(item.usInfo.UsId)">
+                            <p @click="shotScreenPhoto(item.usInfo.UsId, item)">
                               <span v-if="imgload && item.usInfo.UsId == userID"
                                 ><i class="el-icon-loading"></i>截图中...</span
                               ><span v-else>立即截图</span>
@@ -592,7 +592,7 @@ export default {
         return result;
       }
     },
-    shotScreenPhoto(id) {
+    shotScreenPhoto(id, item) {
       if (!this.screenCheck.length) {
         this.$message({
           showClose: true,
@@ -603,6 +603,7 @@ export default {
         return;
       }
       this.userID = id;
+      item.ProcessImgs = [];
       //屏幕截图
       this.imgload = true;
       if (this.screenCheck.includes("屏幕")) {
@@ -668,6 +669,45 @@ export default {
     getMember(arr) {
       this.selMem = arr;
     },
+    /**
+     * websocket截图回调
+     */
+    socketPic(res, type) {
+      console.log(`收到${type}`);
+      if (res.teamId != this.teamValue) {
+        return;
+      }
+      for (let key in this.loadItem) {
+        if (this.loadItem[key].length) {
+          this.loadItem[key].forEach((item) => {
+            if (res.UserId == item.usInfo.UsId) {
+              this.imgload = false;
+              if (JSON.parse(res.imgUrl).length) {
+                item.title = res.title;
+                // item.ProcessImgs = item.ProcessImgs.slice(0, 4);
+                let shotArr = JSON.parse(res.imgUrl);
+                // shotArr = shotArr.length > 4 ? shotArr.splice(0, 3) : shotArr;
+                shotArr.forEach((val) => {
+                  console.log(val);
+                  // item.ProcessImgs = [];
+                  item.ProcessImgs.push({
+                    imgUrl: val.ImgUrl,
+                    time: new Date(val.Times)
+                      .toString()
+                      .timeFormat("yyyy年MM月dd日 HH:mm"),
+                  });
+                });
+              } else {
+                this.$notify({
+                  message: `未获取到${type}`,
+                  type: "info",
+                });
+              }
+            }
+          });
+        }
+      }
+    },
   },
   mounted() {
     const role = this.$xStorage.getItem("user-role");
@@ -696,45 +736,10 @@ export default {
       console.log("开始摄像头拍照");
     });
     this.$E.$on("loadingcamerapic", (res) => {
-      console.log("收到摄像头拍照");
+      this.socketPic(res, "摄像头拍照");
     });
     this.$E.$on("loadingpic", (res) => {
-      if (res.teamId != this.teamValue) {
-        return;
-      }
-      console.log("收到截图");
-      for (let key in this.loadItem) {
-        if (this.loadItem[key].length) {
-          this.loadItem[key].forEach((item) => {
-            if (res.UserId == item.usInfo.UsId) {
-              this.imgload = false;
-              if (JSON.parse(res.imgUrl).length) {
-                item.title = res.title;
-                item.ProcessImgs = item.ProcessImgs.slice(0, 4);
-                let shotArr = JSON.parse(res.imgUrl);
-                shotArr = shotArr.length > 4 ? shotArr.splice(0, 3) : shotArr;
-                shotArr.forEach((val) => {
-                  console.log(val);
-                  item.ProcessImgs = [];
-                  item.ProcessImgs.unshift({
-                    imgUrl: val.ImgUrl,
-                    time: new Date(val.Times)
-                      .toString()
-                      .timeFormat("yyyy年MM月dd日 HH:mm"),
-                  });
-                });
-                // item.ProcessImgs.splice(-1, shotArr.length);
-                // this.$previewRefresh();
-              } else {
-                this.$notify({
-                  message: "未获取到截图",
-                  type: "info",
-                });
-              }
-            }
-          });
-        }
-      }
+      this.socketPic(res, "屏幕截图");
     });
   },
   destroyed() {

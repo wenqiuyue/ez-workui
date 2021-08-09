@@ -8,63 +8,85 @@
       showCrossBtn
       class="high-table"
       ref="ranking"
+      @opened="opened"
     >
       <CContent>
         <template #search>
           <div class="screen">
             <el-select v-model="typeVal">
-              <el-option label="综合" :value="1"> </el-option>
-              <el-option label="鼠标" :value="2"> </el-option>
-              <el-option label="键盘" :value="3"> </el-option>
+              <el-option label="综合排名" :value="1"> </el-option>
+              <el-option label="按鼠标排名" :value="2"> </el-option>
+              <el-option label="按键盘排名" :value="3"> </el-option>
             </el-select>
-            <el-select v-model="speedVal" placeholder="选择速度">
+            <!-- <el-select v-model="speedVal" placeholder="选择速度">
               <el-option label="平均速度" :value="1"> </el-option>
               <el-option label="最高速度" :value="2"> </el-option>
               <el-option label="最低速度" :value="3"> </el-option>
-            </el-select>
-            <el-button type="primary" @click="handleSearch" size="medium"
+            </el-select> -->
+            <el-button type="primary" @click="handleRank" size="medium"
               >开始排名</el-button
             >
           </div>
         </template>
         <template #main>
-          <el-table :data="tableData">
-            <el-table-column align="center" prop="ranking" label="排名">
+          <el-table :data="tableData" v-loading="loading">
+            <el-table-column align="center" label="排名">
               <template slot-scope="scope">
-                <span v-if="scope.row.ranking == 1" class="ranking">
+                <span v-if="scope.$index == 0" class="ranking">
                   <i class="hiFont hi-first" style="color: #f43f34"></i>
                 </span>
-                <span v-else-if="scope.row.ranking == 2" class="ranking">
+                <span v-else-if="scope.$index == 1" class="ranking">
                   <i class="hiFont hi-second" style="color: #f4be5e"></i>
                 </span>
-                <span v-else-if="scope.row.ranking == 3" class="ranking">
+                <span v-else-if="scope.$index == 2" class="ranking">
                   <i class="hiFont hi-third" style="color: #70e5dc"></i>
                 </span>
-                <span v-else>{{ scope.row.ranking }}</span>
+                <span v-else>{{ scope.$index + 1 }}</span>
               </template>
             </el-table-column>
-            <el-table-column align="center" prop="name" label="成员">
+            <el-table-column align="center" label="成员">
               <template slot-scope="scope">
                 <div class="user">
                   <el-avatar
                     size="small"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="imgChange(scope.row.Picture)"
                   ></el-avatar>
-                  <span>{{ scope.row.name }}</span>
+                  <span>{{ scope.row.UserName }}</span>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column align="center" prop="province" label="鼠标速度">
-              <template slot-scope="scope"> 200次每分钟 </template>
+            <el-table-column align="center" label="鼠标点击速度">
+              <template slot-scope="scope">
+                {{ scope.row.MouseClickRatio }}次每分钟
+              </template>
             </el-table-column>
-            <el-table-column align="center" prop="city" label="键盘速度">
-              <template slot-scope="scope"> 120次每分钟 </template>
+            <el-table-column
+              align="center"
+              label="鼠标点击效率"
+              prop="MouseClickStatus"
+            >
             </el-table-column>
-            <el-table-column align="center" prop="address" label="效率状态">
-              <template slot-scope="scope"> 积极 </template>
+            <el-table-column align="center" label="键盘输入速度">
+              <template slot-scope="scope">
+                {{ scope.row.KeysRatio }}次每分钟
+              </template>
             </el-table-column>
-            <el-table-column align="center" prop="zip" label="行为状态">
-              <template slot-scope="scope"> 摸鱼 </template>
+            <el-table-column
+              align="center"
+              label="键盘输入效率"
+              prop="KeysStatus"
+            >
+            </el-table-column>
+            <el-table-column
+              align="center"
+              prop="BehaviorStatus"
+              label="行为状态"
+            >
+              <template slot-scope="scope">
+                {{
+                  scope.row.BehaviorStatus ? scope.row.BehaviorStatus : "未知"
+                }}
+              </template>
             </el-table-column>
           </el-table>
         </template>
@@ -73,74 +95,78 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     XModal: () => import("@/components/XModal"),
     CContent: () => import("@/components/CContent"),
   },
+  props: {
+    teamId: {
+      type: Number,
+      default: null,
+    },
+    uids: {
+      type: Array,
+      default: () => [],
+    },
+    datestart: {
+      type: String,
+      default: null,
+    },
+    dateend: {
+      type: String,
+      default: null,
+    },
+    dateType: {
+      type: Number,
+      default: null,
+    },
+  },
   data() {
     return {
+      loading: false,
       typeVal: 1,
       speedVal: 1,
-      tableData: [
-        {
-          ranking: 1,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          ranking: 2,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          ranking: 3,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          ranking: 4,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          ranking: 5,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          ranking: 6,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          ranking: 7,
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-      ],
+      tableData: [],
     };
+  },
+  methods: {
+    imgChange,
+    opened() {
+      this.$nextTick(() => {
+        this.typeVal = 1;
+        this.handleRank();
+      });
+    },
+    handleRank() {
+      this.loading = true;
+      let wk = null;
+      //如果是按周查询，则wk获取组件传回的天数的前一天,否则wk为组件传回的日期
+      if (this.dateType == 1) {
+        const seldate = new Date(this.dateend);
+        wk = new Date(seldate.setDate(seldate.getDate() - 1)).timeFormat(
+          "yyyy-MM-dd 23:59:59"
+        );
+      } else if (this.dateType == 2) {
+        wk = this.dateend.timeFormat("yyyy-MM-dd 23:59:59");
+      }
+      const data = {
+        uids: this.uids.map((m) => m.UsId),
+        datestart: this.datestart.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: wk,
+        teamId: this.teamId,
+        rankType: this.typeVal,
+      };
+      this.$http
+        .post("/User/Work/GetEfficiencyRanking.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
   },
 };
 </script>

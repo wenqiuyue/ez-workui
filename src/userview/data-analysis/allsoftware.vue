@@ -73,6 +73,7 @@
       :etime="etime"
       :uid="uid"
       :teamValue="teamValue"
+      :selActiveTime="selActiveTime"
     ></progresscom>
   </div>
 </template>
@@ -83,6 +84,10 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    selActiveTime: {
+      type: String,
+      default: null,
+    },
     teamValue: {
       type: Number,
       default: null,
@@ -139,8 +144,12 @@ export default {
       const data = {
         p: this.pageData.pageIndex,
         c: this.pageData.pageSize,
-        stime: this.stime,
-        etime: this.etime,
+        stime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+          : this.stime,
+        etime: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+          : this.etime,
         u: this.uid,
         teamId: this.teamValue,
       };

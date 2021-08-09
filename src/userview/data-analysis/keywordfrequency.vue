@@ -24,6 +24,7 @@
       :etime="searchType == 2 ? datestart : dateend"
       :uid="uid"
       :teamValue="teamId"
+      :selActiveTime="selActiveTime"
     ></progresscom>
   </div>
 </template>
@@ -34,6 +35,10 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    selActiveTime: {
+      type: String,
+      default: null,
+    },
     teamId: {
       type: Number,
       default: null,
@@ -100,17 +105,14 @@ export default {
      * 获取数据
      */
     getData() {
-      let etime = null;
-      if (this.dateType == 1) {
-        const date = new Date(this.dateend);
-        etime = new Date(date.setDate(date.getDate() - 1));
-      } else {
-        etime = this.dateend;
-      }
       const data = {
         usId: this.uid,
-        datestart: this.datestart,
-        dateend: etime,
+        datestart: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+          : this.datestart,
+        dateend: this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+          : this.dateend,
         word: this.word,
         type: this.searchType,
         teamId: this.teamId,
