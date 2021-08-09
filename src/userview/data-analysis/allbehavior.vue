@@ -79,10 +79,11 @@
       v-if="tableData"
       :name="'allbehaviorpic'"
       :activeBar="selRow"
-      :stime="tableData.stime"
-      :etime="tableData.etime"
+      :stime="stime"
+      :etime="etime"
       :uid="tableData.User.id"
       :teamValue="teamValue"
+      :selActiveTime="selActiveTime"
     ></progresscom>
   </div>
 </template>
@@ -93,6 +94,18 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    selActiveTime: {
+      type: String,
+      default: null,
+    },
+    datestart: {
+      type: String,
+      default: null,
+    },
+    dateend: {
+      type: String,
+      default: null,
+    },
     teamValue: {
       type: Number,
       default: null,
@@ -106,6 +119,8 @@ export default {
     return {
       tableData: null,
       selRow: null, //选择的窗口
+      stime: null,
+      etime: null,
     };
   },
   methods: {
@@ -141,6 +156,12 @@ export default {
      */
     opened() {
       this.$nextTick(() => {
+        this.stime = this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01")
+          : this.datestart;
+        this.etime = this.selActiveTime
+          ? this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59")
+          : this.dateend;
         this.tableData = this.selUser;
         //树形表格添加id
         if (

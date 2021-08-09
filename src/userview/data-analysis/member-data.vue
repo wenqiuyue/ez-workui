@@ -378,6 +378,9 @@
       :selUser="selUser"
       :teamValue="teamValue"
       @handleBehavior="handleBehavior"
+      :datestart="stime"
+      :dateend="etime"
+      :selActiveTime="selActiveTime"
     ></AllBehavior>
     <!-- 所有软件弹窗 -->
     <allsoftware
@@ -731,6 +734,7 @@ export default {
      */
     handleAllBehavior(item) {
       this.selUser = item;
+      this.selActiveTime = item.selActiveTime;
       this.$modal.show("allbehavior");
     },
     /**
