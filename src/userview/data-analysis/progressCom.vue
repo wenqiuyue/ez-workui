@@ -307,6 +307,7 @@ export default {
         pageCount: this.pageData.pageSize,
         teamId: this.teamValue,
         page: this.pageData.pageIndex,
+        uid: this.uid,
       };
       this.$http
         .post("/User/Work/GetUserBehaviorImg.ashx", params)

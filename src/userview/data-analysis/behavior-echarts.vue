@@ -24,6 +24,7 @@
       :etime="searchType == 1 ? datestart : dateend"
       :teamValue="teamId"
       :selActiveTime="selActiveTime"
+      :uid="uid"
     ></progresscom>
   </div>
 </template>
@@ -34,6 +35,10 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    uid: {
+      type: Number,
+      default: null,
+    },
     selActiveTime: {
       type: String,
       default: null,

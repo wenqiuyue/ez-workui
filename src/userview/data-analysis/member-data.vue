@@ -405,6 +405,7 @@
       :dateend="etime"
       :dateType="dateType"
       :selActiveTime="selActiveTime"
+      :uid="clickUser"
     ></BehaviorEcharts>
     <!-- 进程截图弹窗 -->
     <progresscom
@@ -719,6 +720,7 @@ export default {
      */
     handleBehavior(val, item) {
       console.log(val, item);
+      this.clickUser = item.User.id;
       this.clickKeyWord = val.Behavoir;
       this.isTimeSearch = item.selActiveTime ? true : false;
       this.selActiveTime = item.selActiveTime;
