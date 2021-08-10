@@ -192,7 +192,7 @@
             </p>
             <p v-if="item.ClientStatus == 1">
               <span class="screen_check">
-                <el-checkbox-group v-model="screenCheck">
+                <el-checkbox-group v-model="item.screenCheck">
                   <el-checkbox label="屏幕"></el-checkbox>
                   <el-checkbox
                     label="摄像头"
@@ -222,7 +222,11 @@
             <template v-if="item.loadPic && item.loadPic.length">
               <div class="receive-img">
                 <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:mm") }}</span> -->
-                <el-carousel trigger="click" height="46px">
+                <el-carousel
+                  trigger="click"
+                  height="40px"
+                  indicator-position="outside"
+                >
                   <el-carousel-item
                     v-for="(pic, imgIndex) in item.loadPic"
                     :key="imgIndex"
@@ -457,7 +461,6 @@ export default {
       selActiveTime: null,
       isTimeSearch: false, //是否按时间查询
       selUser: null, //选择的成员数据列表成员
-      screenCheck: [], //截图类型
       DateRange: [
         new Date(
           new Date().getFullYear(),
@@ -507,6 +510,8 @@ export default {
     this.timer = null;
     this.$E.$off("loadpic");
     this.$E.$off("loadingpic");
+    this.$E.$off("loadcamerapic");
+    this.$E.$off("loadingcamerapic");
   },
   mounted() {
     const role = this.$xStorage.getItem("user-role");
@@ -584,7 +589,7 @@ export default {
      * 截图
      */
     shotScreenPhoto(id, item) {
-      if (!this.screenCheck.length) {
+      if (!item.screenCheck.length) {
         this.$message({
           showClose: true,
           message: "请选择截图类型",
@@ -597,10 +602,10 @@ export default {
       this.userID = id;
       //截图
       this.imgload = true;
-      if (this.screenCheck.includes("屏幕")) {
+      if (item.screenCheck.includes("屏幕")) {
         this.screenShot();
       }
-      if (this.screenCheck.includes("摄像头")) {
+      if (item.screenCheck.includes("摄像头")) {
         this.screenShotCamera();
       }
       if (this.timer) {
@@ -801,6 +806,7 @@ export default {
               }
               console.log(this.stime, this.etime);
               resp.data.items.forEach((element) => {
+                element.screenCheck = [];
                 element.loadPic = [];
                 if (element.ComputerUsageRecord) {
                   element.ComputerUsageRecord.workRat =
@@ -1146,13 +1152,20 @@ export default {
               .el-carousel__item {
                 text-align: center;
               }
+              /deep/.el-carousel__indicators {
+                line-height: 5px;
+              }
+              /deep/.el-carousel__indicator {
+                padding: 3px 4px 4px;
+              }
               /deep/.el-carousel__button {
                 background-color: #c0c4cc;
+                width: 14px;
               }
             }
             .el-image {
               width: 50%;
-              height: 46px;
+              height: 40px;
               margin-right: 0.3rem;
             }
           }

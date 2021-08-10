@@ -724,8 +724,6 @@ export default {
         this.getTeams();
       }
     });
-  },
-  created() {
     this.$E.$on("renewProccess", (res) => {
       this.getTask();
     });
@@ -749,6 +747,8 @@ export default {
     this.calcTime = null;
     this.$E.$off("loadpic");
     this.$E.$off("loadingpic");
+    this.$E.$off("loadcamerapic");
+    this.$E.$off("loadingcamerapic");
   },
 };
 </script>
@@ -1503,7 +1503,10 @@ export default {
             flex-direction: column;
             align-items: center;
             margin-right: 1rem;
-
+            .el-image {
+              width: 115px;
+              height: 60px;
+            }
             img {
               width: 100%;
               // max-height: 85px;

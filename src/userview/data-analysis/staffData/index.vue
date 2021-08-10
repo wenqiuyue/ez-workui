@@ -8,7 +8,7 @@
         ><i class="el-icon-arrow-left"></i>{{ clickUserName }}</span
       >
     </div>
-    <BaseView :title_name="'时间'" class="staff">
+    <BaseView :title_name="'时间'" class="staff" v-loading="loading">
       <ul class="infinite-list" slot="panes">
         <li
           :class="{ activeList: selActiveTime === null }"
@@ -30,7 +30,7 @@
 			软件
 			截图
 			-->
-      <div class="staffbox" slot="content" v-loading="loading">
+      <div class="staffbox" slot="content">
         <div class="state">
           <div class="state_one">
             <h3>效率雷达图</h3>
