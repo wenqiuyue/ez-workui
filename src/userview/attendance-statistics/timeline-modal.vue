@@ -12,7 +12,7 @@
     >
       <div v-loading="loading">
         <div class="soft">
-          <div class="title">时间轴与使用软件</div>
+          <div class="title"><span class="title">时间轴与使用软件</span></div>
           <div class="softbox" v-if="selDateTime && selDateTime.length">
             <div
               v-for="(item, softind) in selDateTime"
@@ -53,7 +53,20 @@
           </div>
         </div>
         <div class="scree">
-          <div class="scree_title">行为热力图</div>
+          <div class="scree_title">
+            <span class="title">行为热力图</span>
+            <ul class="status">
+              <li>
+                <span style="background: #67c23a"></span><span>积极</span>
+              </li>
+              <li>
+                <span style="background: #f56c6c"></span><span>消极</span>
+              </li>
+              <li>
+                <span style="background: #f2f6fc"></span><span>无状态</span>
+              </li>
+            </ul>
+          </div>
           <div
             class="scree_echarts"
             v-if="thermodynamicData && thermodynamicData.length"
@@ -68,7 +81,7 @@
           </div>
         </div>
         <div class="scree">
-          <div class="scree_title">定期截图</div>
+          <div class="scree_title"><span class="title">定期截图</span></div>
           <div
             class="screephot"
             v-if="selDateTime && selDateTime.filter((m) => m.Img).length"
@@ -339,10 +352,32 @@ export default {
     display: flex;
     flex-direction: column;
     .scree_title {
-      font-size: 14px;
-      font-weight: 700;
       margin-bottom: 8px;
-      color: #333333;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      .title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #333333;
+      }
+      .status {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        li {
+          margin-left: 8px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          span:first-child {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-radius: 50%;
+            margin-right: 5px;
+          }
+        }
+      }
     }
     .screephot {
       width: 100%;

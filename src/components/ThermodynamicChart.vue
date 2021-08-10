@@ -26,7 +26,7 @@ export default {
     },
     row: {
       type: Number,
-      default: 7,
+      default: 8,
     },
   },
   data() {
@@ -41,7 +41,7 @@ export default {
         calculable: true,
         orient: "vertical",
         right: "0",
-        bottom: "14%",
+        bottom: "7%",
         color: ["#f2f6fc", "#F56C6C", "#67C23A"],
         showLabel: false,
       },
@@ -54,10 +54,11 @@ export default {
         bottom: "1%",
         color: ["#f2f6fc", "#F56C6C", "#67C23A"],
         showLabel: false,
+        itemHeight: "298",
       },
       gridVertical: {
         left: "1%",
-        height: "65%",
+        height: "80%",
         width: "94%",
         top: "10%",
       },

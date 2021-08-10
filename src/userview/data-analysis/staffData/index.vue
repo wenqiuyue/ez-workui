@@ -39,7 +39,14 @@
             </div>
           </div>
           <div class="state_one">
-            <h3>行为热力图</h3>
+            <div class="card_title_one">
+              <h3>行为热力图</h3>
+              <ul class="status">
+                <li><span style="background: #67c23a"></span>积极</li>
+                <li><span style="background: #f56c6c"></span>消极</li>
+                <li><span style="background: #f2f6fc"></span>无状态</li>
+              </ul>
+            </div>
             <div class="info">
               <ThermodynamicChart
                 :thermodynamicData="thermodynamicData"
@@ -757,6 +764,27 @@ export default {
         font-size: 14px;
         font-weight: bold;
         color: #333;
+      }
+      .card_title_one {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        .status {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          li {
+            margin-right: 8px;
+            span {
+              width: 1.2rem;
+              height: 1.2rem;
+              border-radius: 50%;
+              display: inline-block;
+              margin-right: 5px;
+            }
+          }
+        }
       }
     }
     .state_one:last-child {
