@@ -172,6 +172,11 @@ export default {
 </script>
 <style lang="less" scoped>
 .ranking {
+  /deep/.modal {
+    .ctn {
+      height: calc(100% - 6rem);
+    }
+  }
   .screen {
     display: flex;
     flex-direction: row;

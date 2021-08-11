@@ -369,8 +369,11 @@
           </div>
         </div>
         <p v-if="loading" class="loading">
-          <i class="el-icon-loading"></i>
           <span>加载中...</span>
+          <i class="el-icon-loading"></i>
+        </p>
+        <p v-if="isNoMore" class="loading">
+          <span>没有更多内容了</span>
         </p>
       </div>
       <div v-else>
@@ -459,6 +462,7 @@ export default {
   },
   data() {
     return {
+      isNoMore: false,
       selActiveTime: null,
       isTimeSearch: false, //是否按时间查询
       selUser: null, //选择的成员数据列表成员
@@ -677,6 +681,7 @@ export default {
         });
         return;
       }
+      this.pageData.pageIndex = 1;
       this.memberData = [];
       this.getMemberData();
     },
@@ -823,9 +828,11 @@ export default {
             }
             this.memberData.push(...resp.data.items);
             if (resp.data.items.length < this.pageData.pageSize) {
+              this.isNoMore = true;
               this.busy = true;
             } else {
               this.busy = false;
+              this.isNoMore = false;
             }
           }
         })
@@ -1278,6 +1285,7 @@ export default {
         }
       }
       .loading {
+        padding: 5px 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1285,7 +1293,7 @@ export default {
           font-size: 1.4rem;
           margin-left: 5px;
           font-weight: bold;
-          color: #333333;
+          color: #c0c4cc;
         }
       }
     }
