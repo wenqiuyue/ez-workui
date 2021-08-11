@@ -41,10 +41,18 @@
                 <span v-else-if="scope.$index == 2" class="ranking">
                   <i class="hiFont hi-third" style="color: #70e5dc"></i>
                 </span>
-                <span v-else>{{ scope.$index + 1 }}</span>
+                <div v-else class="flower_rank">
+                  <div class="flower">
+                    <span class="flower1"></span>
+                    <span class="flower2"></span>
+                    <span class="flower3"></span>
+                    <span class="flower4"></span>
+                    <span class="rank">{{ scope.$index + 1 }}</span>
+                  </div>
+                </div>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="成员">
+            <el-table-column label="成员" width="110" align="center">
               <template slot-scope="scope">
                 <div class="user">
                   <el-avatar
@@ -204,14 +212,55 @@ export default {
   .high-table {
     /deep/.ranking {
       i {
-        font-size: 2.6rem;
+        font-size: 2.8rem;
+      }
+    }
+    .flower_rank {
+      .flower {
+        width: 26px;
+        margin: 0 auto;
+        position: relative;
+        .flower1,
+        .flower2,
+        .flower3,
+        .flower4 {
+          display: block;
+          float: left;
+          width: 13px;
+          height: 13px;
+          background: rgb(160, 207, 255);
+        }
+
+        .flower1 {
+          border-radius: 50px 50px 0 50px;
+        }
+
+        .flower2 {
+          border-radius: 50px 50px 50px 0;
+        }
+
+        .flower3 {
+          border-radius: 50px 0 50px 50px;
+        }
+        .flower4 {
+          border-radius: 0 50px 50px 50px;
+        }
+        .rank {
+          text-align: center;
+          width: 26px;
+          height: 26px;
+          line-height: 26px;
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          color: #ffffff;
+        }
       }
     }
     /deep/.user {
       display: flex;
       flex-direction: row;
       align-items: center;
-      justify-content: center;
       span {
         margin-left: 5px;
       }
