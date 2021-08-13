@@ -1,10 +1,5 @@
 <template>
-  <div>
-    <div
-      id="radar"
-      :style="{ width: `${width}px`, height: `${height}px` }"
-    ></div>
-  </div>
+  <div id="radar" :style="{ width: `${width}px`, height: `${height}px` }"></div>
 </template>
 
 <script>
@@ -48,6 +43,21 @@ export default {
       var echarts = require("echarts");
       var chartDom = document.getElementById("radar");
       var myChart = echarts.init(chartDom);
+      var n1 = [this.radarData[0], "", "", "", "", ""];
+      var n2 = ["", this.radarData[1], "", "", "", ""];
+      var n3 = ["", "", this.radarData[2], "", "", ""];
+      var n4 = ["", "", "", this.radarData[3], "", ""];
+      var n5 = ["", "", "", "", this.radarData[4], ""];
+      var n6 = ["", "", "", "", "", this.radarData[5]];
+      var n7 = ["", "", "", "", "", ""];
+      var labelArr = [
+        "团队历史效率",
+        "团队当前效率",
+        "部门历史效率",
+        "部门当前效率",
+        "个人历史效率",
+        "个人当前效率",
+      ]; //显示图例用
       // 绘制图表
       myChart.setOption({
         color: ["#64AFE9"],
@@ -56,54 +66,82 @@ export default {
           data: ["效率"],
           show: false,
         },
-        radar: {
-          indicator: [
-            {
-              text: "团队鼠标效率",
-              max: that.$D.ITEM("Efficiency_Standard", 4).custom,
-            },
-            {
-              text: "团队键盘效率",
-              max: that.$D.ITEM("Efficiency_Standard", 4).custom,
-            },
-            {
-              text: "部门鼠标效率",
-              max: that.$D.ITEM("Efficiency_Standard", 5).custom,
-            },
-            {
-              text: "部门键盘效率",
-              max: that.$D.ITEM("Efficiency_Standard", 5).custom,
-            },
-            {
-              text: "个人鼠标效率",
-              max: that.$D.ITEM("Efficiency_Standard", 6).custom,
-            },
-            {
-              text: "个人键盘效率",
-              max: that.$D.ITEM("Efficiency_Standard", 6).custom,
-            },
-          ],
-          center: ["50%", "50%"],
-          radius: 90,
-          name: {
-            textStyle: {
-              color: "#fff",
-              backgroundColor: "#666",
-              borderRadius: 3,
-              padding: [3, 5],
+        radar: [
+          {
+            splitLine: {
+              lineStyle: {
+                color: "#000",
+              },
             },
           },
-        },
+          {
+            indicator: [
+              {
+                text: "团队历史效率",
+                max: that.$D.ITEM("Efficiency_Standard", 4).custom,
+              },
+              {
+                text: "团队当前效率",
+                max: that.$D.ITEM("Efficiency_Standard", 4).custom,
+              },
+              {
+                text: "部门历史效率",
+                max: that.$D.ITEM("Efficiency_Standard", 5).custom,
+              },
+              {
+                text: "部门当前效率",
+                max: that.$D.ITEM("Efficiency_Standard", 5).custom,
+              },
+              {
+                text: "个人历史效率",
+                max: that.$D.ITEM("Efficiency_Standard", 6).custom,
+              },
+              {
+                text: "个人当前效率",
+                max: that.$D.ITEM("Efficiency_Standard", 6).custom,
+              },
+            ],
+            center: ["50%", "50%"],
+            radius: 90,
+            name: {
+              textStyle: {
+                color: "#fff",
+                backgroundColor: "#666",
+                borderRadius: 3,
+                padding: [3, 3],
+              },
+            },
+            splitArea: {
+              areaStyle: {
+                color: ["none", "none", "none", "none", "none"],
+              },
+            },
+            axisLine: {
+              lineStyle: {
+                color: "#cde6f5",
+              },
+            },
+            splitLine: {
+              lineStyle: {
+                color: "#cde6f5", //网格的颜色
+              },
+            },
+          },
+        ],
         series: [
           {
             name: "效率雷达图",
             type: "radar",
+            radarIndex: 1,
             data: [
               {
                 value: that.radarData,
-                name: "效率",
                 symbol: "rect",
-                symbolSize: 12,
+                symbolSize: 6,
+                lineStyle: {
+                  width: 2,
+                  color: "rgb(100, 175, 233)",
+                },
                 areaStyle: {
                   color: "rgba(100, 175, 233, 0.6)",
                 },
@@ -115,6 +153,190 @@ export default {
                 },
               },
             ],
+            itemStyle: {
+              normal: {
+                borderWidth: 0,
+                color: "#000",
+                // show:false
+              },
+            },
+            silent: true,
+            z: 1, //图层是一层一层叠加，所以这个也是一级一级递增
+          },
+          {
+            type: "radar", //绘制第一个点
+            radarIndex: 1,
+            name: labelArr[0],
+            silent: true,
+            z: 2, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n1,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#A66CFE",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
+          },
+          {
+            type: "radar",
+            radarIndex: 1, //绘制第二个点
+            name: labelArr[1],
+            silent: true,
+            z: 3, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n2,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#FFA662",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
+          },
+          {
+            type: "radar", //绘制第三个点
+            radarIndex: 1,
+            name: labelArr[2],
+            silent: true,
+            z: 4, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n3,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#5AA4FB",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
+          },
+          {
+            type: "radar", //绘制第四个点
+            radarIndex: 1,
+            name: labelArr[3],
+            silent: true,
+            z: 5, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n4,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#FF858B",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
+          },
+          {
+            type: "radar", //绘制第五个点
+            radarIndex: 1,
+            name: labelArr[4],
+            silent: true,
+            z: 6, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n5,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#7AF16F",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
+          },
+          {
+            type: "radar", //绘制第六个点
+            radarIndex: 1,
+            name: labelArr[5],
+            silent: true,
+            z: 7, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n6,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#33A7BF",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
+          },
+          {
+            type: "radar", //这个图层是为了盖住圆心，如果去掉，圆心的颜色为最后一个图层的颜色
+            radarIndex: 1,
+            name: "",
+            silent: true,
+            z: 8, //图层是一层一层叠加，所以这个也是一级一级递增
+            data: [
+              {
+                value: n7,
+                symbolSize: 7,
+              },
+            ],
+            itemStyle: {
+              normal: {
+                borderWidth: 2,
+                color: "#f8f7f7",
+              },
+            },
+            lineStyle: {
+              width: 0,
+              labelLine: {
+                show: false, //隐藏标示线
+              },
+            },
           },
         ],
       });
@@ -123,4 +345,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="less" scoped>
+#radar {
+  margin: 0 auto;
+}
+</style>

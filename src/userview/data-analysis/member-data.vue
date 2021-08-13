@@ -122,7 +122,7 @@
             style="float: right"
             @click="$modal.show('ranking')"
             v-if="memberData && memberData.length"
-            ><i class="hiFont hi-jiangpaipaiming"></i> 效率排名</el-button
+            ><i class="hiFont hi-jiangpaipaiming"></i> 操作效率排名</el-button
           >
         </div>
       </div>
@@ -152,34 +152,20 @@
               >
             </p>
             <p>
-              鼠标点击效率：<span
+              行为状态：<span
+                :style="`color:${getbehaviorColor(item.BehaviorStatus)}`"
+                >{{ item.BehaviorStatus ? item.BehaviorStatus : "无" }}</span
+              >
+            </p>
+            <p>
+              操作效率：<span
                 :style="`color:${getEfficiencyColor(item.EfficiencyMStatus)}`"
                 >{{
                   item.EfficiencyMStatus ? item.EfficiencyMStatus : "无"
                 }}</span
               >
             </p>
-            <p>
-              键盘输入效率：<span
-                :style="`color:${getEfficiencyColor(item.EfficiencyKStatus)}`"
-                >{{
-                  item.EfficiencyKStatus ? item.EfficiencyKStatus : "无"
-                }}</span
-              >
-            </p>
-            <p>
-              行为状态：<span
-                :style="`color:${getbehaviorColor(item.BehaviorStatus)}`"
-                >{{ item.BehaviorStatus ? item.BehaviorStatus : "无" }}</span
-              >
-            </p>
-            <!-- <el-button
-              type="primary"
-              size="mini"
-              class="view_btn"
-              @click="handleDataInfo(item)"
-              >高级视图</el-button
-            > -->
+            <!-- <div :id="`chart-${item.User.id}`" class="chart"></div> -->
           </div>
           <div class="work_time">
             <p>
@@ -293,7 +279,7 @@
                   <tooltip
                     :content="`${appitem.AppName}`"
                     :ref="`memprop-${index}-${ind}`"
-                    width="98%"
+                    max-width="98%"
                   ></tooltip>
                 </p>
               </div>
@@ -321,7 +307,7 @@
                 @handleClick="handleKeyWord(worditem, item)"
                 :content="`${worditem.Key}`"
                 :ref="`memprop-${index}-${wordind}`"
-                width="28%"
+                maxWidth="40%"
               ></tooltip>
             </div>
             <div class="work_appl_list_empty" v-else>暂无数据</div>
@@ -545,6 +531,46 @@ export default {
     imgChange,
     getEfficiencyColor,
     getbehaviorColor,
+    /**
+     * 操作效率折线图
+     */
+    getChart(id) {
+      // 基于准备好的dom，初始化echarts实例
+      var echarts = require("echarts");
+      var chartDom = document.getElementById(`chart-${id}`);
+      var myChart = echarts.init(chartDom);
+
+      let option = {
+        grid: {},
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          show: false,
+        },
+        yAxis: {
+          type: "value",
+          max: 10,
+          show: false,
+        },
+        series: [
+          {
+            type: "line",
+            smooth: true,
+            data: [3, 1, 1, 1, 1, 1, 2],
+            symbol: "none",
+
+            lineStyle: {
+              color: this.getEfficiencyColor("消极"),
+            },
+            areaStyle: {
+              color: this.getEfficiencyColor("消极"),
+            },
+          },
+        ],
+      };
+      option && myChart.setOption(option);
+    },
     /**
      * websocket截图回调
      */
@@ -834,6 +860,11 @@ export default {
               this.busy = false;
               this.isNoMore = false;
             }
+            // this.$nextTick(() => {
+            //   this.memberData.forEach((m) => {
+            //     this.getChart(m.User.id);
+            //   });
+            // });
           }
         })
         .finally(() => (this.loading = false));
@@ -1133,6 +1164,12 @@ export default {
             margin-top: 6px;
             padding: 6px 11px;
           }
+          .chart {
+            width: 100%;
+            height: 3rem;
+            margin-right: 1rem;
+            box-sizing: border-box;
+          }
         }
         .work_time {
           width: 15%;
@@ -1194,7 +1231,7 @@ export default {
           }
         }
         .work_status {
-          width: 22%;
+          width: 290px;
           padding-top: 33px;
           .card_title {
             margin-bottom: 0;

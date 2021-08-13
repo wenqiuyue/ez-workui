@@ -4,8 +4,20 @@
 <script>
 export default {
   props: {
-    thermodynamicData: {
-      type: Array,
+    datestart: {
+      type: String,
+      default: null,
+    },
+    dateend: {
+      type: String,
+      default: null,
+    },
+    UsId: {
+      type: Number,
+      default: null,
+    },
+    teamId: {
+      type: Number,
       default: null,
     },
     width: {
@@ -31,6 +43,10 @@ export default {
   },
   data() {
     return {
+      pageData: {
+        page: 1,
+      },
+      thermodynamicData: [],
       xAxisData: [],
       yAxisData: [],
       thermodynamicArray: [],
@@ -46,6 +62,7 @@ export default {
         showLabel: false,
       },
       visualMaphorizontal: {
+        type: "continuous",
         min: 1,
         max: 3,
         calculable: true,
@@ -54,7 +71,7 @@ export default {
         bottom: "1%",
         color: ["#f2f6fc", "#F56C6C", "#67C23A"],
         showLabel: false,
-        itemHeight: "298",
+        itemHeight: "310",
       },
       gridVertical: {
         left: "1%",
@@ -70,39 +87,38 @@ export default {
       },
     };
   },
-  watch: {
-    thermodynamicData() {
-      if (this.thermodynamicData) {
-        this.thermodynamicArray = this.thermodynamicData.map((m) => {
-          if (m == "积极") {
-            return 1;
-          } else if (m == "消极") {
-            return 2;
-          } else if (m == "未知") {
-            return 3;
-          }
-        });
-        this.getAxisData();
-      }
-    },
-  },
+  watch: {},
   mounted() {
-    this.$nextTick(() => {
-      if (this.thermodynamicData) {
-        this.thermodynamicArray = this.thermodynamicData.map((m) => {
-          if (m == "积极") {
-            return 1;
-          } else if (m == "消极") {
-            return 2;
-          } else if (m == "未知") {
-            return 3;
-          }
-        });
-        this.getAxisData();
-      }
-    });
+    this.getData();
   },
   methods: {
+    getData() {
+      const data = {
+        UsId: this.UsId,
+        datestart: this.datestart,
+        dateend: this.dateend,
+        teamId: this.teamId,
+        page: this.pageData.page,
+        pageCount: this.column * this.row,
+      };
+      this.$http
+        .post("/User/Work/GetBehaviorThermodynamicChart.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.thermodynamicData = resp.data.Behavior;
+            this.thermodynamicArray = this.thermodynamicData.map((m) => {
+              if (m == "积极") {
+                return 1;
+              } else if (m == "消极") {
+                return 2;
+              } else if (m == "未知") {
+                return 3;
+              }
+            });
+            this.getAxisData();
+          }
+        });
+    },
     getAxisData() {
       this.xAxisData = [];
       this.yAxisData = [];
@@ -195,7 +211,7 @@ export default {
             data: this.coordinate,
 
             label: {
-              show: true,
+              show: false,
             },
             emphasis: {
               itemStyle: {
@@ -212,4 +228,8 @@ export default {
   },
 };
 </script>
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+#thermodynamic {
+  margin: 0 auto;
+}
+</style>

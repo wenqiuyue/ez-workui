@@ -36,7 +36,7 @@
             <span>{{ scope.row.Key }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="KeywordsStatus" label="状态">
+        <el-table-column prop="KeywordsStatus" label="工作状态">
           <template slot-scope="scope">
             {{ scope.row.KeywordsStatus ? scope.row.KeywordsStatus : "无" }}
           </template>

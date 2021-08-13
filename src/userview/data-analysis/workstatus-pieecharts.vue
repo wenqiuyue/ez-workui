@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div ref="myChart" :style="{ width: `100%`, height: `${height}px` }"></div>
+    <div
+      ref="myChart"
+      :style="{ width: `${width}px`, height: `${height}px` }"
+    ></div>
   </div>
 </template>
 
@@ -26,7 +29,7 @@ export default {
     width: {
       type: Number,
       default: () => {
-        return 300;
+        return 290;
       },
     },
     height: {

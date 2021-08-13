@@ -145,6 +145,7 @@ export default {
           {
             data: this.eacharData.result,
             type: "line",
+            color: ["#409EFF"],
           },
         ],
       };

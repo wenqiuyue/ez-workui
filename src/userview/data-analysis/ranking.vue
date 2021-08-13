@@ -4,7 +4,7 @@
       name="ranking"
       width="1200px"
       height="700px"
-      title="效率状态排名"
+      title="操作效率排名"
       showCrossBtn
       class="high-table"
       ref="ranking"

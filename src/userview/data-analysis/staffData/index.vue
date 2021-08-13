@@ -33,7 +33,7 @@
       <div class="staffbox" slot="content">
         <div class="state">
           <div class="state_one">
-            <h3>效率雷达图</h3>
+            <h3>操作效率雷达图</h3>
             <div class="info">
               <Radar :efficiencyData="efficiencyData"></Radar>
             </div>
@@ -49,11 +49,23 @@
             </div>
             <div class="info">
               <ThermodynamicChart
-                :thermodynamicData="thermodynamicData"
                 :isColumn="true"
                 :height="'260px'"
+                :width="'370px'"
                 :column="12"
                 :row="10"
+                :datestart="
+                  selActiveTime
+                    ? selActiveTime.timeFormat('yyyy-MM-dd 00:00:01')
+                    : stime.timeFormat('yyyy-MM-dd 00:00:01')
+                "
+                :dateend="
+                  selActiveTime
+                    ? selActiveTime.timeFormat('yyyy-MM-dd 23:59:59')
+                    : etime.timeFormat('yyyy-MM-dd 23:59:59')
+                "
+                :UsId="uid"
+                :teamId="teamId"
               ></ThermodynamicChart>
             </div>
           </div>
@@ -135,30 +147,6 @@
           </div>
           <div class="state_two">
             <div class="card_title">
-              <h3>高频关键词</h3>
-              <el-button
-                type="text"
-                size="small"
-                @click.stop="handleAllWords"
-                v-if="ThreeTexts.length"
-                >查看全部</el-button
-              >
-            </div>
-            <div class="info" v-if="ThreeTexts && ThreeTexts.length">
-              <tooltip
-                class="i_text"
-                v-for="(item, wordindex) in ThreeTexts"
-                :key="wordindex"
-                @handleClick="handleKeyWord(item)"
-                :content="item.Key"
-                :ref="`demandLeftMenu-${wordindex}`"
-                width="62px"
-              ></tooltip>
-            </div>
-            <div class="work_appl_list_empty" v-else>暂无数据</div>
-          </div>
-          <div class="state_two">
-            <div class="card_title">
               <h3>
                 行为分析<el-tooltip placement="top" effect="light"
                   ><div slot="content">
@@ -197,6 +185,30 @@
                   width="100%"
                 ></tooltip
               ></el-tag>
+            </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
+          </div>
+          <div class="state_two">
+            <div class="card_title">
+              <h3>高频关键词</h3>
+              <el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllWords"
+                v-if="ThreeTexts.length"
+                >查看全部</el-button
+              >
+            </div>
+            <div class="info" v-if="ThreeTexts && ThreeTexts.length">
+              <tooltip
+                class="i_text"
+                v-for="(item, wordindex) in ThreeTexts"
+                :key="wordindex"
+                @handleClick="handleKeyWord(item)"
+                :content="item.Key"
+                :ref="`demandLeftMenu-${wordindex}`"
+                maxWidth="40%"
+              ></tooltip>
             </div>
             <div class="work_appl_list_empty" v-else>暂无数据</div>
           </div>
@@ -336,7 +348,7 @@ export default {
       dataDetails: null,
       behaviorArray: [],
       AppDetails: [],
-      thermodynamicData: null, //热力图
+
       efficiencyData: null, //雷达图
       loading: false,
       workTime: null,
@@ -463,12 +475,6 @@ export default {
         date: this.selActiveTime,
         teamId: this.teamId,
       };
-      const data2 = {
-        UsId: this.uid,
-        datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
-        teamId: this.teamId,
-      };
       const data3 = {
         uid: this.uid,
         datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
@@ -476,7 +482,7 @@ export default {
         teamId: this.teamId,
       };
       const data4 = {
-        Ids: JSON.stringify([this.uid]),
+        usId: this.uid,
         datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
         dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
         teamId: this.teamId,
@@ -486,7 +492,6 @@ export default {
         this.$http.get("/Teams/MemberJob/MemberDataDetails.ashx#", {
           params: data1,
         }),
-        this.$http.post("/User/Work/GetBehaviorThermodynamicChart.ashx", data2),
         this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx", data3),
         this.$http.get("/User/Work/GetBehaviorAnalyse.ashx", { params: data4 }),
       ]).then((resp) => {
@@ -524,13 +529,10 @@ export default {
           this.workTime = resp[0].data.WorkTime;
         }
         if (resp[1].res == 0) {
-          this.thermodynamicData = resp[1].data.Behavior;
+          this.efficiencyData = resp[1].data;
         }
         if (resp[2].res == 0) {
-          this.efficiencyData = resp[2].data;
-        }
-        if (resp[3].res == 0) {
-          this.behaviorArray = resp[3].data.Behavior;
+          this.behaviorArray = resp[2].data.Behavior;
         }
         this.loading = false;
       });
@@ -545,12 +547,6 @@ export default {
         et: this.etime,
         teamId: this.teamId,
       };
-      const data2 = {
-        UsId: this.uid,
-        datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
-        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
-        teamId: this.teamId,
-      };
       const data3 = {
         uid: this.uid,
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
@@ -558,7 +554,7 @@ export default {
         teamId: this.teamId,
       };
       const data4 = {
-        Ids: JSON.stringify([this.uid]),
+        usId: this.uid,
         datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
         dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
         teamId: this.teamId,
@@ -566,7 +562,6 @@ export default {
       };
       Promise.all([
         this.$http.post("/User/MemberDataDetailsSummary.ashx#", data1),
-        this.$http.post("/User/Work/GetBehaviorThermodynamicChart.ashx", data2),
         this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx", data3),
         this.$http.get("/User/Work/GetBehaviorAnalyse.ashx", { params: data4 }),
       ]).then((resp) => {
@@ -604,14 +599,12 @@ export default {
           this.softData = resp[0].data.TimeLine;
           this.workTime = resp[0].data.WorkTime;
         }
+
         if (resp[1].res == 0) {
-          this.thermodynamicData = resp[1].data.Behavior;
+          this.efficiencyData = resp[1].data;
         }
         if (resp[2].res == 0) {
-          this.efficiencyData = resp[2].data;
-        }
-        if (resp[3].res == 0) {
-          this.behaviorArray = resp[3].data.Behavior;
+          this.behaviorArray = resp[2].data.Behavior;
         }
         this.loading = false;
       });
@@ -760,6 +753,7 @@ export default {
       flex: 1;
       background: #fff;
       margin-right: 8px;
+      width: 34%;
       h3 {
         font-size: 14px;
         font-weight: bold;

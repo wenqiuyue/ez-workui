@@ -61,7 +61,7 @@
                         <label v-else>无</label>
                       </span>
                       <span
-                        >状态：
+                        >工作状态：
                         <template
                           v-if="
                             value.FocusFormStatus &&
