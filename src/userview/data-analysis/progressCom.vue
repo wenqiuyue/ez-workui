@@ -6,30 +6,44 @@
       height="90%"
       :name="name"
       :showCrossBtn="true"
-      :title="`
-        ${activeBar ? activeBar.name : ''}${
-        name == 'memberDatatimeAxisPhoto' ? '状态的' : '的'
-      }截图`"
       class="work-timeAxis"
       @beforeOpen="dataInit"
       @opened="open()"
     >
-      <div slot="sel" class="header_sel" v-if="name != 'staffDataPic'">
-        <el-date-picker
-          v-model="timeStart"
-          type="date"
-          placeholder="开始日期"
-          @change="handleChange"
-        >
-        </el-date-picker>
-        <div style="background: #ffffff">至</div>
-        <el-date-picker
-          v-model="timeEnd"
-          type="date"
-          placeholder="结束日期"
-          @change="handleChange"
-        >
-        </el-date-picker>
+      <div slot="header" class="header_tit">
+        <div class="sel">
+          <div class="header_sel" v-if="name != 'staffDataPic'">
+            <el-date-picker
+              v-model="timeStart"
+              type="date"
+              placeholder="开始日期"
+              @change="handleChange"
+            >
+            </el-date-picker>
+            <div style="background: #ffffff">至</div>
+            <el-date-picker
+              v-model="timeEnd"
+              type="date"
+              placeholder="结束日期"
+              @change="handleChange"
+            >
+            </el-date-picker>
+          </div>
+        </div>
+        <div class="tit_text">
+          <span class="name">
+            {{ activeBar ? activeBar.name : "" }}
+          </span>
+          <span
+            >{{
+              `
+        ${name == "memberDatatimeAxisPhoto" ? "状态的" : "的"}截图`
+            }}
+          </span>
+        </div>
+        <a>
+          <i class="hiFont hi-close-thin" @click="onCancel"></i>
+        </a>
       </div>
       <div class="content_modal" v-loading="loading">
         <template v-if="progressPhotoArr && progressPhotoArr.length">
@@ -88,11 +102,21 @@
                       <span
                         >鼠标点击速度：{{ value.MouseClickAverage }}次每分钟
                       </span>
-                      <span>鼠标点击效率：{{ value.EfficiencyMStatus }}</span>
                       <span
                         >键盘输入速度：{{ value.KeysAverage }}次每分钟
                       </span>
-                      <span>键盘输入效率：{{ value.EfficiencyKStatus }}</span>
+                      <span
+                        >操作效率：<label
+                          :style="`color:${getEfficiencyColor(
+                            value.EfficiencyStatus
+                          )}`"
+                          >{{
+                            value.EfficiencyStatus
+                              ? value.EfficiencyStatus
+                              : "无"
+                          }}</label
+                        ></span
+                      >
                     </span>
                   </h4>
                   <el-image
@@ -120,6 +144,7 @@
 </template>
 
 <script>
+import { getEfficiencyColor } from "@/commons";
 export default {
   data() {
     return {
@@ -183,6 +208,13 @@ export default {
     XModal: () => import("@/components/XModal.vue"),
   },
   methods: {
+    getEfficiencyColor,
+    /**
+     * 关闭弹窗
+     */
+    onCancel() {
+      this.$modal.hide(this.name);
+    },
     /**
      * 时间筛选
      */
@@ -324,6 +356,7 @@ export default {
 </script>
 
 <style lang="less" scoped="scoped">
+@import "../../assets/variable.less";
 .progressCom {
   /deep/.ctn {
     height: calc(100% - 6rem);
@@ -349,7 +382,63 @@ export default {
   box-sizing: border-box;
   padding: 2rem;
   overflow: auto;
+  .header_tit {
+    height: 6rem;
+    line-height: 6rem;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: @color_blue;
+    position: relative;
+    .sel {
+      position: absolute;
+      left: 0;
+      top: 0rem;
+    }
 
+    & > div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 1.6rem;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      .name {
+        max-width: 300px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+      }
+    }
+
+    & > a {
+      position: absolute;
+      display: block;
+      top: 2rem;
+      right: 0.5rem;
+      line-height: 2rem;
+      border-left: 1px solid #eee;
+      color: #9b9b9b;
+
+      i {
+        padding: 0 1rem;
+        display: block;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        color: @color_black_light;
+
+        &:hover {
+          color: @color_blue;
+        }
+      }
+    }
+  }
   /deep/.el-timeline-item__timestamp {
     font-size: 1.6rem;
     color: #333;

@@ -166,6 +166,7 @@ export default {
   text-align: center;
   width: 100%;
   cursor: pointer;
+  border-top: 1px solid #e4e7ed;
   .mb {
     height: 32px;
   }

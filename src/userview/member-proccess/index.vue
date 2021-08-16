@@ -93,24 +93,31 @@
                         <div class="status_speed">
                           <div>
                             <span
-                              >鼠标点击效率：{{
-                                item.EfficiencyMStatus
-                                  ? item.EfficiencyMStatus
-                                  : "无"
-                              }}</span
-                            ><span
-                              >键盘输入效率：{{
-                                item.EfficiencyKStatus
-                                  ? item.EfficiencyKStatus
-                                  : "无"
-                              }}</span
+                              >操作效率：<label
+                                :style="`color:${getEfficiencyColor(
+                                  item.EfficiencyStatus
+                                )}`"
+                              >
+                                {{
+                                  item.EfficiencyStatus
+                                    ? item.EfficiencyStatus
+                                    : "无"
+                                }}</label
+                              ></span
                             >
                           </div>
                           <div>
                             <span
-                              >行为状态：{{
-                                item.BehaviorStatus ? item.BehaviorStatus : "无"
-                              }}</span
+                              >行为状态：<label
+                                :style="`color:${getbehaviorColor(
+                                  item.BehaviorStatus
+                                )}`"
+                                >{{
+                                  item.BehaviorStatus
+                                    ? item.BehaviorStatus
+                                    : "无"
+                                }}</label
+                              ></span
                             >
                           </div>
                         </div>
@@ -317,7 +324,7 @@
 </template>
 
 <script>
-import { imgChange } from "@/commons";
+import { imgChange, getEfficiencyColor, getbehaviorColor } from "@/commons";
 // import xSocketLink from "@/assets/xSocketLink";
 export default {
   components: {
@@ -458,6 +465,8 @@ export default {
   },
   methods: {
     imgChange,
+    getEfficiencyColor,
+    getbehaviorColor,
     /**
      * 获取团队
      */

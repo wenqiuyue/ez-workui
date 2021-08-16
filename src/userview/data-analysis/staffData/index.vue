@@ -237,7 +237,9 @@
                     :key="csoftind"
                     @click="handleAppPic(citem)"
                   >
-                    {{ citem.PName }}
+                    {{ citem.PName }}({{
+                      (citem.PNamePercent * 100).toFixed(0)
+                    }}%)
                   </li>
                 </ul>
               </div>
@@ -251,20 +253,21 @@
         </div>
         <div class="scree">
           <div class="scree_title">定期截图</div>
-          <div class="screephot" v-if="softData && softData.length">
-            <div
-              class="screen"
-              v-for="(itempic, picindex) in softData"
-              :key="picindex"
-            >
-              <el-image
-                style="width: 157px; height: 88px"
-                :src="cmurl + itempic.Img"
-                :preview-src-list="[`${cmurl}${itempic.Img}`]"
+          <div v-if="softData && softData.filter((m) => m.Img).length">
+            <viewer :images="softData.filter((m) => m.Img)" class="screephot">
+              <div
+                class="screen"
+                v-for="(itempic, picindex) in softData.filter((m) => m.Img)"
+                :key="picindex"
               >
-              </el-image>
-              <p class="time">{{ itempic.Line }}</p>
-            </div>
+                <img
+                  style="width: 157px; height: 88px"
+                  :src="cmurl + itempic.Img"
+                  :alt="itempic.FocusFromName"
+                />
+                <p class="time">{{ itempic.Line }}</p>
+              </div>
+            </viewer>
           </div>
           <div class="nodata" v-else>
             <i class="hiFont hi-wushuju"></i>
@@ -521,9 +524,11 @@ export default {
             };
           });
           //高频关键词
-          this.ThreeTexts = resp[0].data.KeyWordFreqs.filter(
-            (m, index) => index < 20
-          );
+          if (resp[0].data.KeyWordFreqs && resp[0].data.KeyWordFreqs.length) {
+            this.ThreeTexts = resp[0].data.KeyWordFreqs.filter(
+              (m, index) => index < 20
+            );
+          }
           //时间轴与使用软件、定期截图数据
           this.softData = resp[0].data.TimeLine;
           this.workTime = resp[0].data.WorkTime;
@@ -592,9 +597,12 @@ export default {
             };
           });
           //高频关键词
-          this.ThreeTexts = resp[0].data.KeyWordFreqs.filter(
-            (m, index) => index < 20
-          );
+          if (resp[0].data.KeyWordFreqs && resp[0].data.KeyWordFreqs.length) {
+            this.ThreeTexts = resp[0].data.KeyWordFreqs.filter(
+              (m, index) => index < 20
+            );
+          }
+
           //时间轴与使用软件、定期截图数据
           this.softData = resp[0].data.TimeLine;
           this.workTime = resp[0].data.WorkTime;
@@ -795,6 +803,7 @@ export default {
       background: #fff;
       height: 160px;
       width: 34%;
+      overflow-y: hidden;
       .card_title {
         display: flex;
         flex-direction: row;

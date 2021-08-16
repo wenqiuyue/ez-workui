@@ -159,9 +159,9 @@
             </p>
             <p>
               操作效率：<span
-                :style="`color:${getEfficiencyColor(item.EfficiencyMStatus)}`"
+                :style="`color:${getEfficiencyColor(item.EfficiencyStatus)}`"
                 >{{
-                  item.EfficiencyMStatus ? item.EfficiencyMStatus : "无"
+                  item.EfficiencyStatus ? item.EfficiencyStatus : "无"
                 }}</span
               >
             </p>

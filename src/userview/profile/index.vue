@@ -184,8 +184,8 @@
                 </template></el-table-column
               >
               <el-table-column
-                label="我的鼠标效率"
-                prop="EfficiencyMStatus"
+                label="我的操作效率"
+                prop="EfficiencyStatus"
                 show-overflow-tooltip
                 align="center"
                 width="110"
@@ -193,36 +193,17 @@
                 <template slot-scope="scope"
                   ><span
                     :style="`color:${getEfficiencyColor(
-                      scope.row.EfficiencyMStatus
+                      scope.row.EfficiencyStatus
                     )}`"
                     >{{
-                      scope.row.EfficiencyMStatus
-                        ? scope.row.EfficiencyMStatus
+                      scope.row.EfficiencyStatus
+                        ? scope.row.EfficiencyStatus
                         : "无"
                     }}</span
                   ></template
                 ></el-table-column
               >
-              <el-table-column
-                label="我的键盘效率"
-                prop="EfficiencyKStatus"
-                show-overflow-tooltip
-                align="center"
-                width="110"
-              >
-                <template slot-scope="scope"
-                  ><span
-                    :style="`color:${getEfficiencyColor(
-                      scope.row.EfficiencyKStatus
-                    )}`"
-                    >{{
-                      scope.row.EfficiencyKStatus
-                        ? scope.row.EfficiencyKStatus
-                        : "无"
-                    }}</span
-                  ></template
-                ></el-table-column
-              >
+
               <el-table-column
                 label="我的行为状态"
                 prop="BehaviorStatus"

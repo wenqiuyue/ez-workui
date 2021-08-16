@@ -9,6 +9,8 @@ import store from "./store";
 import echarts from "echarts";
 import VueClipboard from "vue-clipboard2";
 import VueCropper from "vue-cropper";
+import Viewer from "v-viewer";
+import "viewerjs/dist/viewer.css";
 import _ from "lodash";
 
 import "@/assets/HiFont/iconfont.js"; //字体图标
@@ -26,6 +28,7 @@ Vue.use(VModal);
 Vue.use(VueClipboard);
 Vue.use(VueCropper);
 Vue.prototype.$echarts = echarts;
+Vue.use(Viewer);
 
 /**
  * 全局前置守卫

@@ -40,7 +40,9 @@
                     :key="csoftind"
                     @click="handleAppPic(citem)"
                   >
-                    {{ citem.PName }}
+                    {{ citem.PName }}({{
+                      (citem.PNamePercent * 100).toFixed(0)
+                    }}%)
                   </li>
                 </ul>
               </div>
@@ -67,38 +69,38 @@
               </li>
             </ul>
           </div>
-          <div
-            class="scree_echarts"
-            v-if="thermodynamicData && thermodynamicData.length"
-          >
+          <div class="scree_echarts">
             <ThermodynamicChart
-              :thermodynamicData="thermodynamicData"
+              v-if="selDateTimeLine"
+              :datestart="
+                selDateTimeLine.Date.timeFormat('yyyy-MM-dd 00:00:01')
+              "
+              :dateend="selDateTimeLine.Date.timeFormat('yyyy-MM-dd 23:59:59')"
+              :UsId="selDateTimeLine.UsId"
+              :teamId="selDateTimeLine.teamId"
             ></ThermodynamicChart>
-          </div>
-          <div class="nodata" v-else>
-            <i class="hiFont hi-wushuju"></i>
-            <p>暂无数据</p>
           </div>
         </div>
         <div class="scree">
           <div class="scree_title"><span class="title">定期截图</span></div>
-          <div
-            class="screephot"
-            v-if="selDateTime && selDateTime.filter((m) => m.Img).length"
-          >
-            <div
-              class="screen"
-              v-for="(itempic, picindex) in selDateTime.filter((m) => m.Img)"
-              :key="picindex"
+          <div v-if="selDateTime && selDateTime.filter((m) => m.Img).length">
+            <viewer
+              :images="selDateTime.filter((m) => m.Img)"
+              class="screephot"
             >
-              <el-image
-                style="width: 157px; height: 88px"
-                :src="cmurl + itempic.Img"
-                :preview-src-list="[`${cmurl}${itempic.Img}`]"
+              <div
+                class="screen"
+                v-for="(itempic, picindex) in selDateTime.filter((m) => m.Img)"
+                :key="picindex"
               >
-              </el-image>
-              <p class="time">{{ itempic.LineTime }}</p>
-            </div>
+                <img
+                  style="width: 157px; height: 88px"
+                  :src="cmurl + itempic.Img"
+                  :alt="itempic.FocusFromName"
+                />
+                <p class="time">{{ itempic.LineTime }}</p>
+              </div>
+            </viewer>
           </div>
           <div class="nodata" v-else>
             <i class="hiFont hi-wushuju"></i>
@@ -128,7 +130,6 @@ export default {
       selRow: null, //选择的软件
       selDateTime: null,
       loading: false,
-      thermodynamicData: null, //热力图数据
     };
   },
   computed: {
@@ -143,28 +144,14 @@ export default {
     opened() {
       this.$nextTick(() => {
         this.loading = true;
-        Promise.all([
-          this.$http.post(
+        this.$http
+          .post(
             "/Attendance/GetMyWorkStatusInHalfHour.ashx",
             this.selDateTimeLine
-          ),
-          this.$http.post("/User/Work/GetBehaviorThermodynamicChart.ashx", {
-            UsId: this.selDateTimeLine.UsId,
-            datestart: this.selDateTimeLine.Date.timeFormat(
-              "yyyy-MM-dd 00:00:01"
-            ),
-            dateend: this.selDateTimeLine.Date.timeFormat(
-              "yyyy-MM-dd 23:59:59"
-            ),
-            teamId: this.selDateTimeLine.teamId,
-          }),
-        ])
+          )
           .then((resp) => {
-            if (resp[0].res == 0) {
-              this.selDateTime = resp[0].data;
-            }
-            if (resp[1].res == 0) {
-              this.thermodynamicData = resp[1].data.Behavior;
+            if (resp.res == 0) {
+              this.selDateTime = resp.data;
             }
           })
           .finally(() => (this.loading = false));

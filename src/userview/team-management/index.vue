@@ -106,8 +106,8 @@
             </template></el-table-column
           >
           <el-table-column
-            label="我的鼠标效率"
-            prop="EfficiencyMStatus"
+            label="团队操作效率"
+            prop="TeamEfficiencyStatus"
             show-overflow-tooltip
             align="center"
             width="110"
@@ -115,19 +115,19 @@
             <template slot-scope="scope"
               ><span
                 :style="`color:${getEfficiencyColor(
-                  scope.row.EfficiencyMStatus
+                  scope.row.TeamEfficiencyStatus
                 )}`"
                 >{{
-                  scope.row.EfficiencyMStatus
-                    ? scope.row.EfficiencyMStatus
+                  scope.row.TeamEfficiencyStatus
+                    ? scope.row.TeamEfficiencyStatus
                     : "无"
                 }}</span
               ></template
             ></el-table-column
           >
           <el-table-column
-            label="我的键盘效率"
-            prop="EfficiencyKStatus"
+            label="我的操作效率"
+            prop="EfficiencyStatus"
             show-overflow-tooltip
             align="center"
             width="110"
@@ -135,12 +135,10 @@
             <template slot-scope="scope"
               ><span
                 :style="`color:${getEfficiencyColor(
-                  scope.row.EfficiencyKStatus
+                  scope.row.EfficiencyStatus
                 )}`"
                 >{{
-                  scope.row.EfficiencyKStatus
-                    ? scope.row.EfficiencyKStatus
-                    : "无"
+                  scope.row.EfficiencyStatus ? scope.row.EfficiencyStatus : "无"
                 }}</span
               ></template
             ></el-table-column
@@ -161,46 +159,7 @@
               ></template
             ></el-table-column
           >
-          <el-table-column
-            label="团队鼠标效率"
-            prop="TeamEfficiencyMStatus"
-            show-overflow-tooltip
-            align="center"
-            width="110"
-          >
-            <template slot-scope="scope"
-              ><span
-                :style="`color:${getEfficiencyColor(
-                  scope.row.TeamEfficiencyMStatus
-                )}`"
-                >{{
-                  scope.row.TeamEfficiencyMStatus
-                    ? scope.row.TeamEfficiencyMStatus
-                    : "无"
-                }}</span
-              ></template
-            ></el-table-column
-          >
-          <el-table-column
-            label="团队键盘效率"
-            prop="TeamEfficiencyKStatus"
-            show-overflow-tooltip
-            align="center"
-            width="110"
-          >
-            <template slot-scope="scope"
-              ><span
-                :style="`color:${getEfficiencyColor(
-                  scope.row.TeamEfficiencyKStatus
-                )}`"
-                >{{
-                  scope.row.TeamEfficiencyKStatus
-                    ? scope.row.TeamEfficiencyKStatus
-                    : "无"
-                }}</span
-              ></template
-            ></el-table-column
-          >
+
           <el-table-column
             label="到期时间"
             prop="ExpireTime"

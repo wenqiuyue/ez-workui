@@ -1,5 +1,29 @@
 <template>
-  <div id="thermodynamic" :style="{ width: width, height: height }"></div>
+  <div class="therm_charts">
+    <div
+      class="left_page"
+      @click="changePage(1)"
+      :style="`${pageData.page <= 1 ? 'cursor: no-drop;' : ''}`"
+    >
+      <i class="el-icon-arrow-left"></i>
+    </div>
+    <transition name="slide-fade">
+      <div
+        id="thermodynamic"
+        :style="{ width: width, height: height }"
+        v-if="show"
+      ></div>
+    </transition>
+    <div
+      class="right_page"
+      @click="changePage(2)"
+      :style="`${
+        pageData.page >= pageData.totalPageCount ? 'cursor: no-drop;' : ''
+      }`"
+    >
+      <i class="el-icon-arrow-right"></i>
+    </div>
+  </div>
 </template>
 <script>
 export default {
@@ -43,8 +67,10 @@ export default {
   },
   data() {
     return {
+      show: false,
       pageData: {
         page: 1,
+        totalPageCount: 0,
       },
       thermodynamicData: [],
       xAxisData: [],
@@ -80,18 +106,44 @@ export default {
         top: "10%",
       },
       gridHorizontal: {
-        left: "1%",
+        left: "center",
         height: "75%",
-        width: "97%",
+        width: "88%",
         top: "6%",
       },
     };
   },
-  watch: {},
+  watch: {
+    dateend() {
+      if (this.dateend) {
+        this.getData();
+      }
+    },
+  },
+  computed: {
+    cmurl() {
+      return process.env.VUE_APP_CMURL;
+    },
+  },
   mounted() {
     this.getData();
   },
   methods: {
+    /**
+     * 分页
+     */
+    changePage(type) {
+      if (type == 1 && this.pageData.page > 1) {
+        this.pageData.page--;
+        this.getData();
+      } else if (
+        type == 2 &&
+        this.pageData.page < this.pageData.totalPageCount
+      ) {
+        this.pageData.page++;
+        this.getData();
+      }
+    },
     getData() {
       const data = {
         UsId: this.UsId,
@@ -101,20 +153,25 @@ export default {
         page: this.pageData.page,
         pageCount: this.column * this.row,
       };
+      this.show = false;
       this.$http
         .post("/User/Work/GetBehaviorThermodynamicChart.ashx", data)
         .then((resp) => {
           if (resp.res == 0) {
+            this.pageData.totalPageCount = Math.ceil(
+              resp.data.TotalCount / (this.column * this.row)
+            );
             this.thermodynamicData = resp.data.Behavior;
             this.thermodynamicArray = this.thermodynamicData.map((m) => {
-              if (m == "积极") {
+              if (m.BehavoirType == "积极") {
                 return 1;
-              } else if (m == "消极") {
+              } else if (m.BehavoirType == "消极") {
                 return 2;
-              } else if (m == "未知") {
+              } else if (m.BehavoirType == "未知") {
                 return 3;
               }
             });
+            this.show = true;
             this.getAxisData();
           }
         });
@@ -144,6 +201,7 @@ export default {
       });
     },
     initCharts() {
+      const that = this;
       // 基于准备好的dom，初始化echarts实例
       var echarts = require("echarts");
       var chartDom = document.getElementById("thermodynamic");
@@ -156,14 +214,26 @@ export default {
       option = {
         tooltip: {
           position: "top",
+          extraCssText: "z-index:99999999",
+          confine: true,
           formatter: function (p) {
-            if (p.value[2] == 1) {
-              return "积极";
-            } else if (p.value[2] == 2) {
-              return "消极";
-            } else if (p.value[2] == 3) {
-              return "未知";
-            }
+            const val = p.value[0] + p.value[1] * 12;
+            const item = that.thermodynamicData[val].CompterInfos[0];
+            let html = `
+                    <span>行为：${that.thermodynamicData[val].Behavoir} </span>
+                    <span style="margin-left:10px">行为状态：${that.thermodynamicData[val].BehavoirType} </span>
+                    <br>
+                    <span>进程名：${item.Pname}</span>
+                    <span style="margin-left:10px">窗口名：${item.FocusFormName}</span>
+                    <br>
+                    <image
+                      style="max-width: 200px"
+                      src="${that.cmurl}${item.ImageName}"
+                      alt=""
+                    >
+                    </image>
+                  `;
+            return html;
           },
         },
         grid: this.isColumn ? this.gridHorizontal : this.gridVertical,
@@ -229,6 +299,51 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.therm_charts {
+  position: relative;
+  .left_page,
+  .right_page {
+    display: none;
+    position: absolute;
+    top: 100px;
+    background: rgba(192, 196, 204, 0.5);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 36px;
+    z-index: 999;
+    cursor: pointer;
+    i {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+  }
+  .left_page {
+    left: 0;
+  }
+  .right_page {
+    right: 0;
+  }
+  &:hover {
+    .left_page,
+    .right_page {
+      display: block;
+    }
+  }
+  .slide-fade-enter-active {
+    transition: all 0.8s ease;
+  }
+  .slide-fade-leave-active {
+    transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+  }
+  .slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active for below version 2.1.8 */ {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+}
 #thermodynamic {
   margin: 0 auto;
 }

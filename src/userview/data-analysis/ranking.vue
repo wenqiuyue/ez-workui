@@ -68,12 +68,6 @@
                 {{ scope.row.MouseClickRatio }}次每分钟
               </template>
             </el-table-column>
-            <el-table-column
-              align="center"
-              label="鼠标点击效率"
-              prop="MouseClickStatus"
-            >
-            </el-table-column>
             <el-table-column align="center" label="键盘输入速度">
               <template slot-scope="scope">
                 {{ scope.row.KeysRatio }}次每分钟
@@ -81,9 +75,21 @@
             </el-table-column>
             <el-table-column
               align="center"
-              label="键盘输入效率"
-              prop="KeysStatus"
+              label="操作效率"
+              prop="MemberEfficiencyStatus"
             >
+              <template slot-scope="scope">
+                <span
+                  :style="`color:${getEfficiencyColor(
+                    scope.row.MemberEfficiencyStatus
+                  )}`"
+                  >{{
+                    scope.row.MemberEfficiencyStatus
+                      ? scope.row.MemberEfficiencyStatus
+                      : "无"
+                  }}</span
+                >
+              </template>
             </el-table-column>
             <el-table-column
               align="center"
@@ -103,7 +109,7 @@
   </div>
 </template>
 <script>
-import { imgChange } from "@/commons";
+import { imgChange, getEfficiencyColor } from "@/commons";
 export default {
   components: {
     XModal: () => import("@/components/XModal"),
@@ -141,6 +147,7 @@ export default {
   },
   methods: {
     imgChange,
+    getEfficiencyColor,
     opened() {
       this.$nextTick(() => {
         this.typeVal = 1;
