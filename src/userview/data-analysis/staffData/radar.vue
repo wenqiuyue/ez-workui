@@ -26,6 +26,7 @@ export default {
   data() {
     return {
       radarData: [],
+      max: null,
     };
   },
   watch: {
@@ -47,6 +48,7 @@ export default {
     getEfficiencyColor,
     drawLine() {
       let that = this;
+      this.max = Math.max(...this.radarData);
       // 基于准备好的dom，初始化echarts实例
       var echarts = require("echarts");
       var chartDom = document.getElementById("radar");
@@ -86,27 +88,27 @@ export default {
             indicator: [
               {
                 text: "团队历史效率",
-                max: that.$D.ITEM("Efficiency_Standard", 4).custom,
+                max: that.max,
               },
               {
                 text: "团队当前效率",
-                max: that.$D.ITEM("Efficiency_Standard", 4).custom,
+                max: that.max,
               },
               {
                 text: "部门历史效率",
-                max: that.$D.ITEM("Efficiency_Standard", 5).custom,
+                max: that.max,
               },
               {
                 text: "部门当前效率",
-                max: that.$D.ITEM("Efficiency_Standard", 5).custom,
+                max: that.max,
               },
               {
                 text: "个人历史效率",
-                max: that.$D.ITEM("Efficiency_Standard", 6).custom,
+                max: that.max,
               },
               {
                 text: "个人当前效率",
-                max: that.$D.ITEM("Efficiency_Standard", 6).custom,
+                max: that.max,
               },
             ],
             center: ["50%", "50%"],

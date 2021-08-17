@@ -35,7 +35,7 @@
           prop="Name"
         >
         </el-table-column>
-        <el-table-column label="创建名称" :show-overflow-tooltip="true">
+        <el-table-column label="创建时间" :show-overflow-tooltip="true">
           <template slot-scope="scope">
             {{
               scope.row.CreatTime
