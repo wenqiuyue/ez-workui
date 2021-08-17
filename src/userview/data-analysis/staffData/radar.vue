@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import { getEfficiencyColor } from "@/commons";
 export default {
   props: {
     efficiencyData: {
@@ -30,13 +31,20 @@ export default {
   watch: {
     efficiencyData() {
       if (this.efficiencyData) {
-        let { UserName, ...data } = this.efficiencyData;
-        this.radarData = Object.values(data);
+        this.radarData = [
+          this.efficiencyData.TeamHistryAverage,
+          this.efficiencyData.TeamAverage,
+          this.efficiencyData.PGHistryAverage,
+          this.efficiencyData.PGroupAverage,
+          this.efficiencyData.MemberHistryAverage,
+          this.efficiencyData.MemberAverage,
+        ];
         this.drawLine();
       }
     },
   },
   methods: {
+    getEfficiencyColor,
     drawLine() {
       let that = this;
       // 基于准备好的dom，初始化echarts实例
@@ -178,7 +186,9 @@ export default {
             itemStyle: {
               normal: {
                 borderWidth: 2,
-                color: "#A66CFE",
+                color: that.getEfficiencyColor(
+                  that.efficiencyData.TeamHistoryStatus
+                ),
               },
             },
             lineStyle: {
@@ -203,7 +213,7 @@ export default {
             itemStyle: {
               normal: {
                 borderWidth: 2,
-                color: "#FFA662",
+                color: that.getEfficiencyColor(that.efficiencyData.TeamStatus),
               },
             },
             lineStyle: {
@@ -228,7 +238,9 @@ export default {
             itemStyle: {
               normal: {
                 borderWidth: 2,
-                color: "#5AA4FB",
+                color: that.getEfficiencyColor(
+                  that.efficiencyData.PGHistoryStatus
+                ),
               },
             },
             lineStyle: {
@@ -253,7 +265,7 @@ export default {
             itemStyle: {
               normal: {
                 borderWidth: 2,
-                color: "#FF858B",
+                color: that.getEfficiencyColor(that.efficiencyData.PGStatus),
               },
             },
             lineStyle: {
@@ -278,7 +290,9 @@ export default {
             itemStyle: {
               normal: {
                 borderWidth: 2,
-                color: "#7AF16F",
+                color: that.getEfficiencyColor(
+                  that.efficiencyData.MemberHistoryStatus
+                ),
               },
             },
             lineStyle: {
@@ -303,7 +317,9 @@ export default {
             itemStyle: {
               normal: {
                 borderWidth: 2,
-                color: "#33A7BF",
+                color: that.getEfficiencyColor(
+                  that.efficiencyData.MemberStatus
+                ),
               },
             },
             lineStyle: {
