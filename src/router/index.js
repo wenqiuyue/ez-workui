@@ -54,6 +54,13 @@ const routes = [
             icon: "hi-overtime",
           },
           {
+            path: "/sensitiveword",
+            name: "敏感词记录",
+            component: () => import("@/userview/sensitiveword-record"),
+            layout: true,
+            icon: "hi-minganciku",
+          },
+          {
             path: "/teamManagement",
             name: "团队管理",
             component: () => import("@/userview/team-management"),

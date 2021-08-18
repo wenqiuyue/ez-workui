@@ -28,6 +28,7 @@
       :selRow="selRow"
     ></windowAliasManager>
     <ActionRule v-else-if="tabType == 5" :selRow="selRow"></ActionRule>
+    <SensitiveWords v-else-if="tabType == 6" :selRow="selRow"></SensitiveWords>
   </div>
 </template>
 
@@ -40,6 +41,7 @@ export default {
     processMarkManager: () => import("./processMarkManager"),
     windowAliasManager: () => import("./windowAliasManager"),
     ActionRule: () => import("./actionRule"),
+    SensitiveWords: () => import("./sensitiveWords"),
   },
   props: {
     selRow: {
@@ -48,8 +50,12 @@ export default {
     },
   },
   data: () => ({
-    tabType: 1,
+    tabType: 6,
     tabList: [
+      {
+        value: 6,
+        label: "敏感词",
+      },
       {
         value: 1,
         label: "部门设置",

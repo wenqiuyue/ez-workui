@@ -1,20 +1,18 @@
 <template>
-  <!-- 菜单 -->
-  <div id="manager-label">
+  <div class="sensitive-words">
     <c-content v-loading="loading">
-      <!-- 搜索部分 -->
-      <c-title
-        slot="search"
-        :TInfo="titleInfo"
-        @addClick="addClick"
-        @searchClick="searchClick"
-      >
-      </c-title>
+      <div slot="search" class="screen">
+        <div class="screen_left"></div>
+        <div class="screen_right">
+          <el-button type="primary" @click="addClick" size="medium"
+            >添加</el-button
+          >
+        </div>
+      </div>
       <!-- 主体表格部分 -->
       <el-table
         slot="main"
         :data="tableData"
-        ref="multipleTable"
         style="width: 100%"
         :cell-style="cellStyle"
         :header-cell-style="cellStyle"
@@ -28,19 +26,14 @@
             />
           </div>
         </template>
+
         <el-table-column
-          label="部门名称"
+          label="敏感词"
           :show-overflow-tooltip="true"
-          fixed
           prop="Name"
         >
         </el-table-column>
-        <el-table-column
-          label="创建时间"
-          :show-overflow-tooltip="true"
-          fixed
-          prop="CreatTime"
-        >
+        <el-table-column label="创建时间" :show-overflow-tooltip="true">
           <template slot-scope="scope">
             {{
               scope.row.CreatTime
@@ -52,12 +45,20 @@
         <el-table-column label="操作">
           <!-- fixed  -->
           <template slot-scope="scope">
-            <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
-              >详情</el-button
-            >
-            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
-              >删除</el-button
-            >
+            <span>
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleEdit(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="danger"
+                size="mini"
+                @click="handleDelt(scope.row)"
+                >删除</el-button
+              >
+            </span>
           </template>
         </el-table-column>
       </el-table>
@@ -65,36 +66,37 @@
       <c-pages
         slot="pages"
         v-model="pageData"
-        @changeEvent="handlePaginationChange"
+        @changeEvent="handlePage"
       ></c-pages>
     </c-content>
-
-    <LabelW
-      :indexData="indexData"
-      ref="proGroupWindow"
-      @eventComfirm="getDataList"
+    <WordsModal
+      :teamValue="teamValue"
       :selRow="selRow"
-    ></LabelW>
+      :indexData="indexData"
+      ref="wordsM"
+      @eventComfirm="getDataList"
+    ></WordsModal>
   </div>
 </template>
 <script>
-import { imgChange } from "@/commons";
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
-    CTitle: () => import("@/components/CTitle"),
     CPages: () => import("@/components/CPages"),
-    LabelW: () => import("./proGroupW"),
+    WordsModal: () => import("./words-modal"),
   },
   props: {
-    //版本信息
+    //规则版本信息
     selRow: {
       type: Object,
       default: null,
     },
+    teamValue: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
-    "#main";
     return {
       loading: false,
       pageData: {
@@ -102,27 +104,13 @@ export default {
         pageSize: 10,
         totalNum: 0,
       },
-      // CX Title组件
-      titleInfo: {
-        // 控制左侧：按钮组四个
-        btnShow: [
-          { type: "addBtn", ishow: true },
-          { type: "startBtn", ishow: false, disabled: true },
-          { type: "closeBtn", ishow: false, disabled: true },
-          { type: "delBtn", ishow: false, disabled: true },
-        ],
-        // 控制右侧：下拉细节 搜索框
-        dropDown: {
-          // Input组件们的：右侧共同属性
-          searchInput: {
-            placeholder: "请输入部门名称",
-          },
-        },
-      },
 
-      tableData: [],
-      searchKW: "",
-      multipleSelection: "",
+      tableData: [
+        {
+          Name: "招聘",
+          CreatTime: "2021-02-01 12:12:11",
+        },
+      ],
       indexData: {
         type: "", // Add Edit
         name: "",
@@ -133,21 +121,29 @@ export default {
       },
     };
   },
-  mounted() {
-    this.getDataList();
-  },
   methods: {
-    imgChange,
+    handleChange() {
+      this.pageData.pageIndex = 1;
+      this.getDataList();
+    },
+    /**
+     * 分页
+     */
+    handlePage(val) {
+      this.pageData = val;
+      this.getDataList();
+    },
     // 删除某一行
     handleDelt(row) {
-      this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
+      this.$confirm("此操作将删除此敏感词, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
           let params = {
-            Ids: [row.Id],
+            id: [row.Id],
+            teamId: this.teamValue,
           };
           this.comDelete(params);
         })
@@ -155,10 +151,7 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post(
-          "/Management/ProgressManagement/DelSystemProgressGroup.ashx",
-          params
-        )
+        .post("/ProgressGroup/DelProgressGroup.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.$message({
@@ -183,36 +176,28 @@ export default {
     openWin(ty, code, proName) {
       this.indexData = {
         type: ty === "ad" ? "Add" : "Edit",
-        name: ty === "ad" ? "添加部门" : "编辑部门",
+        name: ty === "ad" ? "添加敏感词" : "编辑敏感词",
         departmentCode: code,
         proName: proName,
-        xModalName: "proGroupWindow",
+        xModalName: "wordsM",
       };
-      this.$modal.show("proGroupWindow");
+      this.$modal.show("wordsM");
       this.$nextTick(() => {
-        this.$refs.proGroupWindow.changeEditState();
+        this.$refs.wordsM.changeEditState();
       });
     },
-
-    // 查询
-    searchClick(val) {
-      this.searchKW = val;
-      this.pageData.pageIndex = 1;
-      this.getDataList();
-    },
-    // 获取列表
+    // 获取数据
     getDataList() {
       let params = {
         name: this.searchKW,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
+        teamId: this.teamValue,
         configId: this.selRow.Id,
       };
       this.loading = true;
       this.$http
-        .get("/Management/ProgressManagement/ProgressGroupAllList.ashx", {
-          params: params,
-        })
+        .post("/ProgressGroup/QueryProgressGroupList.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.tableData = result.data.Data;
@@ -221,62 +206,16 @@ export default {
           }
         });
     },
-    /**
-     * 分页
-     */
-    handlePaginationChange(val) {
-      this.pageData = val;
-      this.getDataList();
-    },
   },
 };
 </script>
-
 <style lang="less" scoped>
-.member-style {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-
-  li {
-    display: flex;
-    width: 33%;
-    margin-bottom: 1rem;
-    // margin-right: 1rem;
-    align-items: center;
-    // justify-content: space-between;
-    position: relative;
-
-    img {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
-    }
-
-    span {
-      color: #333;
-      margin-right: 2rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    i {
-      width: 1px;
-      height: 70%;
-      background: #ddd;
-      position: absolute;
-      right: 20%;
-      top: 3px;
-    }
-  }
-}
-#manager-label {
+.sensitive-words {
   height: 100%;
-  box-sizing: border-box;
-  /deep/.el-table__row td:last-child {
-    text-align: center !important;
+  .screen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 </style>

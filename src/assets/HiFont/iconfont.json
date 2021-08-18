@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "6263298",
+      "name": "敏感词库",
+      "font_class": "minganciku",
+      "unicode": "e6a4",
+      "unicode_decimal": 59044
+    },
+    {
+      "icon_id": "13638692",
+      "name": "排名",
+      "font_class": "paiming",
+      "unicode": "e6a3",
+      "unicode_decimal": 59043
+    },
+    {
       "icon_id": "396059",
       "name": "第二",
       "font_class": "second",

@@ -42,6 +42,11 @@
       :teamValue="teamValue"
       :selRow="selRow"
     ></ActionRule>
+    <SensitiveWords
+      v-else-if="tabType == 6"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></SensitiveWords>
   </div>
 </template>
 
@@ -54,6 +59,7 @@ export default {
     processMark: () => import("./processMark"),
     WindowAlias: () => import("./windowalias"),
     ActionRule: () => import("./action-rule"),
+    SensitiveWords: () => import("./sensitive-words"),
   },
   props: {
     //规则版本信息
@@ -67,8 +73,12 @@ export default {
     },
   },
   data: () => ({
-    tabType: 1,
+    tabType: 6,
     tabList: [
+      {
+        value: 6,
+        label: "敏感词",
+      },
       {
         value: 1,
         label: "部门设置",
@@ -77,6 +87,7 @@ export default {
         value: 5,
         label: "行为规则设置",
       },
+
       {
         value: 2,
         label: "进程规则设置",

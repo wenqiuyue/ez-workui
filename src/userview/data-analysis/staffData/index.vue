@@ -106,47 +106,6 @@
         <div class="state">
           <div class="state_two">
             <div class="card_title">
-              <h3>常用应用</h3>
-              <el-button
-                type="text"
-                size="small"
-                @click.stop="handleAllSoftware"
-                v-if="AppDetails.length"
-                >查看全部</el-button
-              >
-            </div>
-            <div class="work_appl_list" v-if="AppDetails.length">
-              <div
-                class="w_a_l_card"
-                v-for="(appitem, ind) in AppDetails"
-                :key="ind"
-              >
-                <p class="time">{{ appitem.StayTime }}H</p>
-                <div class="card_proportion">
-                  <div
-                    class="proportion"
-                    :style="`height:${
-                      workTime > 0
-                        ? (appitem.StayTime / workTime) * 100 >= 100
-                          ? 100
-                          : (appitem.StayTime / workTime) * 100
-                        : (5 - ind) * 20
-                    }%`"
-                  ></div>
-                </div>
-                <p class="card_name">
-                  <tooltip
-                    :content="`${appitem.AppName}`"
-                    :ref="`memprop-${ind}`"
-                    width="98%"
-                  ></tooltip>
-                </p>
-              </div>
-            </div>
-            <div class="work_appl_list_empty" v-else>暂无数据</div>
-          </div>
-          <div class="state_two">
-            <div class="card_title">
               <h3>
                 行为分析<el-tooltip placement="top" effect="light"
                   ><div slot="content">
@@ -175,7 +134,6 @@
                   (m, index) => index < 16
                 )"
                 :key="bindx"
-                style="width: 22%"
                 :type="getTagType(bitem.BehavoirType)"
                 @click="handleBehavior(bitem)"
                 ><tooltip
@@ -191,6 +149,73 @@
           <div class="state_two">
             <div class="card_title">
               <h3>高频关键词</h3>
+              <el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllWords"
+                v-if="ThreeTexts.length"
+                >查看全部</el-button
+              >
+            </div>
+            <div class="info" v-if="ThreeTexts && ThreeTexts.length">
+              <tooltip
+                class="i_text"
+                v-for="(item, wordindex) in ThreeTexts"
+                :key="wordindex"
+                @handleClick="handleKeyWord(item)"
+                :content="item.Key"
+                :ref="`demandLeftMenu-${wordindex}`"
+                maxWidth="40%"
+              ></tooltip>
+            </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
+          </div>
+        </div>
+        <div class="state">
+          <div class="state_two">
+            <div class="card_title">
+              <h3>常用应用</h3>
+              <el-button
+                type="text"
+                size="small"
+                @click.stop="handleAllSoftware"
+                v-if="AppDetails.length"
+                >查看全部</el-button
+              >
+            </div>
+            <div class="work_appl_list" v-if="AppDetails.length">
+              <div
+                class="w_a_l_card"
+                v-for="(appitem, ind) in AppDetails"
+                :key="ind"
+              >
+                <p class="time">{{ appitem.StayTime }}H</p>
+                <div class="card_proportion">
+                  <div
+                    class="proportion"
+                    :style="`height:${
+                      workTime > 0
+                        ? (appitem.StayTime / workTime) * 100 >= 100
+                          ? 100
+                          : (appitem.StayTime / workTime) * 100
+                        : (6 - ind) * 20
+                    }%`"
+                  ></div>
+                </div>
+                <p class="card_name">
+                  <tooltip
+                    :content="`${appitem.AppName}`"
+                    :ref="`memprop-${ind}`"
+                    width="98%"
+                  ></tooltip>
+                </p>
+              </div>
+            </div>
+            <div class="work_appl_list_empty" v-else>暂无数据</div>
+          </div>
+          <div class="state_two">
+            <div class="card_title">
+              <h3>敏感词汇</h3>
               <el-button
                 type="text"
                 size="small"
@@ -515,7 +540,7 @@ export default {
           );
           //本日使用软件占比
           this.AppDetails = resp[0].data.AppDetails.filter(
-            (m, index) => index < 5
+            (m, index) => index < 6
           );
           this.echartSoftWearData = resp[0].data.AppDetails.map((m) => {
             return {
@@ -588,7 +613,7 @@ export default {
           );
           //本周/月使用软件占比
           this.AppDetails = resp[0].data.AppDetails.filter(
-            (m, index) => index < 5
+            (m, index) => index < 6
           );
           this.echartSoftWearData = resp[0].data.AppDetails.map((m) => {
             return {
@@ -802,7 +827,7 @@ export default {
       margin-right: 8px;
       background: #fff;
       height: 160px;
-      width: 34%;
+      width: 50%;
       overflow-y: hidden;
       .card_title {
         display: flex;
@@ -846,7 +871,7 @@ export default {
           margin-right: 8px;
           margin-bottom: 4px;
           cursor: pointer;
-          width: 28%;
+          max-width: 80px;
           height: 22px;
           line-height: 20px;
           padding: 0 4px;

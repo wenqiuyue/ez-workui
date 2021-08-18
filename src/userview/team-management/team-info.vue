@@ -170,6 +170,33 @@
                     @keyup.enter.native="changeSet"
                   ></el-input>
                 </li>
+                <li>
+                  <p class="set_row">
+                    <span>是否开启预警</span>
+                    <el-switch v-model="setFive"> </el-switch>
+                  </p>
+                  <p class="email_input_btn" v-if="setFive">
+                    <el-button type="text" icon="el-icon-success"
+                      >保存</el-button
+                    >
+                    <el-button type="text" icon="el-icon-circle-plus"
+                      >继续添加</el-button
+                    >
+                  </p>
+                  <p v-if="setFive">
+                    <el-input
+                      v-for="(eitem, eind) in 3"
+                      :key="eind"
+                      class="set_input email_input"
+                      v-model="passwordVal"
+                      :placeholder="`接收邮箱 ${numChange(eind + 1)}`"
+                      ><el-button
+                        slot="append"
+                        icon="el-icon-delete"
+                      ></el-button
+                    ></el-input>
+                  </p>
+                </li>
               </ul>
             </div>
             <div class="card_li" v-if="infoData.DataClearSeting">
@@ -281,7 +308,7 @@
   </div>
 </template>
 <script>
-import { imgChange } from "@/commons";
+import { imgChange, numChange } from "@/commons";
 export default {
   components: {
     InvitationList: () => import("./invitation-list"),
@@ -304,6 +331,7 @@ export default {
       setTwo: true,
       setThree: false,
       setFour: false,
+      setFive: false,
       passwordVal: null, //口令
     };
   },
@@ -312,6 +340,7 @@ export default {
   },
   methods: {
     imgChange,
+    numChange,
     /**
      * 团队数据库清理设置
      */
@@ -497,6 +526,26 @@ export default {
           /deep/.el-input__inner {
             height: 34px;
             line-height: 34px;
+          }
+        }
+        .email_input {
+          margin-bottom: 8px;
+          /deep/.el-input-group__append {
+            .el-button {
+              color: #f56c6c;
+              background: #fef0f0;
+              border-radius: 0 4px 4px 0;
+              padding: 10px 20px;
+            }
+          }
+        }
+        .email_input_btn {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-end;
+          .el-button {
+            padding: 3px 0 8px 0;
           }
         }
       }

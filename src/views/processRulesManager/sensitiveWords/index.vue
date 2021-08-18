@@ -1,6 +1,6 @@
 <template>
   <!-- 菜单 -->
-  <div id="manager-label">
+  <div id="sensitiveWords">
     <c-content v-loading="loading">
       <!-- 搜索部分 -->
       <c-title
@@ -29,7 +29,7 @@
           </div>
         </template>
         <el-table-column
-          label="部门名称"
+          label="敏感词"
           :show-overflow-tooltip="true"
           fixed
           prop="Name"
@@ -69,12 +69,12 @@
       ></c-pages>
     </c-content>
 
-    <LabelW
+    <SensitiveWordsW
       :indexData="indexData"
-      ref="proGroupWindow"
+      ref="sensitiveWordsW"
       @eventComfirm="getDataList"
       :selRow="selRow"
-    ></LabelW>
+    ></SensitiveWordsW>
   </div>
 </template>
 <script>
@@ -84,7 +84,7 @@ export default {
     CContent: () => import("@/components/CContent"),
     CTitle: () => import("@/components/CTitle"),
     CPages: () => import("@/components/CPages"),
-    LabelW: () => import("./proGroupW"),
+    SensitiveWordsW: () => import("./sensitiveWordsW"),
   },
   props: {
     //版本信息
@@ -115,7 +115,7 @@ export default {
         dropDown: {
           // Input组件们的：右侧共同属性
           searchInput: {
-            placeholder: "请输入部门名称",
+            placeholder: "请输入敏感词名称",
           },
         },
       },
@@ -140,7 +140,7 @@ export default {
     imgChange,
     // 删除某一行
     handleDelt(row) {
-      this.$confirm("此操作将删除此进程, 是否继续?", "提示", {
+      this.$confirm("此操作将删除此敏感词, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
@@ -183,14 +183,14 @@ export default {
     openWin(ty, code, proName) {
       this.indexData = {
         type: ty === "ad" ? "Add" : "Edit",
-        name: ty === "ad" ? "添加部门" : "编辑部门",
+        name: ty === "ad" ? "添加敏感词" : "编辑敏感词",
         departmentCode: code,
         proName: proName,
-        xModalName: "proGroupWindow",
+        xModalName: "sensitiveWordsW",
       };
-      this.$modal.show("proGroupWindow");
+      this.$modal.show("sensitiveWordsW");
       this.$nextTick(() => {
-        this.$refs.proGroupWindow.changeEditState();
+        this.$refs.sensitiveWordsW.changeEditState();
       });
     },
 
@@ -233,46 +233,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.member-style {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-
-  li {
-    display: flex;
-    width: 33%;
-    margin-bottom: 1rem;
-    // margin-right: 1rem;
-    align-items: center;
-    // justify-content: space-between;
-    position: relative;
-
-    img {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
-    }
-
-    span {
-      color: #333;
-      margin-right: 2rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    i {
-      width: 1px;
-      height: 70%;
-      background: #ddd;
-      position: absolute;
-      right: 20%;
-      top: 3px;
-    }
-  }
-}
-#manager-label {
+#sensitiveWords {
   height: 100%;
   box-sizing: border-box;
   /deep/.el-table__row td:last-child {

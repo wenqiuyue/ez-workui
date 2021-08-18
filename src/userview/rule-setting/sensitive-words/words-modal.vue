@@ -1,10 +1,5 @@
 <template>
-  <XModal
-    name="proGroupWindow"
-    :width="'35%'"
-    height="35%"
-    @beforeClose="beforeClose"
-  >
+  <XModal name="wordsM" :width="'35%'" height="35%" @beforeClose="beforeClose">
     <c-win-tmp
       ref="winTmp"
       v-loading="loading"
@@ -24,10 +19,10 @@
         <!-- 必填项 -->
         <el-row>
           <el-col :sm="24" :md="24">
-            <el-form-item label="名称：" prop="name" style="width: 100%">
+            <el-form-item label="敏感词：" prop="name" style="width: 100%">
               <el-input
                 v-model="formData.name"
-                placeholder="请填写部门名称"
+                placeholder="请填写敏感词"
                 v-if="editState"
                 :style="{ width: comWidth }"
                 clearable
@@ -80,7 +75,7 @@ export default {
         name: [
           {
             required: true,
-            message: "请输入部门名称",
+            message: "请输入敏感词",
             trigger: "blur",
           },
           {
@@ -127,11 +122,11 @@ export default {
               .then((res) => {
                 if (res.res == 0) {
                   this.$message({
-                    message: `添加部门成功`,
+                    message: `添加敏感词成功`,
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("wordsM");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -149,11 +144,11 @@ export default {
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
-                    message: `编辑部门成功`,
+                    message: `编辑敏感词成功`,
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("wordsM");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
