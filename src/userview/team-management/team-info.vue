@@ -176,23 +176,28 @@
                     <el-switch v-model="setFive"> </el-switch>
                   </p>
                   <p class="email_input_btn" v-if="setFive">
-                    <el-button type="text" icon="el-icon-success"
+                    <el-button type="text" icon="el-icon-success" size="small"
                       >保存</el-button
                     >
-                    <el-button type="text" icon="el-icon-circle-plus"
-                      >继续添加</el-button
+                    <el-button
+                      type="text"
+                      icon="el-icon-circle-plus"
+                      @click="addAddress"
+                      size="small"
+                      >添加邮箱</el-button
                     >
                   </p>
                   <p v-if="setFive">
                     <el-input
-                      v-for="(eitem, eind) in 3"
+                      v-for="(eitem, eind) in addressArray"
                       :key="eind"
                       class="set_input email_input"
-                      v-model="passwordVal"
+                      v-model="eitem.inputVal"
                       :placeholder="`接收邮箱 ${numChange(eind + 1)}`"
                       ><el-button
                         slot="append"
                         icon="el-icon-delete"
+                        @click="delAddress(eind)"
                       ></el-button
                     ></el-input>
                   </p>
@@ -333,6 +338,11 @@ export default {
       setFour: false,
       setFive: false,
       passwordVal: null, //口令
+      addressArray: [
+        {
+          inputVal: null,
+        },
+      ],
     };
   },
   mounted() {
@@ -341,6 +351,20 @@ export default {
   methods: {
     imgChange,
     numChange,
+    /**
+     * 删除某一个邮箱
+     */
+    delAddress(ind) {
+      this.addressArray = this.addressArray.filter((m, index) => ind != index);
+    },
+    /**
+     * 添加预警接收的邮箱
+     */
+    addAddress() {
+      this.addressArray.push({
+        inputVal: null,
+      });
+    },
     /**
      * 团队数据库清理设置
      */

@@ -82,6 +82,43 @@
                 <span v-else>无</span>
               </div></el-col
             >
+            <el-col :span="24" v-if="!editState"
+              ><div class="info_list">
+                <span class="info_lable">是否接收成员每日报表：</span>
+                是
+              </div></el-col
+            >
+            <el-col :span="24" v-if="!editState" class="receive"
+              ><div class="info_list">
+                <span class="info_lable">接收的成员：</span>
+                <div v-if="selUser.VisibleUser && selUser.VisibleUser.length">
+                  <ul class="mem-imgs">
+                    <li
+                      v-for="(item, index) in selUser.VisibleUser"
+                      :key="index"
+                    >
+                      <el-avatar
+                        size="small"
+                        :src="imgChange(item.Picture, true)"
+                      ></el-avatar>
+                      <p>{{ item.Name }}</p>
+                    </li>
+                  </ul>
+                </div>
+                <span v-else>无</span>
+              </div>
+              <div class="info_list" style="align-items: flex-start">
+                <span class="info_lable">接收的邮箱：</span>
+                <div class="email">
+                  <span>1402472753@qq.com</span>
+                  <span>12753@qq.com</span>
+                  <span>1402472753@qq.com</span>
+                  <span>1402472753@qq.com</span>
+                  <span>1402472753@qq.com</span>
+                  <span>1402472753@qq.com</span>
+                </div>
+              </div></el-col
+            >
             <el-col :span="12" v-if="editState && !selUser.IsSystem"
               ><div class="info_list">
                 <span class="info_lable">角色：</span>
@@ -113,6 +150,46 @@
                   :teamId="teamId"
                 ></mb></div
             ></el-col>
+            <el-col :span="24" v-if="editState"
+              ><div class="info_list edit">
+                <span class="info_lable">是否接收成员每日报表：</span>
+                <el-radio-group v-model="formData.mType">
+                  <el-radio :label="1">是</el-radio>
+                  <el-radio :label="2">否</el-radio>
+                </el-radio-group>
+              </div></el-col
+            >
+            <el-col :span="24" v-if="editState" class="receive"
+              ><div class="info_list edit">
+                <span class="info_lable">接收的成员：</span>
+                <mb
+                  @Confirm="getUser"
+                  :arrays="formData.visible"
+                  :teamId="teamId"
+                ></mb>
+              </div>
+              <div class="info_list edit" style="align-items: flex-start">
+                <span class="info_lable">接收的邮箱：</span>
+                <div class="emali_list">
+                  <div>
+                    <el-button type="primary" size="mini" @click="addAddress"
+                      >添加邮箱</el-button
+                    >
+                  </div>
+                  <el-input
+                    v-for="(eitem, eind) in addressArray"
+                    :key="eind"
+                    class="set_input email_input"
+                    v-model="eitem.inputVal"
+                    :placeholder="`接收邮箱 ${numChange(eind + 1)}`"
+                    ><el-button
+                      slot="append"
+                      icon="el-icon-delete"
+                      @click="delAddress(eind)"
+                    ></el-button
+                  ></el-input>
+                </div></div
+            ></el-col>
           </el-row>
         </div>
       </CWinTmp>
@@ -120,7 +197,7 @@
   </div>
 </template>
 <script>
-import { imgChange } from "@/commons";
+import { imgChange, numChange } from "@/commons";
 export default {
   components: {
     XModal: () => import("@/components/XModal"),
@@ -143,6 +220,7 @@ export default {
   },
   data() {
     return {
+      addressArray: [],
       options: [],
       editState: false,
       indexData: {
@@ -171,6 +249,21 @@ export default {
   },
   methods: {
     imgChange,
+    numChange,
+    /**
+     * 删除某一个邮箱
+     */
+    delAddress(ind) {
+      this.addressArray = this.addressArray.filter((m, index) => ind != index);
+    },
+    /**
+     * 添加预警接收的邮箱
+     */
+    addAddress() {
+      this.addressArray.push({
+        inputVal: null,
+      });
+    },
     // 获取进程组
     getDataList() {
       let params = {
@@ -239,6 +332,9 @@ export default {
         });
         this.formData.mType = this.selUser.MType;
         this.formData.progroup = this.selUser.ProgressGroupName;
+        this.addressArray.push({
+          inputVal: this.selUser.addres,
+        });
       }
     },
     getUser(val) {
@@ -265,15 +361,56 @@ export default {
         margin-left: 12px;
       }
     }
+    .receive {
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      padding: 6px 14px;
+      margin-bottom: 10px;
+      .info_lable {
+        flex-shrink: 0;
+      }
+      .mem-imgs {
+        p {
+          font-size: 12px;
+        }
+      }
+      .email {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        flex: 1;
+        span {
+          display: block;
+        }
+      }
+      .emali_list {
+        width: 100%;
+        .email_input {
+          width: 100%;
+          /deep/.el-input-group__append {
+            .el-button {
+              color: #f56c6c;
+              background: #fef0f0;
+              border-radius: 0 4px 4px 0;
+              padding: 10px 20px;
+            }
+          }
+        }
+      }
+      .edit {
+        /deep/.el-input__inner {
+          height: 34px;
+          line-height: 34px;
+        }
+      }
+    }
     .info_list {
       line-height: 46px;
       font-size: 14px;
       display: flex;
       flex-direction: row;
       align-items: center;
-      .info_lable {
-        // width: 100px;
-      }
+
       .mem-imgs {
         display: flex;
         flex-wrap: wrap;

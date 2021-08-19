@@ -47,6 +47,11 @@
       :teamValue="teamValue"
       :selRow="selRow"
     ></SensitiveWords>
+    <ShieldingSoftware
+      v-else-if="tabType == 7"
+      :teamValue="teamValue"
+      :selRow="selRow"
+    ></ShieldingSoftware>
   </div>
 </template>
 
@@ -60,6 +65,7 @@ export default {
     WindowAlias: () => import("./windowalias"),
     ActionRule: () => import("./action-rule"),
     SensitiveWords: () => import("./sensitive-words"),
+    ShieldingSoftware: () => import("./shielding-software"),
   },
   props: {
     //规则版本信息
@@ -78,6 +84,10 @@ export default {
       {
         value: 6,
         label: "敏感词",
+      },
+      {
+        value: 7,
+        label: "屏蔽的软件",
       },
       {
         value: 1,

@@ -29,6 +29,10 @@
     ></windowAliasManager>
     <ActionRule v-else-if="tabType == 5" :selRow="selRow"></ActionRule>
     <SensitiveWords v-else-if="tabType == 6" :selRow="selRow"></SensitiveWords>
+    <ShieldingSoftware
+      v-else-if="tabType == 7"
+      :selRow="selRow"
+    ></ShieldingSoftware>
   </div>
 </template>
 
@@ -42,6 +46,7 @@ export default {
     windowAliasManager: () => import("./windowAliasManager"),
     ActionRule: () => import("./actionRule"),
     SensitiveWords: () => import("./sensitiveWords"),
+    ShieldingSoftware: () => import("./shieldingSoftware"),
   },
   props: {
     selRow: {
@@ -55,6 +60,10 @@ export default {
       {
         value: 6,
         label: "敏感词",
+      },
+      {
+        value: 7,
+        label: "屏蔽的软件",
       },
       {
         value: 1,

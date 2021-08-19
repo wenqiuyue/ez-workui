@@ -61,19 +61,34 @@ const routes = [
             icon: "hi-minganciku",
           },
           {
-            path: "/teamManagement",
-            name: "团队管理",
-            component: () => import("@/userview/team-management"),
-            layout: true,
-            icon: "hi-customer",
-          },
-          {
             path: "/attendanceStatistics",
             name: "考勤统计",
             component: () => import("@/userview/attendance-statistics"),
             layout: true,
             icon: "hi-attendance",
           },
+          {
+            path: "/taskManager",
+            name: "任务管理",
+            component: () => import("@/userview/task-manager"),
+            layout: true,
+            icon: "hi-task-box",
+          },
+          {
+            path: "/salaryreport",
+            name: "薪资报表",
+            component: () => import("@/userview/salary-report"),
+            layout: true,
+            icon: "hi-xinzipeizhi",
+          },
+          {
+            path: "/teamManagement",
+            name: "团队管理",
+            component: () => import("@/userview/team-management"),
+            layout: true,
+            icon: "hi-customer",
+          },
+
           // {
           //   path: "/ruleSetting",
           //   name: "规则设置",

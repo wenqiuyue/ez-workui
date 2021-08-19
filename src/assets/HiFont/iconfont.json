@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "22761409",
+      "name": "薪资配置",
+      "font_class": "xinzipeizhi",
+      "unicode": "e6c0",
+      "unicode_decimal": 59072
+    },
+    {
       "icon_id": "6263298",
       "name": "敏感词库",
       "font_class": "minganciku",

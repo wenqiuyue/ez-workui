@@ -69,13 +69,19 @@
           </div>
         </template></el-table-column
       >
-      <el-table-column label="操作" width="150" align="center">
+      <el-table-column label="操作" width="240" align="center">
         <template slot-scope="scope">
           <el-button
             type="primary"
             size="small"
             @click="handleUserDetail(scope.row)"
             >详情</el-button
+          >
+          <el-button
+            type="success"
+            size="small"
+            @click="handleHourlyWage(scope.row)"
+            >设置时薪</el-button
           >
           <el-button
             type="danger"
@@ -94,6 +100,10 @@
       @success="getTeamList"
       :userMemberMType="userMemberMType"
     ></UserInfo>
+    <HourlyWage
+      :selUser="selUser"
+      :teamValue="selRow ? selRow.Id : null"
+    ></HourlyWage>
   </div>
 </template>
 <script>
@@ -101,6 +111,7 @@ import { imgChange } from "@/commons";
 export default {
   components: {
     UserInfo: () => import("./user-info"),
+    HourlyWage: () => import("./hourlywage-modal.vue"),
   },
   props: {
     selRow: {
@@ -132,6 +143,13 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 设置时薪
+     */
+    handleHourlyWage(val) {
+      this.selUser = val;
+      this.$modal.show("hourlywageM");
+    },
     /**
      * 删除成员
      */
