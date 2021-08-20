@@ -37,6 +37,7 @@ childLoading: 右边视图加载动画
           <div class="view_title">
             <slot name="title_icon"></slot>
             <p>{{ title_name }}</p>
+            <slot name="title"></slot>
           </div>
           <div class="view_title_ben"><slot name="view_btn"></slot></div>
         </div>

@@ -133,7 +133,7 @@
         </div>
         <div class="empty-wrapper" v-else>
           <img src="../../assets/img/emptyMem.png" alt="" />
-          <p class="empty-taskList">暂无可查看成员</p>
+          <p class="empty-taskList">暂无数据</p>
         </div>
       </div>
     </div>

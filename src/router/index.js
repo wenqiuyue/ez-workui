@@ -68,6 +68,13 @@ const routes = [
             icon: "hi-attendance",
           },
           {
+            path: "/taskDetails",
+            name: "任务详情",
+            component: () => import("@/userview/task-details"),
+            layout: true,
+            icon: "hi-task",
+          },
+          {
             path: "/taskManager",
             name: "任务管理",
             component: () => import("@/userview/task-manager"),

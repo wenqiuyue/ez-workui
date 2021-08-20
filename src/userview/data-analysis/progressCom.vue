@@ -99,10 +99,10 @@
                           value.BehaviorStatus ? value.BehaviorStatus : "未知"
                         }}
                       </span>
-                      <span
+                      <span v-if="value.MouseClickAverage"
                         >鼠标点击速度：{{ value.MouseClickAverage }}次每分钟
                       </span>
-                      <span
+                      <span v-if="value.KeysAverage"
                         >键盘输入速度：{{ value.KeysAverage }}次每分钟
                       </span>
                       <span

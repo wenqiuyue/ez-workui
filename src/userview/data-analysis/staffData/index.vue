@@ -262,9 +262,13 @@
                     :key="csoftind"
                     @click="handleAppPic(citem)"
                   >
-                    {{ citem.PName }}({{
-                      (citem.PNamePercent * 100).toFixed(0)
-                    }}%)
+                    <tooltip
+                      class="i_text"
+                      :content="citem.PName"
+                      :ref="`process-${csoftind}`"
+                      maxWidth="70%"
+                    ></tooltip>
+                    <span>({{ (citem.PNamePercent * 100).toFixed(0) }}%)</span>
                   </li>
                 </ul>
               </div>
@@ -1000,6 +1004,9 @@ export default {
               color: #666;
               line-height: 18px;
               cursor: pointer;
+              display: flex;
+              flex-direction: row;
+              align-items: center;
               &:hover {
                 color: #448ef5;
               }
@@ -1043,6 +1050,9 @@ export default {
               color: #666;
               line-height: 18px;
               cursor: pointer;
+              display: flex;
+              flex-direction: row;
+              align-items: center;
               &:hover {
                 color: #448ef5;
               }
