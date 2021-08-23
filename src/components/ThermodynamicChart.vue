@@ -305,7 +305,7 @@ export default {
   .right_page {
     display: none;
     position: absolute;
-    top: 100px;
+    top: 38%;
     background: rgba(192, 196, 204, 0.5);
     width: 36px;
     height: 36px;

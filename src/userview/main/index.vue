@@ -43,6 +43,7 @@
                 <i v-if="name == '团队管理' && applyCount > 0">{{
                   applyCount > 99 ? "+99" : applyCount
                 }}</i>
+                <i v-if="name == '消息列表'"> 22 </i>
               </router-link>
               <a href="javascript:;" @click="exit" class="hiFont hi-signout">
                 <span>登出</span>

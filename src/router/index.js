@@ -89,6 +89,13 @@ const routes = [
             icon: "hi-xinzipeizhi",
           },
           {
+            path: "/msglist",
+            name: "消息列表",
+            component: () => import("@/userview/msg-list"),
+            layout: true,
+            icon: "hi-msg",
+          },
+          {
             path: "/teamManagement",
             name: "团队管理",
             component: () => import("@/userview/team-management"),
