@@ -30,14 +30,14 @@
         <el-table-column
           label="敏感词"
           :show-overflow-tooltip="true"
-          prop="Name"
+          prop="Sensitive"
         >
         </el-table-column>
         <el-table-column label="创建时间" :show-overflow-tooltip="true">
           <template slot-scope="scope">
             {{
-              scope.row.CreatTime
-                ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
+              scope.row.CreateTime
+                ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:mm")
                 : "--"
             }}
           </template>
@@ -105,12 +105,7 @@ export default {
         totalNum: 0,
       },
 
-      tableData: [
-        {
-          Name: "招聘",
-          CreatTime: "2021-02-01 12:12:11",
-        },
-      ],
+      tableData: [],
       indexData: {
         type: "", // Add Edit
         name: "",
@@ -120,6 +115,9 @@ export default {
         textAlign: "center",
       },
     };
+  },
+  mounted() {
+    this.getDataList();
   },
   methods: {
     handleChange() {
@@ -142,7 +140,7 @@ export default {
       })
         .then(() => {
           let params = {
-            id: [row.Id],
+            Ids: [row.Id],
             teamId: this.teamValue,
           };
           this.comDelete(params);
@@ -151,7 +149,7 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post("/ProgressGroup/DelProgressGroup.ashx", params)
+        .post("/SensitiveWord/DelSensitiveWord.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.$message({
@@ -170,7 +168,7 @@ export default {
     },
     // 编辑
     handleEdit(row) {
-      this.openWin("ed", row.Id, row.Name);
+      this.openWin("ed", row.Id, row.Sensitive);
     },
     // 打开窗口
     openWin(ty, code, proName) {
@@ -197,7 +195,7 @@ export default {
       };
       this.loading = true;
       this.$http
-        .post("/ProgressGroup/QueryProgressGroupList.ashx", params)
+        .post("/SensitiveWord/QuerySensitiveWordList.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.tableData = result.data.Data;

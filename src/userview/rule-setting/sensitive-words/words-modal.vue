@@ -69,7 +69,7 @@ export default {
 
       formData: {
         id: "", // 编辑窗口才用ID
-        name: "", // 标签名称
+        name: "", // 敏感词
       },
       Rules: {
         name: [
@@ -114,7 +114,7 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/ProgressGroup/AddProgressGroup.ashx", {
+              .post("/SensitiveWord/AddSensitiveWord.ashx", {
                 name: this.formData.name,
                 configId: this.selRow.Id,
                 teamId: this.teamValue,
@@ -134,13 +134,13 @@ export default {
               });
           } else {
             let params = {
-              id: this.formData.id, // 添加时值是 undefined
+              Id: this.formData.id, // 添加时值是 undefined
               name: this.formData.name,
               configId: this.selRow.Id,
               teamId: this.teamValue,
             };
             this.$http
-              .post("/ProgressGroup/EditProgressGroup.ashx", params)
+              .post("/SensitiveWord/EditSensitiveWord.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({

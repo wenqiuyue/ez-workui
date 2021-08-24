@@ -71,7 +71,7 @@
           </div>
           <div class="state_one state_one_three">
             <div>
-              <h3>常用应用占比图</h3>
+              <h3>工作状态</h3>
               <div class="info">
                 <Staechart
                   :echartData="echartWorkData"

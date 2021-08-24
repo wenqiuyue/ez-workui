@@ -32,19 +32,19 @@
           label="软件"
           :show-overflow-tooltip="true"
           fixed
-          prop="Name"
+          prop="Software"
         >
         </el-table-column>
         <el-table-column
           label="创建时间"
           :show-overflow-tooltip="true"
           fixed
-          prop="CreatTime"
+          prop="CreateTime"
         >
           <template slot-scope="scope">
             {{
-              scope.row.CreatTime
-                ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
+              scope.row.CreateTime
+                ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:mm")
                 : "--"
             }}
           </template>
@@ -156,7 +156,7 @@ export default {
     comDelete(params) {
       this.$http
         .post(
-          "/Management/ProgressManagement/DelSystemProgressGroup.ashx",
+          "/Management/ProgressManagement/ShieldedSoftware/DelSystemShieldedSoftware.ashx",
           params
         )
         .then((result) => {
@@ -177,7 +177,7 @@ export default {
     },
     // 编辑
     handleEdit(row) {
-      this.openWin("ed", row.Id, row.Name);
+      this.openWin("ed", row.Id, row.Software);
     },
     // 打开窗口
     openWin(ty, code, proName) {
@@ -210,9 +210,10 @@ export default {
       };
       this.loading = true;
       this.$http
-        .get("/Management/ProgressManagement/ProgressGroupAllList.ashx", {
-          params: params,
-        })
+        .post(
+          "/Management/ProgressManagement/ShieldedSoftware/QuerySystemShieldedSoftwareList.ashx",
+          params
+        )
         .then((result) => {
           if (result.res == 0) {
             this.tableData = result.data.Data;

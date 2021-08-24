@@ -3,7 +3,7 @@
     <Header title="任务详情" titleEnglish="Task Details" class="baseHeader">
     </Header>
     <div class="baseViewPage">
-      <BaseView :title_name="'成员详情'">
+      <BaseView :title_name="'任务详情'">
         <div slot="panes">
           <el-select
             v-model="teamValue"
@@ -196,7 +196,7 @@ export default {
       display: flex;
       flex-direction: row;
       align-items: center;
-      margin-top: 10px;
+      margin-top: 14px;
       border-bottom: 1px solid #eee;
       padding-bottom: 10px;
       .lable {

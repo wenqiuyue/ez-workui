@@ -5,7 +5,24 @@
         <el-button type="text" @click="handleMass">群发消息</el-button>
       </div></Header
     >
-    <Tab :options="tabOptions" @change="getTab"> </Tab>
+    <Tab :options="tabOptions" @change="getTab">
+      <template slot="custom">
+        <div class="screen">
+          <el-select v-model="teamValue" filterable placeholder="请选择团队">
+            <el-option
+              v-for="item in teamOptions"
+              :key="item.Id"
+              :label="item.Name"
+              :value="item.Id"
+            >
+            </el-option>
+          </el-select>
+          <el-button type="primary" size="small" class="add-btn-process"
+            >搜 索</el-button
+          >
+        </div>
+      </template>
+    </Tab>
     <c-content v-loading="loading" style="height: calc(100% - 3.6rem)">
       <div class="msg_con" slot="main">
         <ul>
@@ -85,6 +102,8 @@ export default {
   },
   data() {
     return {
+      teamOptions: [], //团队选择器
+      teamValue: null, //选择的团队
       tabOptions: ["未读消息", "已读消息", "我发送的消息"],
       loading: false,
       pageData: {
@@ -95,7 +114,24 @@ export default {
       activeItem: "未读消息",
     };
   },
+  mounted() {
+    this.getTeams();
+  },
   methods: {
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     /**
      * 群发消息
      */
@@ -117,6 +153,21 @@ export default {
 <style lang="less" scoped>
 .msg-list {
   height: 100%;
+  .screen {
+    position: absolute;
+    right: 0;
+    top: -3px;
+    // padding: 0px 22px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    .el-select {
+      width: 200px;
+      height: 34px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+    }
+  }
   .msg_con {
     ul {
       li {

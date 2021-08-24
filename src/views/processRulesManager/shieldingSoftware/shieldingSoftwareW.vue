@@ -24,7 +24,7 @@
         <!-- 必填项 -->
         <el-row>
           <el-col :sm="24" :md="24">
-            <el-form-item label="软件" prop="name" style="width: 100%">
+            <el-form-item label="软件：" prop="name" style="width: 100%">
               <el-input
                 v-model="formData.name"
                 placeholder="请填写软件"
@@ -116,7 +116,7 @@ export default {
           if (!this.formData.id) {
             this.$http
               .post(
-                "/Management/ProgressManagement/AddSystemProgressGroup.ashx",
+                "/Management/ProgressManagement/ShieldedSoftware/AddSystemShieldedSoftware.ashx",
                 {
                   name: this.formData.name,
                   configId: this.selRow.Id,
@@ -143,7 +143,7 @@ export default {
             };
             this.$http
               .post(
-                "/Management/ProgressManagement/EditSystemProgressGroup.ashx",
+                "/Management/ProgressManagement/ShieldedSoftware/EditSystemShieldedSoftware.ashx",
                 params
               )
               .then((result) => {
@@ -153,7 +153,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("proGroupWindow");
+                  this.$modal.hide("shieldingSoftwareW");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();

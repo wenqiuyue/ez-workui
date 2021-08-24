@@ -114,7 +114,7 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/ProgressGroup/AddProgressGroup.ashx", {
+              .post("/ShieldedSoftware/AddShieldedSoftware.ashx", {
                 name: this.formData.name,
                 configId: this.selRow.Id,
                 teamId: this.teamValue,
@@ -134,13 +134,13 @@ export default {
               });
           } else {
             let params = {
-              id: this.formData.id, // 添加时值是 undefined
+              Id: this.formData.id, // 添加时值是 undefined
               name: this.formData.name,
               configId: this.selRow.Id,
               teamId: this.teamValue,
             };
             this.$http
-              .post("/ProgressGroup/EditProgressGroup.ashx", params)
+              .post("/ShieldedSoftware/EditShieldedSoftware.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({

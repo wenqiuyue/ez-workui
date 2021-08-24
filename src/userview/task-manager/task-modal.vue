@@ -1,5 +1,11 @@
 <template>
-  <XModal name="taskM" :width="'35%'" height="55%" @beforeClose="beforeClose">
+  <XModal
+    name="taskM"
+    :width="'45%'"
+    height="70%"
+    @beforeClose="beforeClose"
+    class="taskM"
+  >
     <c-win-tmp
       ref="winTmp"
       v-loading="loading"
@@ -56,6 +62,31 @@
               <div v-else class="state-see">
                 {{ formData.describe }}
               </div>
+            </el-form-item>
+            <el-form-item label="任务进展：" v-if="!editState" class="progress">
+              <el-timeline>
+                <el-timeline-item
+                  timestamp="2020年12月2日 13:21"
+                  placement="top"
+                  v-for="(item, index) in 3"
+                  :key="index"
+                >
+                  <el-card>
+                    <p class="task_con">
+                      单元测试是软件开发过程中要进行的最基本的测试，属于白盒测试范围，一般情况下是在开发人员完成了某个单独模块的编码之后做的测试。它的目的是检查软件编码的正确性以及一些规范性测试，站在开发人员的角度上来查找软件所存在的BUG并记录下产生BUG的原因，以便开发人员进行修改。这样可以在很大程度上减少集成以后而出现的BUG。
+                    </p>
+                    <el-image
+                      style="max-width: 160px"
+                      src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                      alt=""
+                      :preview-src-list="[
+                        'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
+                      ]"
+                    >
+                    </el-image>
+                  </el-card>
+                </el-timeline-item>
+              </el-timeline>
             </el-form-item>
           </el-col>
         </el-row>
@@ -215,6 +246,31 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@media screen and (max-width: 1024px) {
+.taskM {
+  /deep/.el-form {
+    .el-form-item__label {
+      font-weight: bold;
+      color: #303133;
+    }
+    .progress {
+      display: flex;
+      flex-direction: column;
+      .el-form-item__content {
+        margin-left: 0 !important;
+      }
+    }
+    .el-card {
+      .el-card__body {
+        padding: 1rem;
+        .task_con {
+          line-height: 30px;
+          margin-bottom: 5px;
+        }
+        img {
+          border-radius: 4px;
+        }
+      }
+    }
+  }
 }
 </style>

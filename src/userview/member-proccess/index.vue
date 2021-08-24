@@ -201,6 +201,36 @@
                     accordion
                     class="collapse-detail"
                   >
+                    <el-collapse-item :name="`${index}-${childindex}-task`">
+                      <template slot="title">
+                        <span>任务详情</span>
+                      </template>
+                      <!-- 个人任务列表（任务详情） -->
+                      <div class="task-content">
+                        <div v-if="true">
+                          <div
+                            class="list-item"
+                            v-for="(val, index) in 4"
+                            :key="index"
+                          >
+                            <div class="task-detail" @click="toDetail(val)">
+                              <p>
+                                <span class="name">整理对外版功能文档</span>
+                                <el-tag
+                                  type="success"
+                                  size="mini"
+                                  v-if="index == 1"
+                                  >进行中</el-tag
+                                >
+                              </p>
+                            </div>
+                          </div>
+                          <!-- <el-pagination layout="prev, pager, next" :total="100">
+												</el-pagination> -->
+                        </div>
+                        <div v-else class="empty-task">暂无</div>
+                      </div>
+                    </el-collapse-item>
                     <el-collapse-item :name="`${index}-${childindex}-workinfo`">
                       <template slot="title">
                         <span>上班详情</span>
@@ -320,6 +350,7 @@
       <img src="../../assets/img/emptyMem.png" alt="" />
       <p class="empty-taskList">暂无可查看成员</p>
     </div>
+    <TaskModal ref="taskM" :indexData="indexData"></TaskModal>
   </div>
 </template>
 
@@ -330,6 +361,7 @@ export default {
   components: {
     XHeader: () => import("@/components/Header"),
     selMember: () => import("@/components/Selectors/MemberSelectCopy"),
+    TaskModal: () => import("@/userview/task-manager/task-modal"),
   },
 
   data() {
@@ -387,6 +419,11 @@ export default {
       showFilter: false,
       selMem: [],
       calcTime: null,
+      indexData: {
+        type: "", // Add Edit
+        name: "",
+        departmentCode: "",
+      },
     };
   },
   computed: {
@@ -467,6 +504,22 @@ export default {
     imgChange,
     getEfficiencyColor,
     getbehaviorColor,
+    /**
+     * 任务详情
+     */
+    toDetail(val) {
+      this.indexData = {
+        type: "Edit",
+        name: "XXX项目",
+        departmentCode: 1,
+        row: val,
+        xModalName: "taskM",
+      };
+      this.$modal.show("taskM");
+      this.$nextTick(() => {
+        this.$refs.taskM.changeEditState();
+      });
+    },
     /**
      * 获取团队
      */
@@ -1394,6 +1447,7 @@ export default {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-size: 13px;
           }
         }
 

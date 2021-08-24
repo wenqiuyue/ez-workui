@@ -69,7 +69,7 @@ const routes = [
           },
           {
             path: "/taskDetails",
-            name: "任务详情",
+            name: "成员任务",
             component: () => import("@/userview/task-details"),
             layout: true,
             icon: "hi-task",

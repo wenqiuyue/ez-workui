@@ -25,7 +25,7 @@
               >{{ index == 0 ? role : `、role` }}</span
             ></el-form-item
           >
-          <el-form-item label="性别">{{
+          <el-form-item label="性别" v-if="user.Sex">{{
             user.Sex == 1 ? "男" : "女"
           }}</el-form-item>
           <el-form-item label="邮箱地址">{{ user.addres }}</el-form-item>
