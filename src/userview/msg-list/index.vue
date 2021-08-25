@@ -3,6 +3,7 @@
     <Header title="消息列表" titleEnglish="Message List" class="baseHeader">
       <div slot="btnGroup">
         <el-button type="text" @click="handleMass">群发消息</el-button>
+        <el-button type="text" @click="handleAllRead">全部已读</el-button>
       </div></Header
     >
     <Tab :options="tabOptions" @change="getTab">
@@ -17,7 +18,11 @@
             >
             </el-option>
           </el-select>
-          <el-button type="primary" size="small" class="add-btn-process"
+          <el-button
+            type="primary"
+            size="small"
+            class="add-btn-process"
+            @click="handleSearch"
             >搜 索</el-button
           >
         </div>
@@ -25,27 +30,28 @@
     </Tab>
     <c-content v-loading="loading" style="height: calc(100% - 3.6rem)">
       <div class="msg_con" slot="main">
-        <ul>
-          <li v-for="(item, index) in 12" :key="index">
+        <ul v-if="msgData && msgData.length">
+          <li v-for="(item, index) in msgData" :key="index">
             <div class="num">
-              <span>{{ index + 1 }}</span>
+              <span @click="handleRead(item)">查看详情</span>
             </div>
             <div class="user">
               <el-avatar
                 size="large"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                :src="imgChange(item.Picture)"
               ></el-avatar>
               <div class="msg_user_right">
-                <p class="name">文秋月</p>
+                <p class="name">{{ item.UserName }}</p>
                 <p class="time">
-                  <el-tag type="info" size="mini">2020年8月21日 11:21</el-tag>
+                  <el-tag type="info" size="mini">{{
+                    item.CreateTime.timeFormat("yyyy年MM月dd日 HH:mm")
+                  }}</el-tag>
                   <el-tag size="mini">数据监测团队</el-tag>
                 </p>
               </div>
             </div>
             <div class="msg_text">
-              最新的botchiefdll及botchiefdebug文件，修复了debug
-              60版本运行错误的问题，所有文件全部替换成最新的
+              {{ item.Content }}
             </div>
             <div
               class="read_user_card"
@@ -53,15 +59,20 @@
               v-if="activeItem == '我发送的消息'"
             >
               <p>已读人员:</p>
-              <div class="user_list">
-                <div class="user_info" v-for="(uitem, uind) in 12" :key="uind">
+              <div class="user_list" v-if="item.Reads && item.Reads.length">
+                <div
+                  class="user_info"
+                  v-for="(ritem, rind) in item.Reads"
+                  :key="rind"
+                >
                   <el-avatar
                     size="small"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="imgChange(ritem.Picture)"
                   ></el-avatar>
-                  <span>张晓晓</span>
+                  <span>{{ ritem.UserName }}</span>
                 </div>
               </div>
+              <div class="user_list" v-else>无</div>
             </div>
             <div
               class="read_user_card"
@@ -69,29 +80,44 @@
               v-if="activeItem == '我发送的消息'"
             >
               <p>未读人员:</p>
-              <div class="user_list">
-                <div class="user_info" v-for="(uitem, uind) in 3" :key="uind">
+              <div class="user_list" v-if="item.UnReads && item.UnReads.length">
+                <div
+                  class="user_info"
+                  v-for="(uitem, uind) in item.UnReads"
+                  :key="uind"
+                >
                   <el-avatar
                     size="small"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="imgChange(uitem.Picture)"
                   ></el-avatar>
-                  <span>张晓晓</span>
+                  <span>{{ uitem.UserName }}</span>
                 </div>
               </div>
+              <div class="user_list" v-else>无</div>
             </div>
           </li>
         </ul>
+        <div class="empty-wrapper" v-else>
+          <img src="../../assets/img/emptyMem.png" alt="" />
+          <p class="empty-taskList">暂无数据</p>
+        </div>
       </div>
       <c-pages
+        v-if="msgData && msgData.length"
         slot="pages"
         v-model="pageData"
         @changeEvent="pageChange"
       ></c-pages>
     </c-content>
-    <MsgMass></MsgMass>
+    <MsgMass
+      :teamOptions="teamOptions"
+      v-if="teamOptions && teamOptions.length"
+    ></MsgMass>
+    <MsgDetail :selMsg="selMsg" :activeItem="activeItem"></MsgDetail>
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     Header: () => import("@/components/Header"),
@@ -99,9 +125,12 @@ export default {
     CContent: () => import("@/components/CContent"),
     CPages: () => import("@/components/CPages"),
     MsgMass: () => import("./MsgMass"),
+    MsgDetail: () => import("./msg-detail"),
   },
   data() {
     return {
+      selMsg: null, //选择查看的消息
+      msgData: [],
       teamOptions: [], //团队选择器
       teamValue: null, //选择的团队
       tabOptions: ["未读消息", "已读消息", "我发送的消息"],
@@ -118,6 +147,99 @@ export default {
     this.getTeams();
   },
   methods: {
+    imgChange,
+    handleRead(val) {
+      if (this.activeItem == "未读消息") {
+        this.$http.post("/Information/ReadInformation.ashx", {
+          teamId: this.teamValue,
+          Id: val.Id,
+        });
+      }
+      this.selMsg = val;
+      this.$modal.show("msgDetail");
+    },
+    /**
+     * 全部标记已读
+     */
+    handleAllRead() {
+      this.$confirm("此操作将全部消息标记为已读, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "标记成功!",
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消标记",
+          });
+        });
+    },
+    /**
+     * 搜索
+     */
+    handleSearch() {
+      this.pageData.pageIndex = 1;
+      this.getMsg();
+    },
+    /**
+     * 获取消息
+     */
+    getMsg() {
+      if (this.activeItem == "未读消息") {
+        this.myMsg(2);
+      } else if (this.activeItem == "已读消息") {
+        this.myMsg(1);
+      } else {
+        this.mySendMsg();
+      }
+    },
+    /**
+     * 我发送的消息
+     */
+    mySendMsg() {
+      this.loading = true;
+      const data = {
+        teamId: this.teamValue,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+      };
+      this.$http
+        .post("/Information/GetInformations.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.msgData = resp.data.Data;
+            this.pageData.totalNum = resp.data.TotalCount;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
+    /**
+     * 我的消息
+     */
+    myMsg(type) {
+      this.loading = true;
+      const data = {
+        teamId: this.teamValue,
+        type: type,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+      };
+      this.$http
+        .post("/Information/GetUserReadInformations.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.msgData = resp.data.Data;
+            this.pageData.totalNum = resp.data.TotalCount;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
     /**
      * 获取团队
      */
@@ -140,12 +262,16 @@ export default {
     },
     getTab(item) {
       this.activeItem = item.join();
+      if (this.teamValue) {
+        this.handleSearch();
+      }
     },
     /**
      * 分页
      */
     pageChange(val) {
       this.pageData = val;
+      this.getMsg();
     },
   },
 };
@@ -177,21 +303,25 @@ export default {
         position: relative;
         .num {
           position: absolute;
-          top: 8px;
-          right: 2px;
+          top: 6px;
+          right: 0px;
           color: #fff;
           text-align: center;
-          line-height: 32px;
-          font-size: 19px;
+          line-height: 30px;
+          font-size: 13px;
           font-weight: bold;
           span {
             display: block;
             float: left;
-            width: 32px;
-            height: 32px;
+            width: 72px;
+            height: 30px;
             background: rgb(121, 187, 255);
             border-radius: 50px 0 50px 50px;
             margin-right: 10px;
+            cursor: pointer;
+            &:hover {
+              background: #67c23a;
+            }
           }
         }
         .user {
@@ -217,6 +347,11 @@ export default {
         .msg_text {
           margin-top: 8px;
           font-size: 14px;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          -webkit-box-orient: vertical;
         }
         .read_user_card {
           padding: 1rem;
@@ -245,6 +380,25 @@ export default {
             }
           }
         }
+      }
+    }
+    .empty-wrapper {
+      background: #fff;
+      height: 100%;
+
+      img {
+        display: block;
+        margin: 5rem auto;
+        margin-top: 0;
+        padding-top: 5rem;
+        width: 245px;
+        height: 245px;
+      }
+
+      p {
+        color: #6d6d6d;
+        font-size: 1.6rem;
+        text-align: center;
       }
     }
   }

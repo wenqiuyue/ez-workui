@@ -110,6 +110,14 @@
               align="center"
             >
             </el-table-column>
+            <el-table-column
+              prop="time"
+              label="补交任务耗时"
+              show-overflow-tooltip
+              align="center"
+            >
+              <template slot-scope="scope"> {{ scope.row.time }}小时 </template>
+            </el-table-column>
             <el-table-column prop="hourlyWage" label="时薪" align="center">
               <template slot-scope="scope">
                 {{ scope.row.hourlyWage }}元
@@ -153,18 +161,21 @@ export default {
           name: "王小虎",
           hourlyWage: 220,
           salary: 320,
+          time: 42,
           children: [
             {
               id: 29,
               type: "加班时薪",
               hourlyWage: 120,
               salary: 300,
+              time: 21,
             },
             {
               id: 30,
               type: "普通时薪",
               hourlyWage: 100,
               salary: 20,
+              time: 21,
             },
           ],
         },
@@ -173,18 +184,21 @@ export default {
           name: "王小虎",
           hourlyWage: 220,
           salary: 320,
+          time: 42,
           children: [
             {
               id: 31,
               type: "加班时薪",
               hourlyWage: 120,
               salary: 300,
+              time: 21,
             },
             {
               id: 32,
               type: "普通时薪",
               hourlyWage: 100,
               salary: 20,
+              time: 21,
             },
           ],
         },

@@ -13,8 +13,8 @@
     width="800"
   >
     <el-form class="form" :model="msgForm" :rules="rules" ref="msgForm">
-      <el-form-item class="form_item" label="团 队：" prop="teamValue">
-        <el-select v-model="msgForm.teamValue" placeholder="请选择团队">
+      <el-form-item class="form_item" label="团 队：" prop="teamId">
+        <el-select v-model="msgForm.teamId" placeholder="请选择团队">
           <el-option
             v-for="item in teamOptions"
             :key="item.Id"
@@ -24,19 +24,15 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item
-        class="form_item"
-        label="接 收 人："
-        v-if="msgForm.teamValue"
-      >
-        <mb @Confirm="confirm" :arrays="users" :teamId="msgForm.teamValue"></mb>
+      <el-form-item class="form_item" label="接 收 人：" v-if="msgForm.teamId">
+        <mb @Confirm="confirm" :arrays="users" :teamId="msgForm.teamId"></mb>
       </el-form-item>
-      <el-form-item class="form_item" label="消息内容：" prop="Msg">
+      <el-form-item class="form_item" label="消息内容：" prop="content">
         <el-input
           type="textarea"
           :autosize="{ minRows: 3, maxRows: 6 }"
           placeholder="请输入消息内容"
-          v-model="msgForm.Msg"
+          v-model="msgForm.content"
         ></el-input>
       </el-form-item>
     </el-form>
@@ -49,59 +45,50 @@ export default {
     XModel: () => import("@/components/XModal"),
     mb: () => import("@/components/Selectors/MemberSelectCopy"),
   },
-  props: {},
+  props: {
+    teamOptions: {
+      type: Array,
+      default: null,
+    },
+  },
 
   data() {
     return {
       msgForm: {
-        Msg: "", //消息内容
-        Ids: null, //成员id数组
-        teamValue: null,
+        content: "", //消息内容
+        reader: null, //成员id数组
+        teamId: null,
       },
-      teamOptions: [], //团队选择器
+
       users: [],
       rules: {
-        teamValue: [{ required: true, message: "请选择团队", trigger: "blur" }],
-        Msg: [{ required: true, message: "请输入消息内容", trigger: "blur" }],
+        teamId: [{ required: true, message: "请选择团队", trigger: "blur" }],
+        content: [
+          { required: true, message: "请输入消息内容", trigger: "blur" },
+        ],
       },
     };
   },
-  mounted() {
-    this.getTeams();
-  },
+  mounted() {},
   methods: {
-    /**
-     * 获取团队
-     */
-    getTeams() {
-      this.$http
-        .get("/Teams/GetAllTeams.ashx", {
-          params: { searchText: null, type: 2 },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.teamOptions = resp.data;
-          }
-        });
-    },
     /**
      * 数据初始化
      */
     beforeOpen() {
       this.users = [];
-      this.msgForm.Ids = null;
-      this.msgForm.Msg = "";
-      this.msgForm.Urgent = null;
+      this.msgForm.reader = null;
+      this.msgForm.content = "";
     },
     /**
      * 消息发送
      */
     handleConfirm() {
-      this.msgForm.Ids = this.users.map((m) => m.UId);
+      this.msgForm.reader = this.users.map((m) => m.UsId);
       this.$refs.msgForm.validate((vail) => {
         if (vail) {
+          this.$refs.xmodal.loadBtn(true);
           this.$http
-            .post("/Msg/SendUrgentMsg.ashx", this.msgForm)
+            .post("/Information/SaveInformation.ashx", this.msgForm)
             .then((resp) => {
               if (resp.res == 0) {
                 this.$message({
@@ -110,7 +97,8 @@ export default {
                 });
                 this.$modal.hide("MsgMass");
               }
-            });
+            })
+            .finally(() => this.$refs.xmodal.loadBtn(false));
         } else {
           return false;
         }

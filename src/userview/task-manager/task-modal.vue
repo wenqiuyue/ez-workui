@@ -5,6 +5,7 @@
     height="70%"
     @beforeClose="beforeClose"
     class="taskM"
+    @opened="opened"
   >
     <c-win-tmp
       ref="winTmp"
@@ -37,6 +38,27 @@
               <div v-else class="state-see">
                 {{ formData.task }}
               </div>
+            </el-form-item>
+            <el-form-item
+              label="团队："
+              prop="teamValue"
+              style="width: 100%"
+              v-if="editState"
+            >
+              <el-select
+                v-model="formData.teamValue"
+                filterable
+                placeholder="请选择团队"
+                :style="{ width: comWidth }"
+              >
+                <el-option
+                  v-for="item in teamOptions"
+                  :key="item.Id"
+                  :label="item.Name"
+                  :value="item.Id"
+                >
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item
               label="状态："
@@ -101,14 +123,14 @@ export default {
     indexData: {
       type: Object,
       default: null,
-    }, //规则版本信息
-    selRow: {
-      type: Object,
-      default: null,
     },
     teamValue: {
       type: Number,
       default: 0,
+    },
+    teamOptions: {
+      type: Array,
+      default: null,
     },
   },
   components: {
@@ -129,6 +151,7 @@ export default {
         status: "",
         describe: "",
         CreatTime: "",
+        teamValue: "",
       },
       Rules: {
         name: [
@@ -148,6 +171,11 @@ export default {
   },
   created() {},
   methods: {
+    opened() {
+      this.$nextTick(() => {
+        this.formData.teamValue = this.teamValue;
+      });
+    },
     // 改变窗口状态的，搭配index页 添加和编辑按钮
     changeEditState() {
       this.editState = this.indexData.type === "Add" ? true : false;
@@ -239,6 +267,7 @@ export default {
         status: "",
         describe: "",
         CreatTime: "",
+        teamValue: "",
       };
     },
   },

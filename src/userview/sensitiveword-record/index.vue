@@ -91,43 +91,49 @@
             </selMember>
           </div>
         </div>
-        <el-button type="primary" class="search_btn" size="medium"
+        <el-button
+          type="primary"
+          class="search_btn"
+          size="medium"
+          @click="handleGetData"
           >搜 索</el-button
         >
       </div>
       <div class="sensitiveword_list" v-loading="loading">
         <div class="list_card" v-if="memberData && memberData.length">
           <el-row :gutter="20">
-            <el-col :span="12" v-for="(item, index) in 20" :key="index"
+            <el-col :span="12" v-for="(item, index) in memberData" :key="index"
               ><div class="card">
                 <div class="user">
                   <el-avatar
                     size="large"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="imgChange(item.Picture)"
                   ></el-avatar>
-                  <p>文秋月</p>
+                  <p>{{ item.UserName }}</p>
                 </div>
-                <div class="rigth_word">
+                <div class="rigth_word" v-if="item.Words && item.Words.length">
                   <tooltip
                     class="word_item"
-                    v-for="(worditem, wordind) in 25"
+                    v-for="(worditem, wordind) in item.Words"
                     :key="wordind"
                     @handleClick="handleKeyWord(worditem, item)"
-                    :content="`敏感词${wordind}`"
+                    :content="`${worditem}`"
                     :ref="`memprop-${index}-${wordind}`"
                     width="80px"
                   ></tooltip>
-                </div></div
-            ></el-col>
+                </div>
+                <div class="rigth_word empty" v-else>无敏感词</div>
+              </div></el-col
+            >
           </el-row>
           <el-pagination
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="pageData.pageIndex"
-            :page-sizes="[15, 30, 45, 60]"
+            :page-sizes="[20, 30, 40, 50]"
             :page-size="pageData.pageSize"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="400"
+            :total="pageData.totalCount"
           >
           </el-pagination>
         </div>
@@ -140,6 +146,7 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     Header: () => import("@/components/Header"),
@@ -148,13 +155,15 @@ export default {
   },
   data() {
     return {
+      ds: null, //开始时间
+      de: null, //结束时间
       pageData: {
         pageIndex: 1,
-        pageSize: 15,
-        pageNum: 0,
+        pageSize: 20,
+        totalCount: 0,
       }, //分页
       loading: false,
-      memberData: [{}],
+      memberData: [],
       teamOptions: [], //团队选择器
       teamValue: null, //选择的团队
       selMem: [], //选择的成员
@@ -179,6 +188,7 @@ export default {
     this.getTeams();
   },
   methods: {
+    imgChange,
     /**
      * 查看某个敏感词
      */
@@ -198,6 +208,55 @@ export default {
       }
       this.pageData.pageIndex = 1;
       this.memberData = [];
+      this.getWordData();
+    },
+    /**
+     * 获取敏感词数据
+     */
+    getWordData() {
+      this.loading = true;
+      const day = new Date(this.selDate).getDay();
+      const dayNum = day > 0 ? day - 1 : 6;
+      const date = new Date(this.selDate);
+      if (this.dateType == 1) {
+        this.ds = new Date(date.setDate(date.getDate() - dayNum)).timeFormat(
+          "yyyy-MM-dd 00:00:01"
+        );
+        const s = new Date(this.ds);
+        this.de = new Date(s.setDate(s.getDate() + 6)).timeFormat(
+          "yyyy-MM-dd 23:59:59"
+        );
+      } else if (this.dateType == 2) {
+        this.ds = new Date(date.getFullYear(), date.getMonth(), 1).timeFormat(
+          "yyyy-MM-dd 00:00:01"
+        );
+        this.de = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0
+        ).timeFormat("yyyy-MM-dd 23:59:59");
+      } else {
+        this.ds = this.DateRange[0].timeFormat("yyyy-MM-dd 00:00:01");
+        this.de = this.DateRange[1].timeFormat("yyyy-MM-dd 23:59:59");
+      }
+      const data = {
+        datestart: this.ds,
+        dateend: this.de,
+        UsIds: this.selMem.map((m) => m.UsId),
+        page: this.pageData.pageIndex,
+        pageCount: this.pageData.pageSize,
+        teamId: this.teamValue,
+        dt: this.dateType,
+      };
+      this.$http
+        .post("/SensitiveWord/GetMemberSensitiveWord.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.memberData = resp.data.Data;
+            this.pageData.totalCount = resp.data.TotalCount;
+          }
+        })
+        .finally(() => (this.loading = false));
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -424,6 +483,10 @@ export default {
           /deep/.tooltip_text {
             font-size: 13px;
           }
+        }
+        .empty {
+          align-items: center;
+          justify-content: center;
         }
       }
     }
