@@ -3,7 +3,9 @@
     <Header title="消息列表" titleEnglish="Message List" class="baseHeader">
       <div slot="btnGroup">
         <el-button type="text" @click="handleMass">群发消息</el-button>
-        <el-button type="text" @click="handleAllRead">全部已读</el-button>
+        <el-button type="text" @click="handleAllRead" v-if="teamValue"
+          >全部已读</el-button
+        >
       </div></Header
     >
     <Tab :options="tabOptions" @change="getTab">
@@ -16,6 +18,17 @@
               :label="item.Name"
               :value="item.Id"
             >
+              <div class="team_sel">
+                <span>{{ item.Name }}</span>
+                <el-tag
+                  type="warning"
+                  effect="dark"
+                  size="mini"
+                  v-if="item.Count"
+                >
+                  {{ item.Count }}</el-tag
+                >
+              </div>
             </el-option>
           </el-select>
           <el-button
@@ -109,10 +122,7 @@
         @changeEvent="pageChange"
       ></c-pages>
     </c-content>
-    <MsgMass
-      :teamOptions="teamOptions"
-      v-if="teamOptions && teamOptions.length"
-    ></MsgMass>
+    <MsgMass></MsgMass>
     <MsgDetail :selMsg="selMsg" :activeItem="activeItem"></MsgDetail>
   </div>
 </template>
@@ -168,10 +178,18 @@ export default {
         type: "warning",
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "标记成功!",
-          });
+          this.$http
+            .post("/Information/AllReadInformation.ashx", {
+              teamId: this.teamValue,
+            })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  type: "success",
+                  message: "标记成功!",
+                });
+              }
+            });
         })
         .catch(() => {
           this.$message({
@@ -244,15 +262,11 @@ export default {
      * 获取团队
      */
     getTeams() {
-      this.$http
-        .get("/Teams/GetAllTeams.ashx", {
-          params: { searchText: null, type: 2 },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.teamOptions = resp.data;
-          }
-        });
+      this.$http.post("/Teams/GetInformationTeamList.ashx").then((resp) => {
+        if (resp.res == 0) {
+          this.teamOptions = resp.data;
+        }
+      });
     },
     /**
      * 群发消息
@@ -277,6 +291,12 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+/deep/.team_sel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
 .msg-list {
   height: 100%;
   .screen {

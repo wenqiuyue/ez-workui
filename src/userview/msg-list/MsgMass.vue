@@ -45,15 +45,10 @@ export default {
     XModel: () => import("@/components/XModal"),
     mb: () => import("@/components/Selectors/MemberSelectCopy"),
   },
-  props: {
-    teamOptions: {
-      type: Array,
-      default: null,
-    },
-  },
 
   data() {
     return {
+      teamOptions: [],
       msgForm: {
         content: "", //消息内容
         reader: null, //成员id数组
@@ -69,8 +64,24 @@ export default {
       },
     };
   },
-  mounted() {},
+  mounted() {
+    this.getTeams();
+  },
   methods: {
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     /**
      * 数据初始化
      */

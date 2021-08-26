@@ -5,43 +5,43 @@
       width="800px"
       title="任务详情"
       :showCrossBtn="true"
+      @opened="opened"
     >
-      <div class="taskm_content">
+      <div class="taskm_content" v-if="selTask">
         <el-row>
           <el-col :span="10" class="left_col"
             ><div class="m_left">
-              <el-image
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="fill"
-              ></el-image></div
+              <el-image :src="cmurl + selTask.Img" fit="fill"></el-image></div
           ></el-col>
           <el-col :span="14" class="right_col"
             ><div class="m_right">
               <p class="name">
-                <span
-                  >第三阶段任务详情的前端页面第三阶段任务详情的前端页面</span
-                >
+                <span>{{ selTask.TaskInfo.Title }}</span>
               </p>
               <p class="time_status">
                 <span>
                   <label class="lable">时间段：</label>
-                  <label class="con">13:21 - 14:11</label>
+                  <label class="con"
+                    >{{ selTask.StartTime }} - {{ selTask.EndTime }}</label
+                  >
                 </span>
                 <span>
                   <label class="lable">任务状态：</label>
-                  <label class="con">启用</label>
+                  <label class="con">{{
+                    selTask.TaskInfo.Enable ? "启用" : "禁用"
+                  }}</label>
                 </span>
                 <span>
                   <label class="lable">创建时间：</label>
-                  <label class="con">2021-2-31 14:21</label>
+                  <label class="con">{{
+                    selTask.TaskInfo.CreateTime.timeFormat("yyyy-MM-dd HH:mm")
+                  }}</label>
                 </span>
               </p>
               <p class="desc">
                 <span>
                   <label class="lable">任务描述：</label>
-                  <label class="con"
-                    >第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面第三阶段任务详情的前端页面</label
-                  >
+                  <label class="con">{{ selTask.TaskInfo.Describe }}</label>
                 </span>
               </p>
             </div></el-col
@@ -50,10 +50,10 @@
         <el-row>
           <el-col :span="24">
             <ThermodynamicChart
-              :datestart="'2021-08-17 00:00:01'"
-              :dateend="'2021-08-17 23:59:59'"
-              :UsId="2"
-              :teamId="29"
+              :datestart="ds"
+              :dateend="de"
+              :UsId="selMem && selMem.length ? selMem[0].UsId : null"
+              :teamId="teamValue"
             ></ThermodynamicChart
           ></el-col>
         </el-row>
@@ -66,6 +66,47 @@ export default {
   components: {
     XModal: () => import("@/components/XModal"),
     ThermodynamicChart: () => import("@/components/ThermodynamicChart"),
+  },
+  props: {
+    selTask: {
+      type: Object,
+      default: null,
+    },
+    date: {
+      type: String,
+      default: null,
+    },
+    teamValue: {
+      type: Number,
+      default: null,
+    },
+    selMem: {
+      type: Array,
+      default: null,
+    },
+  },
+  data() {
+    return {
+      ds: null,
+      de: null,
+    };
+  },
+  computed: {
+    cmurl() {
+      return process.env.VUE_APP_CMURL;
+    },
+  },
+  methods: {
+    opened() {
+      this.$nextTick(() => {
+        this.ds = new Date(this.date).timeFormat(
+          `yyyy-MM-dd ${this.selTask.StartTime}`
+        );
+        this.de = new Date(this.date).timeFormat(
+          `yyyy-MM-dd ${this.selTask.EndTime}`
+        );
+      });
+    },
   },
 };
 </script>

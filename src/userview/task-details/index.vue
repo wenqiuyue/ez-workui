@@ -71,7 +71,14 @@
             </el-collapse-item>
           </el-collapse>
         </div>
-        <TaskDetailRight slot="content"></TaskDetailRight>
+        <TaskDetailRight
+          slot="content"
+          :taskArray="taskArray"
+          v-loading="loading"
+          :date="expandId"
+          :teamValue="teamValue"
+          :selMem="selMem"
+        ></TaskDetailRight>
       </BaseView>
     </div>
   </div>
@@ -93,6 +100,8 @@ export default {
       ulTimeArr: [],
       expandId: null,
       selMem: [],
+      loading: false,
+      taskArray: [],
     };
   },
   mounted() {
@@ -101,6 +110,41 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 获取任务
+     */
+    getTask() {
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+        return;
+      }
+      if (!this.selMem.length) {
+        this.$message({
+          message: "请先选择成员",
+          type: "warning",
+        });
+        return;
+      }
+      this.loading = true;
+      const data = {
+        date: this.expandId,
+        page: 1,
+        pageCount: 100,
+        teamId: this.teamValue,
+        userId: this.selMem[0].UsId,
+      };
+      this.$http
+        .post("/Task/GetMemberTaskList.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.taskArray = resp.data.Data;
+          }
+        })
+        .then(() => (this.loading = false));
+    },
     /**
      * 获取成员
      */
@@ -111,6 +155,7 @@ export default {
     // 左侧li点击事件
     liClick(index) {
       this.expandId = index;
+      this.getTask();
     },
     /**
      * 获取团队

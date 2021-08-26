@@ -1,49 +1,150 @@
 <template>
   <div class="taskdetail-right">
-    <div style="height: 100%" v-if="true">
+    <div style="height: 100%" v-if="taskArray && taskArray.length">
       <el-row :gutter="12">
-        <el-col :span="4" v-for="(item, index) in 21" :key="index"
-          ><div class="task_card" @click="handleTask">
+        <el-col :span="4" v-for="(item, index) in taskArray" :key="index">
+          <!-- 正常任务 -->
+          <div class="task_card" @click="handleTask(item, 1)" v-if="true">
             <el-image
-              v-if="index % 2 == 0"
+              v-if="item.IsRepair"
               class="bujiao_img"
               :src="require('../../assets/img/bujiao.png')"
               fit="contain"
             ></el-image>
             <div class="img">
-              <el-image
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="fill"
-              ></el-image>
+              <el-image :src="cmurl + item.Img" fit="fill"></el-image>
             </div>
             <div class="task_content">
               <p class="task_title">
                 <i class="hiFont hi-task"></i>
-                <span
-                  >第三阶段任务详情的前端页面第三阶段任务详情的前端页面</span
+                <span>{{ item.TaskInfo.Title }}</span>
+              </p>
+              <p>
+                <el-tag size="mini"
+                  >任务时间段：{{ item.StartTime }} - {{ item.EndTime }}</el-tag
                 >
               </p>
-              <p><el-tag size="mini">时间段：13:21 - 14:00</el-tag></p>
             </div>
-          </div></el-col
-        >
+          </div>
+          <!-- 补交任务 -->
+          <div class="task_card notask" @click="handleTask(item, 2)">
+            <div class="img">
+              <el-image
+                :src="require('../../assets/img/noTask.png')"
+                fit="scale-down"
+              ></el-image>
+            </div>
+            <div class="task_content">
+              <!-- <p class="add_task">+</p> -->
+              <p>
+                <el-tag size="mini" type="warning"
+                  >无任务时段：{{ item.StartTime }} - {{ item.EndTime }}</el-tag
+                >
+              </p>
+            </div>
+          </div>
+          <!-- 签到 -->
+          <div class="task_card notask">
+            <div class="img">
+              <el-image
+                :src="require('../../assets/img/clock.png')"
+                fit="scale-down"
+              ></el-image>
+            </div>
+            <div class="task_content">
+              <!-- <p class="add_task">+</p> -->
+              <p>
+                <el-tag size="mini" type="success"
+                  >开始工作：12月21日 13:12</el-tag
+                >
+              </p>
+            </div>
+          </div>
+          <!-- 签到 -->
+          <div class="task_card notask">
+            <div class="img">
+              <el-image
+                :src="require('../../assets/img/clock.png')"
+                fit="scale-down"
+              ></el-image>
+            </div>
+            <div class="task_content">
+              <!-- <p class="add_task">+</p> -->
+              <p>
+                <el-tag size="mini" type="danger"
+                  >结束工作：12月21日 18:12</el-tag
+                >
+              </p>
+            </div>
+          </div>
+        </el-col>
       </el-row>
     </div>
     <div class="empty-wrapper" v-else>
       <img src="../../assets/img/emptyMem.png" alt="" />
       <p class="empty-taskList">暂无数据</p>
     </div>
-    <TaskDetailM></TaskDetailM>
+    <TaskDetailM
+      :selTask="selTask"
+      :date="date"
+      :teamValue="teamValue"
+      :selMem="selMem"
+    ></TaskDetailM>
+    <MakeUp
+      :selTask="selTask"
+      :date="date"
+      :teamValue="teamValue"
+      :selMem="selMem"
+    ></MakeUp>
   </div>
 </template>
 <script>
 export default {
   components: {
     TaskDetailM: () => import("./taskdetail-modal"),
+    MakeUp: () => import("./makeup-card"),
   },
+  props: {
+    taskArray: {
+      type: Array,
+      default: null,
+    },
+    date: {
+      type: String,
+      default: null,
+    },
+    teamValue: {
+      type: Number,
+      default: null,
+    },
+    selMem: {
+      type: Array,
+      default: null,
+    },
+  },
+  data() {
+    return {
+      selTask: null,
+    };
+  },
+  computed: {
+    cmurl() {
+      return process.env.VUE_APP_CMURL;
+    },
+  },
+
   methods: {
-    handleTask() {
-      this.$modal.show("taskdetailM");
+    /**
+     * 卡片点击
+     * type:1 任务详情弹窗  2补交任务弹窗
+     */
+    handleTask(val, type) {
+      this.selTask = val;
+      if (type == 1) {
+        this.$modal.show("taskdetailM");
+      } else if (type == 2) {
+        this.$modal.show("makeup");
+      }
     },
   },
 };
@@ -84,6 +185,7 @@ export default {
         flex-direction: row;
         align-items: flex-start;
         margin-bottom: 8px;
+        height: 32px;
         i {
           color: #909399;
         }
@@ -98,6 +200,24 @@ export default {
           -webkit-box-orient: vertical;
         }
       }
+    }
+  }
+  .notask {
+    .img {
+      .el-image {
+        width: 100%;
+        height: 110px;
+        border-radius: 4px 4px 0 0;
+      }
+    }
+    .add_task {
+      border: 2px solid #ebeef5;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 5px;
+      color: #303133;
+      font-weight: bold;
+      margin-bottom: 5px;
     }
   }
   .empty-wrapper {

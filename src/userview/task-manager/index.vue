@@ -13,8 +13,11 @@
         </a>
       </div>
     </Header>
-    <TaskList v-if="tabType == 1"></TaskList>
-    <MemberTask v-else-if="tabType == 2"></MemberTask>
+    <TaskList v-if="tabType == 1" :teamOptions="teamOptions"></TaskList>
+    <MemberTask
+      v-else-if="tabType == 2"
+      :teamOptions="teamOptions"
+    ></MemberTask>
   </div>
 </template>
 <script>
@@ -26,6 +29,7 @@ export default {
   },
   data() {
     return {
+      teamOptions: [],
       tabType: 1,
       tabList: [
         {

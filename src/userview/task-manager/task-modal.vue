@@ -40,6 +40,20 @@
               </div>
             </el-form-item>
             <el-form-item
+              label="执行人："
+              prop="userName"
+              style="width: 100%"
+              v-if="!editState"
+            >
+              <div class="user">
+                <el-avatar
+                  size="small"
+                  :src="imgChange(formData.userPic)"
+                ></el-avatar>
+                <span>{{ formData.userName }}</span>
+              </div>
+            </el-form-item>
+            <el-form-item
               label="团队："
               prop="teamValue"
               style="width: 100%"
@@ -67,7 +81,7 @@
               v-if="!editState"
             >
               <div class="state-see">
-                {{ formData.status }}
+                {{ formData.status ? "启用" : "禁用" }}
               </div>
             </el-form-item>
             <el-form-item label="描述：" prop="describe" style="width: 100%">
@@ -85,30 +99,31 @@
                 {{ formData.describe }}
               </div>
             </el-form-item>
-            <el-form-item label="任务进展：" v-if="!editState" class="progress">
-              <el-timeline>
+            <el-form-item label="任务历史：" v-if="!editState" class="progress">
+              <el-timeline v-if="formData.progress && formData.progress.length">
                 <el-timeline-item
-                  timestamp="2020年12月2日 13:21"
+                  :timestamp="`${item.CreateTime.timeFormat(
+                    'yyyy年MM月dd日 HH:mm'
+                  )} 至 ${item.UpdateTime.timeFormat('yyyy年MM月dd日 HH:mm')}`"
                   placement="top"
-                  v-for="(item, index) in 3"
+                  v-for="(item, index) in formData.progress"
                   :key="index"
                 >
                   <el-card>
                     <p class="task_con">
-                      单元测试是软件开发过程中要进行的最基本的测试，属于白盒测试范围，一般情况下是在开发人员完成了某个单独模块的编码之后做的测试。它的目的是检查软件编码的正确性以及一些规范性测试，站在开发人员的角度上来查找软件所存在的BUG并记录下产生BUG的原因，以便开发人员进行修改。这样可以在很大程度上减少集成以后而出现的BUG。
+                      {{ item.Describe }}
                     </p>
                     <el-image
                       style="max-width: 160px"
-                      src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                      :src="cmurl + item.Img"
                       alt=""
-                      :preview-src-list="[
-                        'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-                      ]"
+                      :preview-src-list="[cmurl + item.Img]"
                     >
                     </el-image>
                   </el-card>
                 </el-timeline-item>
               </el-timeline>
+              <div v-else>无历史数据</div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -118,6 +133,7 @@
 </template>
 
 <script>
+import { imgChange } from "@/commons";
 export default {
   props: {
     indexData: {
@@ -144,7 +160,6 @@ export default {
       editState: false,
       comWidth: "95%",
       attend: false,
-
       formData: {
         id: "", // 编辑窗口才用ID
         task: "",
@@ -152,6 +167,9 @@ export default {
         describe: "",
         CreatTime: "",
         teamValue: "",
+        progress: [],
+        userName: null,
+        userPic: null,
       },
       Rules: {
         name: [
@@ -169,8 +187,14 @@ export default {
       },
     };
   },
+  computed: {
+    cmurl() {
+      return process.env.VUE_APP_CMURL;
+    },
+  },
   created() {},
   methods: {
+    imgChange,
     opened() {
       this.$nextTick(() => {
         this.formData.teamValue = this.teamValue;
@@ -180,10 +204,13 @@ export default {
     changeEditState() {
       this.editState = this.indexData.type === "Add" ? true : false;
       if (this.indexData.row) {
-        this.formData.task = this.indexData.row.task;
-        this.formData.status = this.indexData.row.status;
-        this.formData.describe = this.indexData.row.describe;
-        this.formData.CreatTime = this.indexData.row.CreatTime;
+        this.formData.task = this.indexData.row.Title;
+        this.formData.status = this.indexData.row.Enable;
+        this.formData.describe = this.indexData.row.Describe;
+        this.formData.CreatTime = this.indexData.row.CreateTime;
+        this.formData.progress = this.indexData.row.Taskhistorys;
+        this.formData.userName = this.indexData.row.UserName;
+        this.formData.userPic = this.indexData.row.Picture;
         this.formData.id = this.indexData.departmentCode;
       }
     },
@@ -204,10 +231,10 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/ProgressGroup/AddProgressGroup.ashx", {
-                name: this.formData.name,
-                configId: this.selRow.Id,
-                teamId: this.teamValue,
+              .post("/Task/AddTask.ashx", {
+                teamId: this.formData.teamValue,
+                title: this.formData.task,
+                Describe: this.formData.describe,
               })
               .then((res) => {
                 if (res.res == 0) {
@@ -224,13 +251,13 @@ export default {
               });
           } else {
             let params = {
-              id: this.formData.id, // 添加时值是 undefined
-              name: this.formData.name,
-              configId: this.selRow.Id,
-              teamId: this.teamValue,
+              Id: this.formData.id,
+              teamId: this.formData.teamValue,
+              title: this.formData.task,
+              describe: this.formData.describe,
             };
             this.$http
-              .post("/ProgressGroup/EditProgressGroup.ashx", params)
+              .post("/Task/EditTask.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
@@ -238,7 +265,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("wordsM");
+                  this.$modal.hide("taskM");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -261,14 +288,15 @@ export default {
     beforeClose() {
       this.attend = false;
       this.loading = false;
-      this.formData = {
-        id: "", // 编辑窗口才用ID
-        task: "",
-        status: "",
-        describe: "",
-        CreatTime: "",
-        teamValue: "",
-      };
+      Object.assign(this.$data, this.$options.data());
+      // this.formData = {
+      //   id: "", // 编辑窗口才用ID
+      //   task: "",
+      //   status: "",
+      //   describe: "",
+      //   CreatTime: "",
+      //   teamValue: "",
+      // };
     },
   },
 };
@@ -278,12 +306,15 @@ export default {
 .taskM {
   /deep/.el-form {
     .el-form-item__label {
-      font-weight: bold;
       color: #303133;
     }
     .progress {
       display: flex;
       flex-direction: column;
+      .el-form-item__label {
+        font-weight: bold;
+        color: #303133;
+      }
       .el-form-item__content {
         margin-left: 0 !important;
       }
@@ -300,6 +331,17 @@ export default {
         }
       }
     }
+    .user {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      .el-avatar {
+        margin-right: 5px;
+      }
+    }
+  }
+  .form-box .el-form-item {
+    margin-bottom: 0px;
   }
 }
 </style>

@@ -4,7 +4,12 @@
       <template #search>
         <div class="screen">
           <div class="search">
-            <el-select v-model="teamValue" filterable placeholder="请选择团队">
+            <el-select
+              v-model="teamValue"
+              filterable
+              placeholder="请选择团队"
+              v-if="!isMember"
+            >
               <el-option
                 v-for="item in teamOptions"
                 :key="item.Id"
@@ -16,7 +21,9 @@
             <el-input v-model="searchVal" placeholder="输入任务名"></el-input>
             <el-button type="primary" @click="handleSearch">搜索</el-button>
           </div>
-          <el-button type="primary" @click="addClick">添加任务</el-button>
+          <el-button type="primary" @click="addClick" v-if="!isMember"
+            >添加任务</el-button
+          >
         </div>
       </template>
       <!-- 主体表格部分 -->
@@ -40,48 +47,81 @@
         <el-table-column
           label="任务"
           :show-overflow-tooltip="true"
-          fixed
-          prop="task"
+          prop="Title"
         >
+        </el-table-column>
+        <el-table-column label="执行人" :show-overflow-tooltip="true">
+          <template slot-scope="scope">
+            <div class="user">
+              <el-avatar
+                size="small"
+                :src="imgChange(scope.row.Picture)"
+              ></el-avatar>
+              <span>{{ scope.row.UserName }}</span>
+            </div>
+          </template>
         </el-table-column>
         <el-table-column
           label="描述"
           :show-overflow-tooltip="true"
-          fixed
-          prop="describe"
+          prop="Describe"
         >
+          <template slot-scope="scope">
+            {{ scope.row.Describe ? scope.row.Describe : "无" }}
+          </template>
         </el-table-column>
         <el-table-column
           label="状态"
           :show-overflow-tooltip="true"
-          fixed
-          prop="status"
+          prop="Enable"
         >
           <template slot-scope="scope">
-            <el-tag type="success" size="medium">{{ scope.row.status }}</el-tag>
+            <el-tag
+              :type="scope.row.Enable ? 'success' : 'danger'"
+              size="medium"
+              >{{ scope.row.Enable ? "启用" : "禁用" }}</el-tag
+            >
           </template>
         </el-table-column>
+
         <el-table-column
           label="创建时间"
           :show-overflow-tooltip="true"
-          fixed
-          prop="CreatTime"
+          prop="CreateTime"
         >
           <template slot-scope="scope">
             {{
-              scope.row.CreatTime
-                ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
+              scope.row.CreateTime
+                ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:mm")
                 : "--"
             }}
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="210">
           <!-- fixed  -->
           <template slot-scope="scope">
             <el-button type="primary" size="mini" @click="handleEdit(scope.row)"
               >详情</el-button
             >
-            <el-button type="danger" size="mini" @click="handleDelt(scope.row)"
+            <el-button
+              type="success"
+              size="mini"
+              @click="handleEnable(scope.row, true)"
+              v-if="!isMember && !scope.row.Enable"
+              >启用</el-button
+            >
+            <el-button
+              type="warning"
+              size="mini"
+              @click="handleEnable(scope.row, false)"
+              v-if="!isMember && scope.row.Enable"
+              >禁用</el-button
+            >
+            <el-button
+              type="danger"
+              size="mini"
+              @click="handleDelt(scope.row)"
+              v-if="!isMember"
               >删除</el-button
             >
           </template>
@@ -105,16 +145,37 @@
   </div>
 </template>
 <script>
+import { imgChange } from "@/commons";
 export default {
   components: {
     CContent: () => import("@/components/CContent"),
     CPages: () => import("@/components/CPages"),
     TaskModal: () => import("./task-modal"),
   },
+  props: {
+    teamOptions: {
+      type: Array,
+      default: null,
+    },
+    //是否是成员任务
+    isMember: {
+      type: Boolean,
+      default: false,
+    },
+    //团队id
+    teamId: {
+      type: Number,
+      default: null,
+    },
+    //成员任务时候的用户id
+    userId: {
+      type: Number,
+      default: null,
+    },
+  },
   data() {
     return {
       searchVal: null, //搜索的任务
-      teamOptions: [],
       teamValue: null, //选择的团队
       loading: false,
       indexData: {
@@ -122,20 +183,7 @@ export default {
         name: "",
         departmentCode: "",
       },
-      tableData: [
-        {
-          task: "任务管理页面",
-          status: "启用",
-          describe: "完成任务管理列表功能",
-          CreatTime: "2021-02-01 12:12:11",
-        },
-        {
-          task: "任务详情",
-          status: "启用",
-          describe: "完成任务管理列表功能",
-          CreatTime: "2021-02-01 12:12:11",
-        },
-      ],
+      tableData: [],
       pageData: {
         pageIndex: 1,
         pageSize: 10,
@@ -146,7 +194,43 @@ export default {
       },
     };
   },
+  watch: {
+    //成员任务的团队切换
+    teamId(val, ovl) {
+      if (val && val != ovl && this.isMember) {
+        this.teamValue = val;
+        this.handleSearch();
+      }
+    },
+    //成员任务的成员切换
+    userId(val, ovl) {
+      if (val != ovl && this.isMember) {
+        this.handleSearch();
+      }
+    },
+  },
   methods: {
+    imgChange,
+    /**
+     * 启用、禁用任务
+     */
+    handleEnable(val, type) {
+      const data = {
+        teamId: this.teamValue,
+        Id: val.Id,
+        operation: type,
+      };
+      this.$http.post("/Task/EnableTask.ashx", data).then((resp) => {
+        if (resp.res == 0) {
+          this.$message({
+            showClose: true,
+            message: `${type ? "启用" : "禁用"}任务成功！`,
+            type: "success",
+          });
+          this.getDataList();
+        }
+      });
+    },
     // 删除某一行
     handleDelt(row) {
       this.$confirm("此操作将删除此项目, 是否继续?", "提示", {
@@ -154,10 +238,27 @@ export default {
         cancelButtonText: "取消",
         type: "warning",
       })
-        .then(() => {})
+        .then(() => {
+          const data = {
+            teamId: this.teamValue,
+            Ids: [row.Id],
+          };
+          this.comDelete(data);
+        })
         .catch(() => {});
     },
-
+    comDelete(params) {
+      this.$http.post("/Task/DelTask.ashx", params).then((result) => {
+        if (result.res == 0) {
+          this.$message({
+            showClose: true,
+            message: "删除任务成功！",
+            type: "success",
+          });
+          this.getDataList();
+        }
+      });
+    },
     // 新增
     addClick() {
       this.openWin("ad");
@@ -169,8 +270,11 @@ export default {
     // 打开窗口
     openWin(ty, code, row) {
       this.indexData = {
-        type: ty === "ad" ? "Add" : "Edit",
-        name: ty === "ad" ? "添加项目" : "编辑项目",
+        type: ty === "ad" ? "Add" : `${this.isMember ? "" : "Edit"}`,
+        name:
+          ty === "ad"
+            ? "添加项目"
+            : `${this.isMember ? "项目详情" : "编辑项目"}`,
         departmentCode: code,
         row: row,
         xModalName: "taskM",
@@ -188,24 +292,31 @@ export default {
     },
     // 获取列表
     getDataList() {
-      let params = {
-        name: this.searchKW,
+      if (!this.teamValue) {
+        this.$message({
+          message: "请先选择团队",
+          type: "warning",
+        });
+        return;
+      }
+      const data = {
+        teamId: this.teamValue,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
-        configId: this.selRow.Id,
+        name: this.searchVal,
+        usId: this.isMember ? this.userId : null,
+        type: (this.isMember && this.userId) || !this.isMember ? 2 : 1,
       };
       this.loading = true;
       this.$http
-        .get("/Management/ProgressManagement/ProgressGroupAllList.ashx", {
-          params: params,
-        })
+        .post("/Task/GetTaskList.ashx", data)
         .then((result) => {
           if (result.res == 0) {
             this.tableData = result.data.Data;
             this.pageData.totalNum = result.data.TotalCount;
-            this.loading = false;
           }
-        });
+        })
+        .finally(() => (this.loading = false));
     },
     /**
      * 分页
@@ -236,6 +347,15 @@ export default {
         margin: 0 5px;
         width: 18rem;
       }
+    }
+  }
+  .user {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    .el-avatar {
+      margin-right: 5px;
     }
   }
 }
