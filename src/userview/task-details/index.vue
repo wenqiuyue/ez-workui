@@ -78,6 +78,7 @@
           :date="expandId"
           :teamValue="teamValue"
           :selMem="selMem"
+          @loadData="getTask"
         ></TaskDetailRight>
       </BaseView>
     </div>

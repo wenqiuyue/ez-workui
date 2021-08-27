@@ -40,19 +40,19 @@
             <el-table-column
               label="类型"
               :show-overflow-tooltip="true"
-              prop="Name"
+              prop="WageType"
             >
             </el-table-column>
-            <el-table-column label="时薪" prop="hourlywage">
+            <el-table-column label="时薪" prop="Wage">
               <template slot-scope="scope">
-                {{ scope.row.hourlywage ? scope.row.hourlywage : 0 }}元
+                {{ scope.row.Wage ? scope.row.Wage : 0 }}元
               </template>
             </el-table-column>
             <el-table-column label="创建时间" :show-overflow-tooltip="true">
               <template slot-scope="scope">
                 {{
-                  scope.row.CreatTime
-                    ? scope.row.CreatTime.timeFormat("yyyy-MM-dd HH:mm")
+                  scope.row.CreateTime
+                    ? scope.row.CreateTime.timeFormat("yyyy-MM-dd HH:mm")
                     : "--"
                 }}
               </template>
@@ -77,6 +77,12 @@
               </template>
             </el-table-column>
           </el-table>
+          <!-- 分页组件 -->
+          <c-pages
+            slot="pages"
+            v-model="pageData"
+            @changeEvent="handlePaginationChange"
+          ></c-pages>
         </c-content>
       </div>
     </XModal>
@@ -85,6 +91,7 @@
       :indexData="indexData"
       ref="hourlywageSetM"
       @eventComfirm="getDataList"
+      :selUser="selUser"
     ></Sethourlywage>
   </div>
 </template>
@@ -94,6 +101,7 @@ export default {
     XModal: () => import("@/components/XModal"),
     CContent: () => import("@/components/CContent"),
     Sethourlywage: () => import("./set-hourlywage-modal"),
+    CPages: () => import("@/components/CPages"),
   },
   props: {
     selUser: {
@@ -107,6 +115,11 @@ export default {
   },
   data() {
     return {
+      pageData: {
+        pageIndex: 1,
+        pageSize: 10,
+        totalNum: 0,
+      },
       loading: false,
       cellStyle: {
         textAlign: "center",
@@ -116,20 +129,24 @@ export default {
         name: "",
         departmentCode: "",
       },
-      tableData: [
-        {
-          Name: "普通时薪",
-          hourlywage: "220",
-          CreatTime: "2021-02-01 12:12:11",
-        },
-      ],
+      tableData: [],
     };
   },
   methods: {
     /**
+     * 分页
+     */
+    handlePaginationChange(val) {
+      this.pageData = val;
+      this.getDataList();
+    },
+    /**
      * 弹窗打开回调
      */
-    opened() {},
+    opened() {
+      this.pageData.pageIndex = 1;
+      this.getDataList();
+    },
     // 删除某一行
     handleDelt(row) {
       this.$confirm("此操作将删除此时薪, 是否继续?", "提示", {
@@ -139,7 +156,7 @@ export default {
       })
         .then(() => {
           let params = {
-            id: [row.Id],
+            Ids: [row.Id],
             teamId: this.teamValue,
           };
           this.comDelete(params);
@@ -148,7 +165,7 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post("/ProgressGroup/DelProgressGroup.ashx", params)
+        .post("/Teams/MemberWage/DelMemberWage.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.$message({
@@ -186,22 +203,21 @@ export default {
     // 获取数据
     getDataList() {
       let params = {
-        name: this.searchKW,
+        memberId: this.selUser.Id,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
         teamId: this.teamValue,
-        configId: this.selRow.Id,
       };
       this.loading = true;
       this.$http
-        .post("/ProgressGroup/QueryProgressGroupList.ashx", params)
+        .post("/Teams/MemberWage/GetMemberWageList.ashx", params)
         .then((result) => {
           if (result.res == 0) {
-            this.tableData = result.data.Data;
-            this.pageData.totalNum = result.data.TotalCount;
-            this.loading = false;
+            this.tableData = result.data.data;
+            this.pageData.totalNum = result.data.total;
           }
-        });
+        })
+        .finally(() => (this.loading = false));
     },
   },
 };

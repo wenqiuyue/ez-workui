@@ -7,7 +7,7 @@
       :showCrossBtn="true"
       @opened="opened"
     >
-      <div class="taskm_content" v-if="selTask">
+      <div class="taskm_content" v-if="selTask && selTask.TaskInfo">
         <el-row>
           <el-col :span="10" class="left_col"
             ><div class="m_left">

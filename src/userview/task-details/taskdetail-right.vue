@@ -1,10 +1,14 @@
 <template>
   <div class="taskdetail-right">
     <div style="height: 100%" v-if="taskArray && taskArray.length">
-      <el-row :gutter="12">
+      <el-row :gutter="10">
         <el-col :span="4" v-for="(item, index) in taskArray" :key="index">
           <!-- 正常任务 -->
-          <div class="task_card" @click="handleTask(item, 1)" v-if="true">
+          <div
+            class="task_card"
+            @click="handleTask(item, 1)"
+            v-if="!item.IsFree && item.TaskInfo"
+          >
             <el-image
               v-if="item.IsRepair"
               class="bujiao_img"
@@ -27,7 +31,11 @@
             </div>
           </div>
           <!-- 补交任务 -->
-          <div class="task_card notask" @click="handleTask(item, 2)">
+          <div
+            class="task_card notask"
+            @click="handleTask(item, 2)"
+            v-else-if="item.IsFree"
+          >
             <div class="img">
               <el-image
                 :src="require('../../assets/img/noTask.png')"
@@ -38,13 +46,14 @@
               <!-- <p class="add_task">+</p> -->
               <p>
                 <el-tag size="mini" type="warning"
-                  >无任务时段：{{ item.StartTime }} - {{ item.EndTime }}</el-tag
+                  >无任务时段：{{ item.CreateTime.timeFormat("HH:mm") }} -
+                  {{ item.UpdateTime.timeFormat("HH:mm") }}</el-tag
                 >
               </p>
             </div>
           </div>
           <!-- 签到 -->
-          <div class="task_card notask">
+          <div class="task_card notask" v-else-if="item.CheckStatus == '签到'">
             <div class="img">
               <el-image
                 :src="require('../../assets/img/clock.png')"
@@ -55,13 +64,15 @@
               <!-- <p class="add_task">+</p> -->
               <p>
                 <el-tag size="mini" type="success"
-                  >开始工作：12月21日 13:12</el-tag
+                  >开始工作：{{
+                    item.CheckTime.timeFormat("MM月dd日 HH:mm")
+                  }}</el-tag
                 >
               </p>
             </div>
           </div>
-          <!-- 签到 -->
-          <div class="task_card notask">
+          <!-- 签退 -->
+          <div class="task_card notask" v-else-if="item.CheckStatus == '签退'">
             <div class="img">
               <el-image
                 :src="require('../../assets/img/clock.png')"
@@ -72,7 +83,9 @@
               <!-- <p class="add_task">+</p> -->
               <p>
                 <el-tag size="mini" type="danger"
-                  >结束工作：12月21日 18:12</el-tag
+                  >结束工作：{{
+                    item.CheckTime.timeFormat("MM月dd日 HH:mm")
+                  }}</el-tag
                 >
               </p>
             </div>
@@ -95,6 +108,7 @@
       :date="date"
       :teamValue="teamValue"
       :selMem="selMem"
+      @loadData="$emit('loadData')"
     ></MakeUp>
   </div>
 </template>
@@ -154,6 +168,12 @@ export default {
   height: 100%;
   background: #ffffff;
   padding: 12px;
+  overflow-y: auto;
+  .el-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
   .task_card {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
@@ -199,6 +219,10 @@ export default {
           text-overflow: ellipsis;
           -webkit-box-orient: vertical;
         }
+      }
+      .el-tag {
+        width: 100%;
+        overflow-x: hidden;
       }
     }
   }

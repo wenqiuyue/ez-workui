@@ -130,6 +130,7 @@ export default class xSocketLink {
                 "27",
                 "70",
                 "120",
+                "122",
                 "28",
                 "29",
               ].indexOf(res.res) >= 0

@@ -43,7 +43,9 @@
                 <i v-if="name == '团队管理' && applyCount > 0">{{
                   applyCount > 99 ? "+99" : applyCount
                 }}</i>
-                <i v-if="name == '消息列表'"> 22 </i>
+                <i v-if="name == '消息列表' && informationCount > 0">
+                  {{ informationCount > 99 ? "+99" : informationCount }}
+                </i>
               </router-link>
               <a href="javascript:;" @click="exit" class="hiFont hi-signout">
                 <span>登出</span>
@@ -75,6 +77,7 @@ export default {
       showBtn: true,
       layoutRoutesUser,
       applyCount: null, //申请数量
+      informationCount: null, //消息数量
     };
   },
   computed: {
@@ -115,18 +118,22 @@ export default {
     /**
      * 获取申请条数
      */
-    getApplyCount() {
-      this.$http
-        .post("/Teams/InvitedOrApply/GetApplyMessage.ashx")
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.applyCount = resp.data;
-          }
-        });
+    getCount() {
+      Promise.all([
+        this.$http.post("/Teams/InvitedOrApply/GetApplyMessage.ashx"),
+        this.$http.post("/Information/GetSumNewInformation.ashx"),
+      ]).then((resp) => {
+        if (resp[0].res == 0) {
+          this.applyCount = resp[0].data;
+        }
+        if (resp[1].res == 0) {
+          this.informationCount = resp[1].data.Count;
+        }
+      });
     },
   },
   mounted() {
-    this.getApplyCount();
+    this.getCount();
     //建立Socket链接
     // return;
     this.$http.get("/User/GetLocalIP.ashx").then((resp) => {
@@ -141,6 +148,8 @@ export default {
               _this.$E.$emit("loadingpic", res); //发来加载进程截图
             } else if (["120"].includes(res.res)) {
               this.applyCount = res.data.ApplySumCount; //更新团队申请数量
+            } else if (["122"].includes(res.res)) {
+              this.informationCount = res.data.InformationCount; //更新消息数量
             } else if (["28"].includes(res.res)) {
               _this.$E.$emit("loadcamerapic", res); //发来通知成员拍照
             } else if (["29"].includes(res.res)) {

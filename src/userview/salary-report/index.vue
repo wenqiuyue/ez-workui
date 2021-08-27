@@ -87,7 +87,11 @@
             </selMember>
           </div>
         </div>
-        <el-button type="primary" class="search_btn" size="medium"
+        <el-button
+          type="primary"
+          class="search_btn"
+          size="medium"
+          @click="handleGetData"
           >搜 索</el-button
         >
       </div>
@@ -99,32 +103,39 @@
             style="width: 100%; margin-bottom: 5px"
             row-key="id"
             :header-cell-style="attenceHeaderStyle"
-            :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+            :tree-props="{
+              children: 'MemberWageTypes',
+              hasChildren: 'hasChildren',
+            }"
           >
-            <el-table-column prop="name" label="成员" show-overflow-tooltip>
+            <el-table-column prop="UserName" label="成员" show-overflow-tooltip>
             </el-table-column>
             <el-table-column
-              prop="type"
+              prop="WageType"
               label="类型"
               show-overflow-tooltip
               align="center"
             >
             </el-table-column>
             <el-table-column
-              prop="time"
+              prop="RepairWork"
               label="补交任务耗时"
               show-overflow-tooltip
               align="center"
             >
-              <template slot-scope="scope"> {{ scope.row.time }}小时 </template>
-            </el-table-column>
-            <el-table-column prop="hourlyWage" label="时薪" align="center">
               <template slot-scope="scope">
-                {{ scope.row.hourlyWage }}元
+                {{
+                  scope.row.RepairWork ? scope.row.RepairWork.toFixed(2) : 0
+                }}小时
               </template>
             </el-table-column>
-            <el-table-column prop="salary" label="薪资" align="center">
-              <template slot-scope="scope"> {{ scope.row.salary }}元 </template>
+            <el-table-column prop="Wage" label="时薪" align="center">
+              <template slot-scope="scope">
+                {{ scope.row.Wage ? scope.row.Wage : 0 }}元
+              </template>
+            </el-table-column>
+            <el-table-column prop="Salary" label="薪资" align="center">
+              <template slot-scope="scope"> {{ scope.row.Salary }}元 </template>
             </el-table-column>
           </el-table>
           <el-pagination
@@ -155,54 +166,9 @@ export default {
   },
   data() {
     return {
-      tableData: [
-        {
-          id: 2,
-          name: "王小虎",
-          hourlyWage: 220,
-          salary: 320,
-          time: 42,
-          children: [
-            {
-              id: 29,
-              type: "加班时薪",
-              hourlyWage: 120,
-              salary: 300,
-              time: 21,
-            },
-            {
-              id: 30,
-              type: "普通时薪",
-              hourlyWage: 100,
-              salary: 20,
-              time: 21,
-            },
-          ],
-        },
-        {
-          id: 3,
-          name: "王小虎",
-          hourlyWage: 220,
-          salary: 320,
-          time: 42,
-          children: [
-            {
-              id: 31,
-              type: "加班时薪",
-              hourlyWage: 120,
-              salary: 300,
-              time: 21,
-            },
-            {
-              id: 32,
-              type: "普通时薪",
-              hourlyWage: 100,
-              salary: 20,
-              time: 21,
-            },
-          ],
-        },
-      ],
+      ds: null, //开始时间
+      de: null, //结束时间
+      tableData: [],
       pageData: {
         pageIndex: 1,
         pageSize: 15,
@@ -245,7 +211,68 @@ export default {
         return;
       }
       this.pageData.pageIndex = 1;
-      this.memberData = [];
+      this.tableData = [];
+      this.getSalary();
+    },
+    /**
+     * 获取报表
+     */
+    getSalary() {
+      this.loading = true;
+      const day = new Date(this.selDate).getDay();
+      const dayNum = day > 0 ? day - 1 : 6;
+      const date = new Date(this.selDate);
+      if (this.dateType == 1) {
+        this.ds = new Date(date.setDate(date.getDate() - dayNum)).timeFormat(
+          "yyyy-MM-dd 00:00:01"
+        );
+        const s = new Date(this.ds);
+        this.de = new Date(s.setDate(s.getDate() + 6)).timeFormat(
+          "yyyy-MM-dd 23:59:59"
+        );
+      } else if (this.dateType == 2) {
+        this.ds = new Date(date.getFullYear(), date.getMonth(), 1).timeFormat(
+          "yyyy-MM-dd 00:00:01"
+        );
+        this.de = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0
+        ).timeFormat("yyyy-MM-dd 23:59:59");
+      } else {
+        this.ds = this.DateRange[0].timeFormat("yyyy-MM-dd 00:00:01");
+        this.de = this.DateRange[1].timeFormat("yyyy-MM-dd 23:59:59");
+      }
+      const data = {
+        sdate: this.ds,
+        edate: this.de,
+        usIds: this.selMem.map((m) => m.UsId),
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+        teamId: this.teamValue,
+        datetype: this.dateType,
+      };
+      this.$http
+        .post("/User/Work/GetMemberPayrollReport.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.tableData = resp.data.Data;
+            if (this.tableData && this.tableData.length) {
+              this.tableData.forEach((m, index) => {
+                m.id = index + 1;
+                m.RepairWork = m.SumRepairWork;
+                m.Salary = m.SumSalary;
+                if (m.MemberWageTypes && m.MemberWageTypes.length) {
+                  m.MemberWageTypes.forEach((s, sind) => {
+                    s.id = `${index + 1}-${sind}`;
+                  });
+                }
+              });
+            }
+            this.pageData.totalNum = resp.data.totalCount;
+          }
+        })
+        .finally(() => (this.loading = false));
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);

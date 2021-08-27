@@ -24,9 +24,9 @@
         <!-- 必填项 -->
         <el-row>
           <el-col :sm="24" :md="24">
-            <el-form-item label="类型：" prop="name" style="width: 100%">
+            <el-form-item label="类型：" prop="wagetype" style="width: 100%">
               <el-input
-                v-model="formData.name"
+                v-model="formData.wagetype"
                 placeholder="请填写类型"
                 v-if="editState"
                 :style="{ width: comWidth }"
@@ -34,12 +34,12 @@
               >
               </el-input>
               <div v-else class="state-see">
-                {{ formData.name }}
+                {{ formData.wagetype }}
               </div>
             </el-form-item>
-            <el-form-item label="时薪：" prop="hourlywage" style="width: 100%">
+            <el-form-item label="时薪：" prop="wage" style="width: 100%">
               <el-input
-                v-model="formData.hourlywage"
+                v-model="formData.wage"
                 placeholder="请填写时薪"
                 v-if="editState"
                 type="number"
@@ -48,7 +48,7 @@
               >
               </el-input>
               <div v-else class="state-see">
-                {{ formData.hourlywage }}
+                {{ formData.wage }}
               </div>
             </el-form-item>
           </el-col>
@@ -61,6 +61,10 @@
 <script>
 export default {
   props: {
+    selUser: {
+      type: Object,
+      default: null,
+    },
     indexData: {
       type: Object,
       default: null,
@@ -88,11 +92,11 @@ export default {
 
       formData: {
         id: "", // 编辑窗口才用ID
-        name: "", // 标签名称
-        hourlywage: "",
+        wagetype: "", // 标签名称
+        wage: "",
       },
       Rules: {
-        name: [
+        wagetype: [
           {
             required: true,
             message: "请输入类型",
@@ -104,7 +108,7 @@ export default {
             trigger: "blur",
           },
         ],
-        hourlywage: [
+        wage: [
           {
             required: true,
             message: "请输入金额",
@@ -120,8 +124,8 @@ export default {
     changeEditState() {
       this.editState = this.indexData.type === "Add" ? true : false;
       if (this.indexData.row) {
-        this.formData.name = this.indexData.row.Name;
-        this.formData.hourlywage = this.indexData.row.hourlywage;
+        this.formData.wagetype = this.indexData.row.WageType;
+        this.formData.wage = this.indexData.row.Wage;
         this.formData.id = this.indexData.departmentCode;
       }
     },
@@ -142,9 +146,10 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/ProgressGroup/AddProgressGroup.ashx", {
-                name: this.formData.name,
-                configId: this.selRow.Id,
+              .post("/Teams/MemberWage/SaveMemberWage.ashx", {
+                memberId: this.selUser.Id,
+                wage: this.formData.wage,
+                wagetype: this.formData.wagetype,
                 teamId: this.teamValue,
               })
               .then((res) => {
@@ -162,13 +167,14 @@ export default {
               });
           } else {
             let params = {
-              id: this.formData.id, // 添加时值是 undefined
-              name: this.formData.name,
-              configId: this.selRow.Id,
+              memberId: this.selUser.Id,
+              wage: this.formData.wage,
+              wagetype: this.formData.wagetype,
               teamId: this.teamValue,
+              Id: this.formData.id,
             };
             this.$http
-              .post("/ProgressGroup/EditProgressGroup.ashx", params)
+              .post("/Teams/MemberWage/SaveMemberWage.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
@@ -176,7 +182,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("shieldM");
+                  this.$modal.hide("hourlywageSetM");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -201,8 +207,8 @@ export default {
       this.loading = false;
       this.formData = {
         id: "", // 编辑窗口才用ID
-        name: "",
-        hourlywage: "",
+        wagetype: "",
+        wage: "",
       };
     },
   },

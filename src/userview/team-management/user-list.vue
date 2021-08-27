@@ -81,6 +81,7 @@
             type="success"
             size="small"
             @click="handleHourlyWage(scope.row)"
+            v-if="userMemberMType == 2"
             >设置时薪</el-button
           >
           <el-button
