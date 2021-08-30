@@ -117,7 +117,9 @@
                 <span v-else>无</span>
               </div>
               <div class="info_list" style="align-items: flex-start">
-                <span class="info_lable">接收的邮箱：</span>
+                <span class="info_lable" style="line-height: 30px"
+                  >接收的邮箱：</span
+                >
                 <div
                   class="email"
                   v-if="selUser.AcceptEmail && selUser.AcceptEmail.length"

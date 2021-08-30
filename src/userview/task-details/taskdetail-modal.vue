@@ -6,12 +6,17 @@
       title="任务详情"
       :showCrossBtn="true"
       @opened="opened"
+      @closed="closed"
     >
       <div class="taskm_content">
         <el-row v-if="selTask && selTask.TaskInfo">
           <el-col :span="10" class="left_col"
             ><div class="m_left">
-              <el-image :src="cmurl + selTask.Img" fit="fill"></el-image></div
+              <el-image
+                :src="cmurl + selTask.Img"
+                fit="fill"
+                :preview-src-list="[cmurl + selTask.Img]"
+              ></el-image></div
           ></el-col>
           <el-col :span="14" class="right_col"
             ><div class="m_right">
@@ -41,7 +46,11 @@
               <p class="desc">
                 <span>
                   <label class="lable">任务描述：</label>
-                  <label class="con">{{ selTask.TaskInfo.Describe }}</label>
+                  <label class="con">{{
+                    selTask.TaskInfo.Describe
+                      ? selTask.TaskInfo.Describe
+                      : "无任务描述"
+                  }}</label>
                 </span>
               </p>
             </div></el-col
@@ -111,6 +120,10 @@ export default {
           this.de = new Date().timeFormat(`yyyy-MM-dd HH:mm`);
         }
       });
+    },
+    closed() {
+      this.ds = null;
+      this.de = null;
     },
   },
 };
