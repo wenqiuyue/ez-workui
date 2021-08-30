@@ -188,7 +188,9 @@ export default {
     getTeamList() {
       this.loading = true;
       this.$http
-        .post("/Teams/TeamManagementDetail.ashx", { teamId: this.selRow.Id })
+        .get("/Teams/TeamManagementDetail.ashx", {
+          params: { teamId: this.selRow.Id },
+        })
         .then((resp) => {
           if (resp.res == 0) {
             this.tableData = resp.data.Membersdata;

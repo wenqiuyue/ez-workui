@@ -1,6 +1,12 @@
 <template>
   <div class="userInfo">
-    <XModal name="userInfo" width="40%" height="77%" @opened="opened">
+    <XModal
+      name="userInfo"
+      width="40%"
+      height="77%"
+      @opened="opened"
+      @closed="closed"
+    >
       <CWinTmp
         ref="cwtinfo"
         :indexData="indexData"
@@ -85,16 +91,19 @@
             <el-col :span="24" v-if="!editState"
               ><div class="info_list">
                 <span class="info_lable">是否接收成员每日报表：</span>
-                是
+                {{ selUser.IsAccept ? "是" : "否" }}
               </div></el-col
             >
-            <el-col :span="24" v-if="!editState" class="receive"
+            <el-col
+              :span="24"
+              v-if="!editState && selUser.IsAccept"
+              class="receive"
               ><div class="info_list">
                 <span class="info_lable">接收的成员：</span>
-                <div v-if="selUser.VisibleUser && selUser.VisibleUser.length">
+                <div v-if="selUser.AcceptMember && selUser.AcceptMember.length">
                   <ul class="mem-imgs">
                     <li
-                      v-for="(item, index) in selUser.VisibleUser"
+                      v-for="(item, index) in selUser.AcceptMember"
                       :key="index"
                     >
                       <el-avatar
@@ -109,14 +118,17 @@
               </div>
               <div class="info_list" style="align-items: flex-start">
                 <span class="info_lable">接收的邮箱：</span>
-                <div class="email">
-                  <span>1402472753@qq.com</span>
-                  <span>12753@qq.com</span>
-                  <span>1402472753@qq.com</span>
-                  <span>1402472753@qq.com</span>
-                  <span>1402472753@qq.com</span>
-                  <span>1402472753@qq.com</span>
+                <div
+                  class="email"
+                  v-if="selUser.AcceptEmail && selUser.AcceptEmail.length"
+                >
+                  <span
+                    v-for="(address, aind) in selUser.AcceptEmail"
+                    :key="aind"
+                    >{{ address }}</span
+                  >
                 </div>
+                <div v-else>没有设置邮箱</div>
               </div></el-col
             >
             <el-col :span="12" v-if="editState && !selUser.IsSystem"
@@ -153,18 +165,21 @@
             <el-col :span="24" v-if="editState"
               ><div class="info_list edit">
                 <span class="info_lable">是否接收成员每日报表：</span>
-                <el-radio-group v-model="formData.mType">
-                  <el-radio :label="1">是</el-radio>
-                  <el-radio :label="2">否</el-radio>
+                <el-radio-group v-model="formData.IsAccept">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
                 </el-radio-group>
               </div></el-col
             >
-            <el-col :span="24" v-if="editState" class="receive"
+            <el-col
+              :span="24"
+              v-if="editState && formData.IsAccept"
+              class="receive"
               ><div class="info_list edit">
                 <span class="info_lable">接收的成员：</span>
                 <mb
-                  @Confirm="getUser"
-                  :arrays="formData.visible"
+                  @Confirm="getAcceptUser"
+                  :arrays="formData.AcceptMember"
                   :teamId="teamId"
                 ></mb>
               </div>
@@ -177,7 +192,7 @@
                     >
                   </div>
                   <el-input
-                    v-for="(eitem, eind) in addressArray"
+                    v-for="(eitem, eind) in formData.addressArray"
                     :key="eind"
                     class="set_input email_input"
                     v-model="eitem.inputVal"
@@ -220,7 +235,6 @@ export default {
   },
   data() {
     return {
-      addressArray: [],
       options: [],
       editState: false,
       indexData: {
@@ -233,6 +247,9 @@ export default {
         visible: [],
         mType: null,
         progroup: null,
+        addressArray: [],
+        IsAccept: true,
+        AcceptMember: [],
       },
     };
   },
@@ -254,13 +271,15 @@ export default {
      * 删除某一个邮箱
      */
     delAddress(ind) {
-      this.addressArray = this.addressArray.filter((m, index) => ind != index);
+      this.formData.addressArray = this.formData.addressArray.filter(
+        (m, index) => ind != index
+      );
     },
     /**
      * 添加预警接收的邮箱
      */
     addAddress() {
-      this.addressArray.push({
+      this.formData.addressArray.push({
         inputVal: null,
       });
     },
@@ -285,11 +304,15 @@ export default {
      */
     comSubmit() {
       this.$refs.cwtinfo.toggleComfirm();
+      const address = this.formData.addressArray.filter((m) => m.inputVal);
       const data = {
         Id: this.formData.id,
         visibleUsId: this.formData.visible.map((m) => m.UsId),
         mType: this.formData.mType,
         progressgroupId: this.formData.progroup,
+        IsAccept: this.formData.IsAccept,
+        AcceptMembers: this.formData.AcceptMember.map((m) => m.UsId),
+        AcceptEmails: address.map((m) => m.inputVal),
       };
       this.$http.post("/Teams/EditMember.ashx", data).then((resp) => {
         if (resp.res == 0) {
@@ -299,6 +322,17 @@ export default {
           });
           this.$modal.hide("userInfo");
           this.$emit("success");
+        }
+      });
+    },
+    closed() {
+      Object.keys(this.formData).forEach((m) => {
+        if (["Id", "mType", "progroup"].includes(m)) {
+          this.formData[m] = null;
+        } else if (["visible", "addressArray", "AcceptMember"].includes(m)) {
+          this.formData[m] = [];
+        } else if (["IsAccept"].includes(m)) {
+          this.formData[m] = true;
         }
       });
     },
@@ -332,13 +366,36 @@ export default {
         });
         this.formData.mType = this.selUser.MType;
         this.formData.progroup = this.selUser.ProgressGroupName;
-        this.addressArray.push({
-          inputVal: this.selUser.addres,
-        });
+        this.formData.IsAccept = this.selUser.IsAccept;
+        if (this.selUser.AcceptEmail && this.selUser.AcceptEmail.length) {
+          this.formData.addressArray = this.selUser.AcceptEmail.map((m) => {
+            return {
+              inputVal: m,
+            };
+          });
+        }
+        if (this.selUser.AcceptMember && this.selUser.AcceptMember.length) {
+          this.formData.AcceptMember = this.selUser.AcceptMember.map((m) => {
+            return {
+              UsId: m.UserId,
+              Name: m.Name,
+              Picture: m.Picture,
+            };
+          });
+        }
       }
     },
+    /**
+     * 接收可见成员
+     */
     getUser(val) {
       this.formData.visible = val;
+    },
+    /**
+     * 接收接收每日日报的成员
+     */
+    getAcceptUser(val) {
+      this.formData.AcceptMember = val;
     },
   },
 };
@@ -375,12 +432,17 @@ export default {
       }
       .email {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
+        flex-direction: column;
         flex: 1;
         span {
           display: block;
+          background: #f8f8f8;
+          height: 32px;
+          line-height: 32px;
+          color: #606266;
+          padding: 0 15px;
+          margin-bottom: 10px;
+          border-radius: 4px;
         }
       }
       .emali_list {

@@ -28,6 +28,11 @@
 <script>
 export default {
   props: {
+    //是否是任务详情
+    istaskDetail: {
+      type: Boolean,
+      default: false,
+    },
     datestart: {
       type: String,
       default: null,
@@ -116,6 +121,7 @@ export default {
   watch: {
     dateend() {
       if (this.dateend) {
+        this.pageData.page = 1;
         this.getData();
       }
     },
@@ -126,7 +132,9 @@ export default {
     },
   },
   mounted() {
-    this.getData();
+    if (!this.istaskDetail) {
+      this.getData();
+    }
   },
   methods: {
     /**

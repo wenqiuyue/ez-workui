@@ -203,7 +203,7 @@ export default {
     // 获取数据
     getDataList() {
       let params = {
-        memberId: this.selUser.Id,
+        memberId: this.selUser.UserId,
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
         teamId: this.teamValue,

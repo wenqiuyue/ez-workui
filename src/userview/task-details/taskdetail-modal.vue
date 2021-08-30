@@ -7,8 +7,8 @@
       :showCrossBtn="true"
       @opened="opened"
     >
-      <div class="taskm_content" v-if="selTask && selTask.TaskInfo">
-        <el-row>
+      <div class="taskm_content">
+        <el-row v-if="selTask && selTask.TaskInfo">
           <el-col :span="10" class="left_col"
             ><div class="m_left">
               <el-image :src="cmurl + selTask.Img" fit="fill"></el-image></div
@@ -54,6 +54,7 @@
               :dateend="de"
               :UsId="selMem && selMem.length ? selMem[0].UsId : null"
               :teamId="teamValue"
+              :istaskDetail="true"
             ></ThermodynamicChart
           ></el-col>
         </el-row>
@@ -102,9 +103,13 @@ export default {
         this.ds = new Date(this.date).timeFormat(
           `yyyy-MM-dd ${this.selTask.StartTime}`
         );
-        this.de = new Date(this.date).timeFormat(
-          `yyyy-MM-dd ${this.selTask.EndTime}`
-        );
+        if (this.selTask.EndTime) {
+          this.de = new Date(this.date).timeFormat(
+            `yyyy-MM-dd ${this.selTask.EndTime}`
+          );
+        } else {
+          this.de = new Date().timeFormat(`yyyy-MM-dd HH:mm`);
+        }
       });
     },
   },

@@ -147,7 +147,7 @@ export default {
           if (!this.formData.id) {
             this.$http
               .post("/Teams/MemberWage/SaveMemberWage.ashx", {
-                memberId: this.selUser.Id,
+                memberId: this.selUser.UserId,
                 wage: this.formData.wage,
                 wagetype: this.formData.wagetype,
                 teamId: this.teamValue,
@@ -167,7 +167,7 @@ export default {
               });
           } else {
             let params = {
-              memberId: this.selUser.Id,
+              memberId: this.selUser.UserId,
               wage: this.formData.wage,
               wagetype: this.formData.wagetype,
               teamId: this.teamValue,

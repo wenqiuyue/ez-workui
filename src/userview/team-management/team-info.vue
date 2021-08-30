@@ -173,19 +173,8 @@
                 <li>
                   <p class="set_row">
                     <span>是否开启预警</span>
-                    <el-switch v-model="setFive"> </el-switch>
-                  </p>
-                  <p class="email_input_btn" v-if="setFive">
-                    <el-button type="text" icon="el-icon-success" size="small"
-                      >保存</el-button
-                    >
-                    <el-button
-                      type="text"
-                      icon="el-icon-circle-plus"
-                      @click="addAddress"
-                      size="small"
-                      >添加邮箱</el-button
-                    >
+                    <el-switch v-model="setFive" @change="changeSetAddress">
+                    </el-switch>
                   </p>
                   <p v-if="setFive">
                     <el-input
@@ -200,6 +189,22 @@
                         @click="delAddress(eind)"
                       ></el-button
                     ></el-input>
+                  </p>
+                  <p class="email_input_btn" v-if="setFive">
+                    <el-button
+                      type="text"
+                      icon="el-icon-success"
+                      size="small"
+                      @click="changeSet"
+                      >保存</el-button
+                    >
+                    <el-button
+                      type="text"
+                      icon="el-icon-circle-plus"
+                      @click="addAddress"
+                      size="small"
+                      >添加邮箱</el-button
+                    >
                   </p>
                 </li>
               </ul>
@@ -338,11 +343,7 @@ export default {
       setFour: false,
       setFive: false,
       passwordVal: null, //口令
-      addressArray: [
-        {
-          inputVal: null,
-        },
-      ],
+      addressArray: [],
     };
   },
   mounted() {
@@ -387,9 +388,23 @@ export default {
       }
     },
     /**
+     * 设置预警邮箱
+     */
+    changeSetAddress() {
+      if (!this.setFive) {
+        this.addressArray = [];
+        this.changeSet();
+      } else {
+        this.addressArray.push({
+          inputVal: null,
+        });
+      }
+    },
+    /**
      * 详情设置
      */
     changeSet() {
+      const address = this.addressArray.filter((m) => m.inputVal);
       const data = {
         teamId: this.selRow.Id,
         IsTeamCode: this.setOne ? 1 : 0,
@@ -397,6 +412,8 @@ export default {
         IsInvitationCode: this.setThree ? 1 : 0,
         InvitationCode: this.passwordVal,
         IsStartCamera: this.setFour ? 1 : 0,
+        IsWarn: this.setFive,
+        WarnEmail: address.map((m) => m.inputVal),
       };
       this.$http.post("/Teams/TeamSet.ashx", data).then((resp) => {
         if (resp.res == 0) {
@@ -432,6 +449,16 @@ export default {
             this.passwordVal = this.infoData.Teamdata.InvitationCode;
             this.setFour =
               this.infoData.Teamdata.IsStartCamera == 1 ? true : false;
+            this.setFive = this.infoData.Teamdata.IsWarn;
+            this.addressArray =
+              this.infoData.Teamdata.WarnEmails &&
+              this.infoData.Teamdata.WarnEmails.length
+                ? this.infoData.Teamdata.WarnEmails.map((m) => {
+                    return {
+                      inputVal: m,
+                    };
+                  })
+                : [];
           }
         })
         .finally(() => (this.loading = false));

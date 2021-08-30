@@ -34,7 +34,11 @@
             :picker-options="{
               selectableRange: `${selTask.CreateTime.timeFormat(
                 'HH:mm:ss'
-              )} - ${selTask.UpdateTime.timeFormat('HH:mm:ss')}`,
+              )} - ${
+                selTask.UpdateTime
+                  ? selTask.UpdateTime.timeFormat('HH:mm:ss')
+                  : new Date().timeFormat('HH:mm:ss')
+              }`,
             }"
           >
           </el-time-picker>
@@ -45,7 +49,11 @@
             :picker-options="{
               selectableRange: `${selTask.CreateTime.timeFormat(
                 'HH:mm:ss'
-              )} - ${selTask.UpdateTime.timeFormat('HH:mm:ss')}`,
+              )} - ${
+                selTask.UpdateTime
+                  ? selTask.UpdateTime.timeFormat('HH:mm:ss')
+                  : new Date().timeFormat('HH:mm:ss')
+              }`,
             }"
           >
           </el-time-picker>
@@ -144,9 +152,13 @@ export default {
         this.formData.sdate = this.selTask.CreateTime.timeFormat(
           "yyyy-MM-dd HH:mm:ss"
         );
-        this.formData.edate = this.selTask.UpdateTime.timeFormat(
-          "yyyy-MM-dd HH:mm:ss"
-        );
+        if (this.selTask.UpdateTime) {
+          this.formData.edate = this.selTask.UpdateTime.timeFormat(
+            "yyyy-MM-dd HH:mm:ss"
+          );
+        } else {
+          this.formData.edate = new Date().timeFormat("yyyy-MM-dd HH:mm:ss");
+        }
       });
     },
     /**

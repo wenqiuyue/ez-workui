@@ -25,7 +25,12 @@
               </p>
               <p>
                 <el-tag size="mini"
-                  >任务时间段：{{ item.StartTime }} - {{ item.EndTime }}</el-tag
+                  >任务时间段：{{ item.CreateTime.timeFormat("HH:mm") }} -
+                  {{
+                    item.UpdateTime
+                      ? item.UpdateTime.timeFormat("HH:mm")
+                      : "当前"
+                  }}</el-tag
                 >
               </p>
             </div>

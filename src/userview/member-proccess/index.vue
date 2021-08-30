@@ -210,17 +210,17 @@
                         <div v-if="true">
                           <div
                             class="list-item"
-                            v-for="(val, index) in 4"
+                            v-for="(val, index) in item.TaskMembers"
                             :key="index"
                           >
                             <div class="task-detail" @click="toDetail(val)">
                               <p>
-                                <span class="name">整理对外版功能文档</span>
+                                <span class="name">{{ val.Name }}</span>
                                 <el-tag
                                   type="success"
                                   size="mini"
-                                  v-if="index == 1"
-                                  >进行中</el-tag
+                                  v-if="val.Status"
+                                  >{{ val.Status }}</el-tag
                                 >
                               </p>
                             </div>
@@ -508,17 +508,28 @@ export default {
      * 任务详情
      */
     toDetail(val) {
-      this.indexData = {
-        type: "Edit",
-        name: "XXX项目",
-        departmentCode: 1,
-        row: val,
-        xModalName: "taskM",
-      };
       this.$modal.show("taskM");
-      this.$nextTick(() => {
-        this.$refs.taskM.changeEditState();
-      });
+      this.$refs.taskM.setLoading(true);
+      this.$http
+        .post("/Task/GetTaskDetail.ashx", {
+          teamId: this.teamValue,
+          Id: val.Id,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.indexData = {
+              type: "",
+              name: "任务详情",
+              departmentCode: 1,
+              row: resp.data,
+              xModalName: "taskM",
+            };
+            this.$nextTick(() => {
+              this.$refs.taskM.changeEditState();
+            });
+          }
+        })
+        .finally(() => this.$refs.taskM.setLoading(false));
     },
     /**
      * 获取团队

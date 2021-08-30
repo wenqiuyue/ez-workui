@@ -33,12 +33,6 @@
       <div class="staffbox" slot="content">
         <div class="state">
           <div class="state_one">
-            <h3>操作效率雷达图</h3>
-            <div class="info">
-              <Radar :efficiencyData="efficiencyData"></Radar>
-            </div>
-          </div>
-          <div class="state_one">
             <div class="card_title_one">
               <h3>行为热力图</h3>
               <ul class="status">
@@ -67,6 +61,12 @@
                 :UsId="uid"
                 :teamId="teamId"
               ></ThermodynamicChart>
+            </div>
+          </div>
+          <div class="state_one">
+            <h3>操作效率雷达图</h3>
+            <div class="info">
+              <Radar :efficiencyData="efficiencyData"></Radar>
             </div>
           </div>
           <div class="state_one state_one_three">
@@ -162,7 +162,7 @@
                 class="i_text"
                 v-for="(item, wordindex) in ThreeTexts"
                 :key="wordindex"
-                @handleClick="handleKeyWord(item)"
+                @handleClick="handleKeyWord(item, 1)"
                 :content="item.Key"
                 :ref="`demandLeftMenu-${wordindex}`"
                 maxWidth="40%"
@@ -219,19 +219,21 @@
               <el-button
                 type="text"
                 size="small"
-                @click.stop="handleAllWords"
-                v-if="ThreeTexts.length"
+                @click.stop="handleAllSensitiveWords"
+                v-if="sensitiveWord.length"
                 >查看全部</el-button
               >
             </div>
-            <div class="info" v-if="ThreeTexts && ThreeTexts.length">
+            <div class="info" v-if="sensitiveWord && sensitiveWord.length">
               <tooltip
                 class="i_text"
-                v-for="(item, wordindex) in ThreeTexts"
-                :key="wordindex"
-                @handleClick="handleKeyWord(item)"
-                :content="item.Key"
-                :ref="`demandLeftMenu-${wordindex}`"
+                v-for="(sitem, swordindex) in sensitiveWord.filter(
+                  (m, index) => index < 20
+                )"
+                :key="swordindex"
+                @handleClick="handleKeyWord(sitem, 2)"
+                :content="sitem.Sensitive"
+                :ref="`sensitiveWord-${swordindex}`"
                 maxWidth="40%"
               ></tooltip>
             </div>
@@ -324,6 +326,23 @@
       :uid="uid"
       :teamValue="teamId"
     ></progresscom>
+    <!-- 所有敏感词 -->
+    <AllSensitiveWord
+      :sensitiveWord="sensitiveWord"
+      :stime="
+        selActiveTime
+          ? selActiveTime.timeFormat('yyyy-MM-dd 00:00:01')
+          : stime.timeFormat('yyyy-MM-dd 00:00:01')
+      "
+      :etime="
+        selActiveTime
+          ? selActiveTime.timeFormat('yyyy-MM-dd 23:59:59')
+          : etime.timeFormat('yyyy-MM-dd 23:59:59')
+      "
+      :uid="uid"
+      :teamValue="teamId"
+      ref="allSWord"
+    ></AllSensitiveWord>
   </div>
 </template>
 
@@ -337,6 +356,7 @@ export default {
     keywordfrequency: () => import("../keywordfrequency"),
     progresscom: () => import("../progressCom"),
     ThermodynamicChart: () => import("@/components/ThermodynamicChart"),
+    AllSensitiveWord: () => import("../allSensitiveWord"),
   },
   props: {
     //团队id
@@ -380,7 +400,7 @@ export default {
       dataDetails: null,
       behaviorArray: [],
       AppDetails: [],
-
+      sensitiveWord: [], //敏感词
       efficiencyData: null, //雷达图
       loading: false,
       workTime: null,
@@ -456,6 +476,12 @@ export default {
       this.$emit("handleAllBehavior", this.dataDetails);
     },
     /**
+     * 查看所有敏感词
+     */
+    handleAllSensitiveWords() {
+      this.$modal.show("allSensitiveWords");
+    },
+    /**
      * 查看全部关键词
      */
     handleAllWords() {
@@ -520,12 +546,19 @@ export default {
         teamId: this.teamId,
         type: 1,
       };
+      const data2 = {
+        usId: this.uid,
+        datestart: this.selActiveTime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.selActiveTime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+      };
       Promise.all([
         this.$http.get("/Teams/MemberJob/MemberDataDetails.ashx#", {
           params: data1,
         }),
         this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx", data3),
         this.$http.get("/User/Work/GetBehaviorAnalyse.ashx", { params: data4 }),
+        this.$http.post("/SensitiveWord/GetSensitiveWord.ashx", data2),
       ]).then((resp) => {
         if (resp[0].res == 0) {
           this.dataDetails = resp[0].data;
@@ -568,6 +601,9 @@ export default {
         if (resp[2].res == 0) {
           this.behaviorArray = resp[2].data.Behavior;
         }
+        if (resp[3].res == 0) {
+          this.sensitiveWord = resp[3].data.Behavior;
+        }
         this.loading = false;
       });
     },
@@ -594,10 +630,17 @@ export default {
         teamId: this.teamId,
         type: 1,
       };
+      const data2 = {
+        usId: this.uid,
+        datestart: this.stime.timeFormat("yyyy-MM-dd 00:00:01"),
+        dateend: this.etime.timeFormat("yyyy-MM-dd 23:59:59"),
+        teamId: this.teamId,
+      };
       Promise.all([
         this.$http.post("/User/MemberDataDetailsSummary.ashx#", data1),
         this.$http.post("/User/Work/WorkEfficiencyAnalysis.ashx", data3),
         this.$http.get("/User/Work/GetBehaviorAnalyse.ashx", { params: data4 }),
+        this.$http.post("/SensitiveWord/GetSensitiveWord.ashx", data2),
       ]).then((resp) => {
         console.log(resp);
         if (resp[0].res == 0) {
@@ -643,14 +686,22 @@ export default {
         if (resp[2].res == 0) {
           this.behaviorArray = resp[2].data.Behavior;
         }
+        if (resp[3].res == 0) {
+          this.sensitiveWord = resp[3].data.Behavior;
+        }
         this.loading = false;
       });
     },
     /**
      * 查看某个关键词
      */
-    handleKeyWord(val) {
-      this.$emit("handleKeyWord", val, this.dataDetails);
+    handleKeyWord(val, type) {
+      if (type == 1) {
+        this.$emit("handleKeyWord", val, this.dataDetails);
+      } else {
+        this.$refs.allSWord.cellClick(val);
+      }
+
       // this.clickKeyWord = val.Key;
       // this.pname = val.FocusFormName;
       // this.$modal.show("staffDataWord");

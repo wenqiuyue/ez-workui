@@ -96,15 +96,21 @@
               >
               </el-input>
               <div v-else class="state-see">
-                {{ formData.describe }}
+                {{ formData.describe ? formData.describe : "无描述" }}
               </div>
             </el-form-item>
             <el-form-item label="任务历史：" v-if="!editState" class="progress">
               <el-timeline v-if="formData.progress && formData.progress.length">
                 <el-timeline-item
-                  :timestamp="`${item.CreateTime.timeFormat(
-                    'yyyy年MM月dd日 HH:mm'
-                  )} 至 ${item.UpdateTime.timeFormat('yyyy年MM月dd日 HH:mm')}`"
+                  :timestamp="`${
+                    item.CreateTime
+                      ? item.CreateTime.timeFormat('yyyy年MM月dd日 HH:mm')
+                      : '--'
+                  } 至 ${
+                    item.UpdateTime
+                      ? item.UpdateTime.timeFormat('yyyy年MM月dd日 HH:mm')
+                      : '--'
+                  }`"
                   placement="top"
                   v-for="(item, index) in formData.progress"
                   :key="index"
@@ -297,6 +303,9 @@ export default {
       //   CreatTime: "",
       //   teamValue: "",
       // };
+    },
+    setLoading(val) {
+      this.loading = val;
     },
   },
 };

@@ -273,7 +273,34 @@ export default {
         );
       } else if (this.name == "behaviorPicList") {
         this.getUserBehaviorImg();
+      } else if (this.name == "sensitiveWord") {
+        this.getSensitiveWordImg();
       }
+    },
+    /**
+     * 敏感词截图
+     */
+    getSensitiveWordImg() {
+      this.photoDis = true;
+      this.loading = true;
+      let params = {
+        uid: this.uid,
+        word: this.activeBar.name,
+        stime: this.stime,
+        etime: this.etime,
+        pageCount: this.pageData.pageSize,
+        teamId: this.teamValue,
+        page: this.pageData.pageIndex,
+      };
+      this.$http
+        .post("/SensitiveWord/GetSensitiveWordImg.ashx#", params)
+        .then((res) => {
+          if (res.res == 0) {
+            this.progressPhotoArr = res.data.data;
+            this.pageData.totalNum = res.data.total;
+          }
+        })
+        .finally(() => (this.loading = false));
     },
     getProcessImgData() {
       this.photoDis = true;

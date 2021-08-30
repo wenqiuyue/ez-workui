@@ -1285,7 +1285,7 @@ export default {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
-            height: 80px;
+            height: 76px;
             overflow-y: hidden;
             // padding-left: 8px;
             .word_item {
