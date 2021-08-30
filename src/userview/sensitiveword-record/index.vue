@@ -143,6 +143,14 @@
         </div>
       </div>
     </div>
+    <progresscom
+      :name="'sensitiveWord'"
+      :activeBar="{ name: word }"
+      :stime="ds"
+      :etime="de"
+      :uid="uid"
+      :teamValue="teamValue"
+    ></progresscom>
   </div>
 </template>
 <script>
@@ -152,9 +160,12 @@ export default {
     Header: () => import("@/components/Header"),
     selMember: () => import("@/components/Selectors/MemberSelectCopy"),
     tooltip: () => import("@/components/textTooltip"),
+    progresscom: () => import("@/userview/data-analysis/progressCom"),
   },
   data() {
     return {
+      uid: null,
+      word: null,
       ds: null, //开始时间
       de: null, //结束时间
       pageData: {
@@ -193,7 +204,9 @@ export default {
      * 查看某个敏感词
      */
     handleKeyWord(val, item) {
-      console.log(val, item);
+      this.word = val;
+      this.uid = item.UserId;
+      this.$modal.show("sensitiveWord");
     },
     /**
      * 获取列表数据
