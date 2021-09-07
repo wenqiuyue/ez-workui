@@ -38,9 +38,9 @@
                     class="s_l_li"
                     v-for="(citem, csoftind) in item.Process"
                     :key="csoftind"
-                    @click="handleAppPic(citem)"
                   >
                     <tooltip
+                      @handleClick="handleAppPic(citem)"
                       class="i_text"
                       :content="citem.PName"
                       :ref="`process-${csoftind}`"

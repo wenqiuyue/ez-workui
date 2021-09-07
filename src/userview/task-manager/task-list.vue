@@ -135,12 +135,11 @@
       ></c-pages>
     </c-content>
     <TaskModal
-      v-if="teamOptions"
+      @loadSuccess="xmodalLoaded"
       ref="taskM"
       :indexData="indexData"
       @eventComfirm="getDataList"
       :teamValue="teamValue"
-      :teamOptions="teamOptions"
     ></TaskModal>
   </div>
 </template>
@@ -209,8 +208,33 @@ export default {
       }
     },
   },
+
+  mounted() {
+    if (this.$route.query.isInfo && this.$route.query.teamValue) {
+      this.teamValue = JSON.parse(this.$route.query.teamValue);
+      this.getDataList();
+    }
+  },
   methods: {
     imgChange,
+    xmodalLoaded() {
+      if (
+        this.$route.query.isInfo &&
+        this.$route.query.teamValue &&
+        this.$route.query.task
+      ) {
+        this.$http
+          .post("/Task/GetTaskDetail.ashx", {
+            teamId: JSON.parse(this.$route.query.teamValue),
+            Id: JSON.parse(this.$route.query.task),
+          })
+          .then((resp) => {
+            if (resp.res == 0) {
+              this.handleEdit(resp.data);
+            }
+          });
+      }
+    },
     /**
      * 启用、禁用任务
      */

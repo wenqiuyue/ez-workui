@@ -68,7 +68,11 @@
           ></el-input>
         </el-form-item> </el-form
     ></XModal>
-    <TaskList :teamValue="teamValue" @getTask="getTask"></TaskList>
+    <TaskList
+      :teamValue="teamValue"
+      @getTask="getTask"
+      :selMem="selMem"
+    ></TaskList>
   </div>
 </template>
 <script>

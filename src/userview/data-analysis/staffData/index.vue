@@ -262,13 +262,13 @@
                     class="s_l_li"
                     v-for="(citem, csoftind) in item.Process"
                     :key="csoftind"
-                    @click="handleAppPic(citem)"
                   >
                     <tooltip
                       class="i_text"
                       :content="citem.PName"
                       :ref="`process-${csoftind}`"
                       maxWidth="70%"
+                      @handleClick="handleAppPic(citem)"
                     ></tooltip>
                     <span>({{ (citem.PNamePercent * 100).toFixed(0) }}%)</span>
                   </li>

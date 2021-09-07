@@ -9,6 +9,15 @@
       @opened="opened"
     >
       <div class="modal_content" v-loading="loading">
+        <div class="screen">
+          <el-input
+            v-model="searchVal"
+            placeholder="任务名关键词搜索"
+          ></el-input>
+          <el-button type="primary" size="medium" @click="handleSearch"
+            >搜 索</el-button
+          >
+        </div>
         <el-table
           :data="tableData"
           border
@@ -89,6 +98,10 @@ export default {
       type: Number,
       default: null,
     },
+    selMem: {
+      type: Array,
+      default: null,
+    },
   },
   data() {
     return {
@@ -107,6 +120,13 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 关键词搜索
+     */
+    handleSearch() {
+      this.pageData.pageIndex = 1;
+      this.getAllData();
+    },
     /**
      * 选择任务
      */
@@ -131,12 +151,10 @@ export default {
         pageIndex: this.pageData.pageIndex,
         pageSize: this.pageData.pageSize,
         name: this.searchVal,
-        usId: null,
-        type: 2,
       };
       this.loading = true;
       this.$http
-        .post("/Task/GetTaskList.ashx", data)
+        .get("/Task/GetMemberTaskSeleced.ashx", { params: data })
         .then((resp) => {
           if (resp.res == 0) {
             this.tableData = resp.data.Data;
@@ -180,7 +198,7 @@ export default {
     height: 100%;
     /deep/.el-table {
       font-size: 13px;
-      height: calc(100% - 32px);
+      height: calc(100% - 73px);
       overflow: auto;
       th,
       td {
@@ -198,6 +216,22 @@ export default {
         align-items: center;
         .el-avatar {
           margin-right: 5px;
+        }
+      }
+    }
+    .screen {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: 5px;
+      .el-input {
+        width: 230px;
+        border: 1px solid #dcdfe6;
+        border-radius: 4px;
+        margin-right: 5px;
+        /deep/.el-input__inner {
+          height: 34px;
+          line-height: 34px;
         }
       }
     }

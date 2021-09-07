@@ -6,6 +6,7 @@
     @beforeClose="beforeClose"
     class="taskM"
     @opened="opened"
+    @loadSuccess="$emit('loadSuccess')"
   >
     <c-win-tmp
       ref="winTmp"
@@ -150,10 +151,6 @@ export default {
       type: Number,
       default: 0,
     },
-    teamOptions: {
-      type: Array,
-      default: null,
-    },
   },
   components: {
     XModal: () => import("@/components/XModal"),
@@ -162,6 +159,7 @@ export default {
 
   data() {
     return {
+      teamOptions: [],
       loading: false,
       editState: false,
       comWidth: "95%",
@@ -198,12 +196,27 @@ export default {
       return process.env.VUE_APP_CMURL;
     },
   },
-  created() {},
+
   methods: {
     imgChange,
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     opened() {
       this.$nextTick(() => {
         this.formData.teamValue = this.teamValue;
+        this.getTeams();
       });
     },
     // 改变窗口状态的，搭配index页 添加和编辑按钮
@@ -295,14 +308,7 @@ export default {
       this.attend = false;
       this.loading = false;
       Object.assign(this.$data, this.$options.data());
-      // this.formData = {
-      //   id: "", // 编辑窗口才用ID
-      //   task: "",
-      //   status: "",
-      //   describe: "",
-      //   CreatTime: "",
-      //   teamValue: "",
-      // };
+      this.$router.replace({});
     },
     setLoading(val) {
       this.loading = val;

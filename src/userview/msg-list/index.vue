@@ -278,6 +278,14 @@ export default {
       this.activeItem = item.join();
       if (this.teamValue) {
         this.handleSearch();
+      } else {
+        this.$message({
+          showClose: true,
+          message: "请先选择团队！",
+          type: "warning",
+          duration: 2000,
+        });
+        return;
       }
     },
     /**
