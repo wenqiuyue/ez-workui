@@ -229,34 +229,37 @@
                 </li>
                 <li class="set_row" v-if="infoData.DataClearSeting.Type == 2">
                   <span
-                    >执行时间：{{
-                      $D.ITEM(
-                        "DBCS_TimeLoopType",
-                        infoData.DataClearSeting.TimeLoopType
-                      ).key
-                    }}
+                    >执行时间：
+
                     <label v-if="infoData.DataClearSeting.TimeLoopType == 3">
+                      每隔
                       {{
                         infoData.DataClearSeting.Time1
                           ? `${infoData.DataClearSeting.Time1}月`
                           : ""
-                      }}{{
+                      }}的{{
                         infoData.DataClearSeting.Time2
-                          ? `${infoData.DataClearSeting.Time2}日`
+                          ? `${infoData.DataClearSeting.Time2}号`
                           : ""
                       }}</label
                     ><label v-if="infoData.DataClearSeting.TimeLoopType == 2">
+                      每隔
                       {{
                         infoData.DataClearSeting.Time1
                           ? `${infoData.DataClearSeting.Time1}周`
                           : ""
-                      }}
+                      }}的
                       {{
                         infoData.DataClearSeting.Time2
                           ? `周${infoData.DataClearSeting.Time2}`
                           : ""
                       }}</label
-                    ></span
+                    ><label v-if="infoData.DataClearSeting.TimeLoopType == 1">{{
+                      $D.ITEM(
+                        "DBCS_TimeLoopType",
+                        infoData.DataClearSeting.TimeLoopType
+                      ).key
+                    }}</label></span
                   >
                 </li>
                 <li class="set_row" v-if="infoData.DataClearSeting.Type == 3">

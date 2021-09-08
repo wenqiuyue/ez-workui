@@ -151,6 +151,7 @@ export default {
      */
     getSelMember(val) {
       this.selMem = val;
+      this.getTask();
       console.log(val);
     },
     // 左侧li点击事件
@@ -242,9 +243,9 @@ export default {
       display: flex;
       flex-direction: row;
       align-items: center;
-      margin-top: 14px;
+      margin-top: 16px;
       border-bottom: 1px solid #eee;
-      padding-bottom: 10px;
+      padding-bottom: 14px;
       .lable {
         font-weight: bold;
         font-size: 14px;

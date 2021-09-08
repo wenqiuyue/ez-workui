@@ -118,7 +118,7 @@
                 >
                   <el-card>
                     <p class="task_con">
-                      {{ item.Describe }}
+                      任务描述：{{ item.Describe ? item.Describe : "无" }}
                     </p>
                     <el-image
                       style="max-width: 160px"

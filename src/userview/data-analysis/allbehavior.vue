@@ -59,7 +59,9 @@
           </el-table-column>
           <el-table-column prop="DateSumNum" label="耗时">
             <template slot-scope="scope">
-              {{ scope.row.DateSumNum }}分钟
+              {{
+                scope.row.DateSumNum ? scope.row.DateSumNum.toFixed(2) : 0
+              }}分钟
             </template>
           </el-table-column>
           <el-table-column prop="ClickSumNum" label="鼠标点击次数">

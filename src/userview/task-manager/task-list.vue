@@ -9,6 +9,7 @@
               filterable
               placeholder="请选择团队"
               v-if="!isMember"
+              @change="handleSearch"
             >
               <el-option
                 v-for="item in teamOptions"
