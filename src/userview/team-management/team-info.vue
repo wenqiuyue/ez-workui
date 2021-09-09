@@ -124,7 +124,7 @@
                     infoData.Teamdata.Code ? infoData.Teamdata.Code : "无"
                   }}</span>
                 </p>
-                <p class="tips">用户可通过团队号加入团队</p>
+                <p class="tips" v-if="setOne">用户可通过团队号加入团队</p>
                 <p
                   style="margin-top: 5px"
                   v-if="

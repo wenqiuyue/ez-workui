@@ -5,8 +5,15 @@ import axios from "axios";
  * 作者：XBB
  * 时间：2019-12-13
  */
-const dic_url =
-  process.env.VUE_APP_DIC + "/Dictionary/NewGetDataDictionaryList.ashx";
+let url = null;
+if (process.env.NODE_ENV === "development") {
+  //***** 测试 *****
+  url = process.env.VUE_APP_DIC;
+} else {
+  //***** 线上 *****
+  url = "";
+}
+const dic_url = url + "/Dictionary/NewGetDataDictionaryList.ashx";
 export default class xDictionary {
   constructor() {
     this.dic = [];

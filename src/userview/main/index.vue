@@ -48,7 +48,7 @@
                 </i>
               </router-link>
               <a href="javascript:;" @click="exit" class="hiFont hi-signout">
-                <span>登出</span>
+                <span>退出</span>
               </a>
               <div class="title_bottom" @click="handleHome">
                 <!-- <img class="mb" src="@/assets/main/main_mb.png" />
@@ -113,7 +113,7 @@ export default {
       // this.$xSocket.destroy();
       // this.$xSocket = 0;
       this.$router.push("/");
-      this.$message("登出成功");
+      this.$message("退出成功");
     },
     /**
      * 获取申请条数

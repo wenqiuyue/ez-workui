@@ -122,7 +122,9 @@
             <el-option
               :label="item.key"
               :value="item.value"
-              v-for="(item, index) in $D.LIST('DBCS_ClearType')"
+              v-for="(item, index) in $D
+                .LIST('DBCS_ClearType')
+                .filter((m) => m.value != 3)"
               :key="index"
             ></el-option>
           </el-select>

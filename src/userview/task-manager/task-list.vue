@@ -258,7 +258,7 @@ export default {
     },
     // 删除某一行
     handleDelt(row) {
-      this.$confirm("此操作将删除此项目, 是否继续?", "提示", {
+      this.$confirm("此操作将删除此任务, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
@@ -298,8 +298,8 @@ export default {
         type: ty === "ad" ? "Add" : `${this.isMember ? "" : "Edit"}`,
         name:
           ty === "ad"
-            ? "添加项目"
-            : `${this.isMember ? "项目详情" : "编辑项目"}`,
+            ? "添加任务"
+            : `${this.isMember ? "任务详情" : "编辑任务"}`,
         departmentCode: code,
         row: row,
         xModalName: "taskM",

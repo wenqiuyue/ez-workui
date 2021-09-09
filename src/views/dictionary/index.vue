@@ -114,11 +114,6 @@ export default {
       AddFather: false,
     };
   },
-  computed: {
-    dic_url() {
-      return process.env.VUE_APP_DIC;
-    },
-  },
   watch: {
     searchValue() {
       if (this.searchValue == "") {
@@ -163,7 +158,7 @@ export default {
           };
         }
         this.$http
-          .post(this.dic_url + "/Dictionary/DeleteDataDictionary.ashx", param)
+          .post("/Dictionary/DeleteDataDictionary.ashx", param)
           .then((res) => {
             if (res.res == 0) {
               this.$message({
@@ -198,7 +193,7 @@ export default {
       this.AddFather = false;
       this.editObj = {};
       this.$http
-        .post(this.dic_url + "/Dictionary/NewGetDataDictionaryList.ashx", {
+        .post("/Dictionary/NewGetDataDictionaryList.ashx", {
           name: this.searchValue,
         })
         .then((res) => {
@@ -223,7 +218,7 @@ export default {
         FID = "";
       }
       this.$http
-        .post(this.dic_url + "/Dictionary/AddDataDictionary.ashx", {
+        .post("/Dictionary/AddDataDictionary.ashx", {
           key: this.editObj.Key,
           value: this.editObj.Value,
           FID,
@@ -265,7 +260,7 @@ export default {
           return;
         }
         this.$http
-          .post(this.dic_url + "/Dictionary/AddDataDictionary.ashx", {
+          .post("/Dictionary/AddDataDictionary.ashx", {
             //添加子级
             key: this.editObj.Key,
             value: this.editObj.Value,
@@ -290,7 +285,7 @@ export default {
       if (!this.add && !this.editObj.DictionaryID) {
         //修改父级
         this.$http
-          .post(this.dic_url + "/Dictionary/EditDataDictionaryList.ashx", {
+          .post("/Dictionary/EditDataDictionaryList.ashx", {
             dictionaryID: this.editObj.FDictionaryID,
             key: this.editObj.Key,
             value: this.editObj.Value,
@@ -312,7 +307,7 @@ export default {
       if (!this.add && this.editObj.DictionaryID) {
         //修改子级
         this.$http
-          .post(this.dic_url + "/Dictionary/EditDataDictionaryList.ashx", {
+          .post("/Dictionary/EditDataDictionaryList.ashx", {
             dictionaryID: this.editObj.DictionaryID,
             fDictionaryID: this.editObj.FDictionaryID,
             key: this.editObj.Key,
