@@ -846,7 +846,7 @@ export default {
                     element.ComputerUsageRecord.workRat.map((m) => {
                       return {
                         name: m.name,
-                        value: m.value.toFixed(1),
+                        value: m ? m.value.toFixed(1) : 0,
                       };
                     });
                 }

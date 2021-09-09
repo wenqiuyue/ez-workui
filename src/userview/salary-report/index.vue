@@ -131,11 +131,13 @@
             </el-table-column>
             <el-table-column prop="Wage" label="时薪" align="center">
               <template slot-scope="scope">
-                {{ scope.row.Wage ? scope.row.Wage : 0 }}元
+                {{ scope.row.Wage ? scope.row.Wage.toFixed(2) : 0 }}元
               </template>
             </el-table-column>
             <el-table-column prop="Salary" label="薪资" align="center">
-              <template slot-scope="scope"> {{ scope.row.Salary }}元 </template>
+              <template slot-scope="scope">
+                {{ scope.row.Salary ? scope.row.Salary.toFixed(2) : 0 }}元
+              </template>
             </el-table-column>
           </el-table>
           <el-pagination
