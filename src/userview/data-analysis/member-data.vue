@@ -13,6 +13,7 @@
       :stime="stime"
       :etime="etime"
       :teamId="teamValue"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       @handleAllSoftware="handleAllSoftware"
       @handleAllWords="handleAllWords"
       @handleKeyWord="handleKeyWord"
@@ -176,6 +177,7 @@
                 width="70%"
               ></tooltip>
             </p>
+
             <p v-if="item.ClientStatus == 1">
               <span class="screen_check">
                 <el-checkbox-group v-model="item.screenCheck">
@@ -205,6 +207,7 @@
                 该用户已离线
               </el-tag>
             </p>
+
             <template v-if="item.loadPic && item.loadPic.length">
               <div class="receive-img">
                 <!-- <span>{{ pic.Times.timeFormat("yyyy-MM-dd HH:mm") }}</span> -->
@@ -368,6 +371,7 @@
     </div>
     <!-- 所有行为分析 -->
     <AllBehavior
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :selUser="selUser"
       :teamValue="teamValue"
       @handleBehavior="handleBehavior"
@@ -377,6 +381,7 @@
     ></AllBehavior>
     <!-- 所有软件弹窗 -->
     <allsoftware
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :stime="stime"
       :etime="etime"
       :uid="clickUser"
@@ -387,6 +392,7 @@
     <AllWords :selUser="selUser" @handleKeyWord="handleKeyWord"></AllWords>
     <!-- 行为折线图弹窗 -->
     <BehaviorEcharts
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :teamId="teamValue"
       :searchType="isTimeSearch ? 1 : 2"
       :behavior="clickKeyWord"
@@ -404,9 +410,11 @@
       :uid="clickUser"
       :teamValue="teamValue"
       :gid="gid"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
     ></progresscom>
     <!-- 关键词使用频率 -->
     <keywordfrequency
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :searchType="isTimeSearch ? 2 : 1"
       :selActiveTime="selActiveTime"
       :datestart="stime"
@@ -463,6 +471,8 @@ export default {
       imgload: false,
       userID: "",
       timer: null,
+      IsRealTimeScreenshot: false, //是否显示实时截图
+      IsStartCamera: false, //是否显示摄像头
       teamOptions: [], //团队选择器
       teamValue: null, //选择的团队
       selMem: [], //选择的成员
@@ -613,7 +623,12 @@ export default {
     /**
      * 团队切换
      */
-    handleTeamChange() {
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.IsRealTimeScreenshot = team.IsRealTimeScreenshot; //是否显示实时截图
+        this.IsStartCamera = team.IsStartCamera; //是否显示摄像头
+      }
       this.selMem = [];
     },
     /**

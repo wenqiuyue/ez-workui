@@ -18,6 +18,7 @@
       </div>
     </XModal>
     <progresscom
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :name="'behaviorPicList'"
       :activeBar="{ name: behavior }"
       :stime="datestart"
@@ -35,6 +36,11 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     uid: {
       type: Number,
       default: null,

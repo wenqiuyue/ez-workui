@@ -7,7 +7,12 @@
         <div class="sel" v-if="isShowTeam">
           <span>团队</span>
           <div>
-            <el-select v-model="teamValue" filterable placeholder="请选择团队">
+            <el-select
+              v-model="teamValue"
+              filterable
+              placeholder="请选择团队"
+              @change="handleTeamChange"
+            >
               <el-option
                 v-for="item in teamOptions"
                 :key="item.Id"
@@ -350,7 +355,11 @@
       <img src="../../assets/img/emptyMem.png" alt="" />
       <p class="empty-taskList">暂无可查看成员</p>
     </div>
-    <TaskModal ref="taskM" :indexData="indexData"></TaskModal>
+    <TaskModal
+      ref="taskM"
+      :indexData="indexData"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
+    ></TaskModal>
   </div>
 </template>
 
@@ -366,6 +375,7 @@ export default {
 
   data() {
     return {
+      IsRealTimeScreenshot: true,
       screenCheck: [], //截屏类型
       isShowTeam: false, // 是否显示团队选择
       teamOptions: [], //团队选择器
@@ -504,6 +514,15 @@ export default {
     imgChange,
     getEfficiencyColor,
     getbehaviorColor,
+    /**
+     * 团队切换
+     */
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.IsRealTimeScreenshot = team.IsRealTimeScreenshot; //是否显示实时截图
+      }
+    },
     /**
      * 任务详情
      */

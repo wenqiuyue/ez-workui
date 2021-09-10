@@ -18,6 +18,7 @@
       </div>
     </XModal>
     <progresscom
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :name="'keywordfrequency'"
       :activeBar="{ name: word, pname: pname }"
       :stime="datestart"
@@ -35,6 +36,11 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     selActiveTime: {
       type: String,
       default: null,

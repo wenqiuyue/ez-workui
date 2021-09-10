@@ -37,7 +37,9 @@
           <span
             >{{
               `
-        ${name == "memberDatatimeAxisPhoto" ? "状态的" : "的"}截图`
+        ${name == "memberDatatimeAxisPhoto" ? "状态的" : "的"}${
+                IsRealTimeScreenshot ? "截图" : "详情"
+              }`
             }}
           </span>
         </div>
@@ -120,6 +122,7 @@
                     </span>
                   </h4>
                   <el-image
+                    v-if="IsRealTimeScreenshot"
                     style="max-width: 200px"
                     :src="cmurl + value.imgURL"
                     alt=""
@@ -163,6 +166,11 @@ export default {
     };
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     selActiveTime: {
       type: String,
       default: null,

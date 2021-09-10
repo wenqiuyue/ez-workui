@@ -45,9 +45,9 @@
       <div class="msg_con" slot="main">
         <ul v-if="msgData && msgData.length">
           <li v-for="(item, index) in msgData" :key="index">
-            <div class="num">
+            <!-- <div class="num">
               <span @click="handleRead(item)">查看详情</span>
-            </div>
+            </div> -->
             <div class="user">
               <el-avatar
                 size="large"
@@ -59,7 +59,12 @@
                   <el-tag type="info" size="mini">{{
                     item.CreateTime.timeFormat("yyyy年MM月dd日 HH:mm")
                   }}</el-tag>
-                  <el-tag size="mini">数据监测团队</el-tag>
+                  <el-tag size="mini" type="warning">{{
+                    item.TeamName
+                  }}</el-tag>
+                  <el-button type="text" size="small" @click="handleRead(item)"
+                    >点击查看详情</el-button
+                  >
                 </p>
               </div>
             </div>

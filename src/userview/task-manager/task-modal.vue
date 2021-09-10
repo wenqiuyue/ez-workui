@@ -121,6 +121,7 @@
                       任务描述：{{ item.Describe ? item.Describe : "无" }}
                     </p>
                     <el-image
+                      v-if="IsRealTimeScreenshot"
                       style="max-width: 160px"
                       :src="cmurl + item.Img"
                       alt=""
@@ -143,6 +144,11 @@
 import { imgChange } from "@/commons";
 export default {
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     indexData: {
       type: Object,
       default: null,

@@ -28,6 +28,11 @@
 <script>
 export default {
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     //是否是任务详情
     istaskDetail: {
       type: Boolean,
@@ -227,7 +232,9 @@ export default {
           formatter: function (p) {
             const val = p.value[0] + p.value[1] * 12;
             const item = that.thermodynamicData[val].CompterInfos[0];
-            let html = `
+            let html = null;
+            if (that.IsRealTimeScreenshot) {
+              html = `
                     <span>行为：${that.thermodynamicData[val].Behavoir} </span>
                     <span style="margin-left:10px">行为状态：${that.thermodynamicData[val].BehavoirType} </span>
                     <br>
@@ -235,12 +242,23 @@ export default {
                     <span style="margin-left:10px">窗口名：${item.FocusFormName}</span>
                     <br>
                     <image
-                      style="max-width: 200px"
+                      style="max-width: 200px;"
                       src="${that.cmurl}${item.ImageName}"
                       alt=""
                     >
                     </image>
                   `;
+            } else {
+              html = `
+                    <span>行为：${that.thermodynamicData[val].Behavoir} </span>
+                    <span style="margin-left:10px">行为状态：${that.thermodynamicData[val].BehavoirType} </span>
+                    <br>
+                    <span>进程名：${item.Pname}</span>
+                    <span style="margin-left:10px">窗口名：${item.FocusFormName}</span>
+                    <br>
+                    
+                  `;
+            }
             return html;
           },
         },

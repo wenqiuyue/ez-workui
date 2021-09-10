@@ -82,10 +82,11 @@
               :dateend="selDateTimeLine.Date.timeFormat('yyyy-MM-dd 23:59:59')"
               :UsId="selDateTimeLine.UsId"
               :teamId="selDateTimeLine.teamId"
+              :IsRealTimeScreenshot="IsRealTimeScreenshot"
             ></ThermodynamicChart>
           </div>
         </div>
-        <div class="scree">
+        <div class="scree" v-if="IsRealTimeScreenshot">
           <div class="scree_title"><span class="title">定期截图</span></div>
           <div v-if="selDateTime && selDateTime.filter((m) => m.Img).length">
             <viewer
@@ -113,7 +114,11 @@
         </div>
       </div>
     </XModal>
-    <progresscom :name="'staffDataPic'" :activeBar="selRow"></progresscom>
+    <progresscom
+      :name="'staffDataPic'"
+      :activeBar="selRow"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
+    ></progresscom>
   </div>
 </template>
 <script>
@@ -125,6 +130,11 @@ export default {
     tooltip: () => import("@/components/textTooltip"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     selDateTimeLine: {
       type: Object,
       default: null,

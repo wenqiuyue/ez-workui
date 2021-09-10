@@ -9,7 +9,7 @@
               filterable
               placeholder="请选择团队"
               v-if="!isMember"
-              @change="handleSearch"
+              @change="handleTeamChange"
             >
               <el-option
                 v-for="item in teamOptions"
@@ -141,6 +141,7 @@
       :indexData="indexData"
       @eventComfirm="getDataList"
       :teamValue="teamValue"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
     ></TaskModal>
   </div>
 </template>
@@ -175,6 +176,7 @@ export default {
   },
   data() {
     return {
+      IsRealTimeScreenshot: true,
       searchVal: null, //搜索的任务
       teamValue: null, //选择的团队
       loading: false,
@@ -218,6 +220,22 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 成员任务团队切换
+     */
+    memberTeamChange(val) {
+      this.IsRealTimeScreenshot = val;
+    },
+    /**
+     * 团队切换
+     */
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.IsRealTimeScreenshot = team.IsRealTimeScreenshot; //是否显示实时截图
+      }
+      this.handleSearch();
+    },
     xmodalLoaded() {
       if (
         this.$route.query.isInfo &&

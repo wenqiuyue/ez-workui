@@ -74,6 +74,7 @@
       :uid="uid"
       :teamValue="teamValue"
       :selActiveTime="selActiveTime"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
     ></progresscom>
   </div>
 </template>
@@ -84,6 +85,11 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     selActiveTime: {
       type: String,
       default: null,

@@ -40,6 +40,7 @@
       </el-table>
     </XModal>
     <progresscom
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :name="'sensitiveWord'"
       :activeBar="{ name: word }"
       :stime="stime"
@@ -56,6 +57,11 @@ export default {
     progresscom: () => import("./progressCom"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     sensitiveWord: {
       type: Array,
       default: null,

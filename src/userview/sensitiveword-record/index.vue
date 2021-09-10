@@ -144,6 +144,7 @@
       </div>
     </div>
     <progresscom
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :name="'sensitiveWord'"
       :activeBar="{ name: word }"
       :stime="ds"
@@ -164,6 +165,7 @@ export default {
   },
   data() {
     return {
+      IsRealTimeScreenshot: true, //是否显示截图
       uid: null,
       word: null,
       ds: null, //开始时间
@@ -308,7 +310,11 @@ export default {
     /**
      * 团队切换
      */
-    handleTeamChange() {
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.IsRealTimeScreenshot = team.IsRealTimeScreenshot; //是否显示实时截图
+      }
       this.selMem = [];
     },
   },

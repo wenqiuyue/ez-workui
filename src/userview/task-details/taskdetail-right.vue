@@ -16,7 +16,16 @@
               fit="contain"
             ></el-image>
             <div class="img">
-              <el-image :src="cmurl + item.Img" fit="fill"></el-image>
+              <el-image
+                :src="cmurl + item.Img"
+                fit="fill"
+                v-if="IsRealTimeScreenshot"
+              ></el-image>
+              <el-image
+                :src="require('../../assets/img/task.png')"
+                fit="contain"
+                v-else
+              ></el-image>
             </div>
             <div class="task_content">
               <p class="task_title">
@@ -107,6 +116,7 @@
       :date="date"
       :teamValue="teamValue"
       :selMem="selMem"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
     ></TaskDetailM>
     <MakeUp
       :selTask="selTask"
@@ -124,6 +134,11 @@ export default {
     MakeUp: () => import("./makeup-card"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     taskArray: {
       type: Array,
       default: null,

@@ -13,7 +13,7 @@
         <div id="sub-work" class="hp-menu-borderd">
           <!-- 标题 -->
           <form>
-            <h3 @click="handleHome" class="header_title_main">工作平台</h3>
+            <h3>易掌-工作平台</h3>
             <!-- <el-dropdown
               style="text-align: right; margin: 2rem 1rem"
               trigger="click"

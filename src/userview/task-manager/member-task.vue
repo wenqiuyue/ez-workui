@@ -2,7 +2,12 @@
   <div class="member-task">
     <BaseView :title_name="'成员列表'">
       <div slot="panes" style="height: 100%">
-        <el-select v-model="teamValue" filterable placeholder="请先选择团队">
+        <el-select
+          v-model="teamValue"
+          filterable
+          placeholder="请先选择团队"
+          @change="handleTeamChange"
+        >
           <el-option
             v-for="item in teamOptions"
             :key="item.Id"
@@ -69,6 +74,15 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 团队切换
+     */
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.$refs.tasklist.memberTeamChange(team.IsRealTimeScreenshot);
+      }
+    },
     // 左侧li点击事件
     liClick(index) {
       this.generaId = index;

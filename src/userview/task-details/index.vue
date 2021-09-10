@@ -1,15 +1,15 @@
 <template>
   <div class="task-details">
-    <Header title="任务详情" titleEnglish="Task Details" class="baseHeader">
+    <Header title="成员任务" titleEnglish="Member Tasks" class="baseHeader">
     </Header>
     <div class="baseViewPage">
-      <BaseView :title_name="'任务详情'">
+      <BaseView :title_name="'成员任务'">
         <div slot="panes">
           <el-select
             v-model="teamValue"
             filterable
             placeholder="请先选择团队"
-            @change="selMem = []"
+            @change="handleTeamChange"
           >
             <el-option
               v-for="item in teamOptions"
@@ -79,6 +79,7 @@
           :teamValue="teamValue"
           :selMem="selMem"
           @loadData="getTask"
+          :IsRealTimeScreenshot="IsRealTimeScreenshot"
         ></TaskDetailRight>
       </BaseView>
     </div>
@@ -95,6 +96,7 @@ export default {
   },
   data() {
     return {
+      IsRealTimeScreenshot: true,
       teamValue: null, //选择的团队
       teamOptions: [],
       activeTime: "",
@@ -111,6 +113,16 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 团队切换
+     */
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.IsRealTimeScreenshot = team.IsRealTimeScreenshot; //是否显示实时截图
+      }
+      this.selMem = [];
+    },
     /**
      * 获取任务
      */

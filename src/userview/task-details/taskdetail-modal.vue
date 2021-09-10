@@ -16,6 +16,12 @@
                 :src="cmurl + selTask.Img"
                 fit="fill"
                 :preview-src-list="[cmurl + selTask.Img]"
+                v-if="IsRealTimeScreenshot"
+              ></el-image
+              ><el-image
+                :src="require('../../assets/img/task.png')"
+                fit="contain"
+                v-else
               ></el-image></div
           ></el-col>
           <el-col :span="14" class="right_col"
@@ -78,6 +84,11 @@ export default {
     ThermodynamicChart: () => import("@/components/ThermodynamicChart"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     selTask: {
       type: Object,
       default: null,

@@ -42,6 +42,7 @@
                 v-model="teamValue"
                 filterable
                 placeholder="请选择团队"
+                @change="handleTeamChange"
               >
                 <el-option
                   v-for="item in teamOptions"
@@ -1593,7 +1594,10 @@
       ></c-pages>
     </XModal>
     <!-- 打卡时间线弹窗 -->
-    <TimeLineModal :selDateTimeLine="selDateTimeLine"></TimeLineModal>
+    <TimeLineModal
+      :selDateTimeLine="selDateTimeLine"
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
+    ></TimeLineModal>
     <!-- 申诉审核弹窗 -->
     <!-- <appeal
       :popData="popData"
@@ -1641,6 +1645,7 @@ export default {
   },
   data() {
     return {
+      IsRealTimeScreenshot: true, //是否显示截图
       selDateTimeLine: null, //选择的日期查看打卡时间线
       teamValue: null, //选择的团队
       teamOptions: [],
@@ -1720,7 +1725,7 @@ export default {
       }
       if (!this.teamValue) {
         this.$message({
-          message: "请先选择团队",
+          message: "请选择团队",
           type: "warning",
         });
         return;
@@ -1753,6 +1758,21 @@ export default {
   methods: {
     imgChange,
     /**
+     * 成员考勤团队切换
+     */
+    memberTeamChange(val) {
+      this.IsRealTimeScreenshot = val;
+    },
+    /**
+     * 团队切换
+     */
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.IsRealTimeScreenshot = team.IsRealTimeScreenshot; //是否显示实时截图
+      }
+    },
+    /**
      * 分页
      */
     pageChange(val) {
@@ -1765,7 +1785,7 @@ export default {
     handleSearchData() {
       if (!this.teamValue) {
         this.$message({
-          message: "请先选择团队",
+          message: "请选择团队",
           type: "warning",
         });
         return;

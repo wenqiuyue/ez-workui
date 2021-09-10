@@ -13,7 +13,7 @@
         <div id="sub-work" class="hp-menu-borderd">
           <!-- 标题 -->
           <form>
-            <h3>工作平台</h3>
+            <h3>易掌-工作平台</h3>
           </form>
 
           <!-- 菜单列表 -->

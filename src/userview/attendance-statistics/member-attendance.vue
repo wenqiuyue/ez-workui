@@ -13,6 +13,7 @@
           filterable
           placeholder="请先选择团队"
           v-if="isShowTeam"
+          @change="handleTeamChange"
         >
           <el-option
             v-for="item in teamOptions"
@@ -79,6 +80,7 @@
         ref="child"
         :changeTab="changeTab"
         activeItem="审核列表"
+        :IsRealTimeScreenshotMember="IsRealTimeScreenshot"
       >
       </item>
     </BaseView>
@@ -105,6 +107,7 @@ export default {
   },
   data() {
     return {
+      IsRealTimeScreenshot: true,
       loading: false, //加载
       activeName: "1", //视图选项
       isactive: null, //自定义Index
@@ -170,6 +173,15 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 团队切换
+     */
+    handleTeamChange(val) {
+      const team = this.teamOptions.find((m) => m.Id == val);
+      if (team) {
+        this.$refs.child.memberTeamChange(team.IsRealTimeScreenshot);
+      }
+    },
     /**
      * 获取团队
      */

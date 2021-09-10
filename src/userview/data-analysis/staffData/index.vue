@@ -43,6 +43,7 @@
             </div>
             <div class="info">
               <ThermodynamicChart
+                :IsRealTimeScreenshot="IsRealTimeScreenshot"
                 :isColumn="true"
                 :height="'260px'"
                 :width="'370px'"
@@ -282,7 +283,7 @@
             <p>暂无数据</p>
           </div>
         </div>
-        <div class="scree">
+        <div class="scree" v-if="IsRealTimeScreenshot">
           <div class="scree_title">定期截图</div>
           <div v-if="softData && softData.filter((m) => m.Img).length">
             <viewer :images="softData.filter((m) => m.Img)" class="screephot">
@@ -319,6 +320,7 @@
       :teamId="teamId"
     ></keywordfrequency> -->
     <progresscom
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :name="'staffDataPic'"
       :activeBar="selRow"
       :stime="selActiveTime"
@@ -328,6 +330,7 @@
     ></progresscom>
     <!-- 所有敏感词 -->
     <AllSensitiveWord
+      :IsRealTimeScreenshot="IsRealTimeScreenshot"
       :sensitiveWord="sensitiveWord"
       :stime="
         selActiveTime
@@ -359,6 +362,11 @@ export default {
     AllSensitiveWord: () => import("../allSensitiveWord"),
   },
   props: {
+    //是否显示截图
+    IsRealTimeScreenshot: {
+      type: Boolean,
+      default: true,
+    },
     //团队id
     teamId: {
       type: Number,
