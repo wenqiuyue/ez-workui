@@ -2,7 +2,7 @@
   <div id="profile">
     <Header
       title="个人信息"
-      titleEnglish="Personal Inform"
+      titleEnglish="Personal Information"
       class="baseHeader"
     ></Header>
     <div class="container">

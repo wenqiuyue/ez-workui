@@ -1,6 +1,6 @@
 <template>
   <div class="salary-report">
-    <Header title="薪资报表" titleEnglish="Salary Report" class="baseHeader">
+    <Header title="薪资报表" titleEnglish="Payroll" class="baseHeader">
     </Header>
     <div class="salary_content">
       <div class="select-conditions">

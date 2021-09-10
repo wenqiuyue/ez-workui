@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "13769329",
+      "name": "侧边栏-比较-选中",
+      "font_class": "cebianlan-bijiao-xuanzhong",
+      "unicode": "e6a6",
+      "unicode_decimal": 59046
+    },
+    {
+      "icon_id": "8039211",
+      "name": "查看详情",
+      "font_class": "chakanxiangqing",
+      "unicode": "e6a5",
+      "unicode_decimal": 59045
+    },
+    {
+      "icon_id": "6651927",
+      "name": "icons_add，添加",
+      "font_class": "icons_add",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
       "icon_id": "22761409",
       "name": "薪资配置",
       "font_class": "xinzipeizhi",

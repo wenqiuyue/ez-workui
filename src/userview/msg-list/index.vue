@@ -1,6 +1,6 @@
 <template>
   <div class="msg-list">
-    <Header title="消息列表" titleEnglish="Message List" class="baseHeader">
+    <Header title="消息列表" titleEnglish="Message" class="baseHeader">
       <div slot="btnGroup">
         <el-button type="text" @click="handleMass">群发消息</el-button>
         <el-button type="text" @click="handleAllRead" v-if="teamValue"

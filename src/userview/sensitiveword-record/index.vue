@@ -2,7 +2,7 @@
   <div class="sensitiveword-record">
     <Header
       title="敏感词记录"
-      titleEnglish="Sensitive Word Record"
+      titleEnglish="Sensitive Words"
       class="baseHeader"
     >
     </Header>

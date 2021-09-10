@@ -1,8 +1,8 @@
 @font-face {
   font-family: "hiFont"; /* Project id 1454976 */
-  src: url('iconfont.woff2?t=1629352247158') format('woff2'),
-       url('iconfont.woff?t=1629352247158') format('woff'),
-       url('iconfont.ttf?t=1629352247158') format('truetype');
+  src: url('iconfont.woff2?t=1631268499065') format('woff2'),
+       url('iconfont.woff?t=1631268499065') format('woff'),
+       url('iconfont.ttf?t=1631268499065') format('truetype');
 }
 
 .hiFont {
@@ -11,6 +11,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.hi-cebianlan-bijiao-xuanzhong:before {
+  content: "\e6a6";
+}
+
+.hi-chakanxiangqing:before {
+  content: "\e6a5";
+}
+
+.hi-icons_add:before {
+  content: "\e61c";
 }
 
 .hi-xinzipeizhi:before {

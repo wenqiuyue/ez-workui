@@ -1,10 +1,6 @@
 <template>
   <div class="attendance-statistics">
-    <Header
-      title="考勤统计"
-      titleEnglish="Attendance Statistics"
-      class="baseHeader"
-    >
+    <Header title="考勤统计" titleEnglish="Attendance" class="baseHeader">
       <div slot="btnGroup">
         <a
           v-for="item in tabList"

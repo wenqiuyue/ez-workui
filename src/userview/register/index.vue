@@ -48,6 +48,12 @@
                   placeholder="请输入邮箱验证码"
                 ></el-input>
               </el-form-item>
+              <el-form-item class="padding_item last_item">
+                <el-checkbox v-model="isRead"
+                  >你已经详细阅读并同意
+                </el-checkbox>
+                <span class="read" @click="handleNotice">《隐私政策》</span>
+              </el-form-item>
             </el-form>
             <div class="hp-btn">
               <el-button class="v-button" @click="register" :loading="loading"
@@ -62,11 +68,15 @@
         </div>
       </div>
     </div>
+    <Notice ref="notice"></Notice>
   </div>
 </template>
 
 <script>
 export default {
+  components: {
+    Notice: () => import("./notice"),
+  },
   data() {
     return {
       timer: null,
@@ -74,6 +84,7 @@ export default {
 
       codeLoading: false, //获取验证码加载
       loading: false,
+      isRead: false,
       ruleForm: {
         Name: null,
         Pwd: null,
@@ -137,6 +148,12 @@ export default {
     this.timer = null;
   },
   methods: {
+    /**
+     * 阅读服务
+     */
+    handleNotice() {
+      this.$refs.notice.openDialog();
+    },
     getCode() {
       const TIME_COUNT = 60;
       if (!this.timer) {
@@ -191,6 +208,14 @@ export default {
      * 注册
      */
     register() {
+      if (!this.isRead) {
+        this.$message({
+          showClose: true,
+          message: "请先仔细阅读隐私政策",
+          type: "error",
+        });
+        return;
+      }
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           this.loading = true;
@@ -229,10 +254,10 @@ export default {
 
   & > div {
     background: #fff;
-    width: 100%;
+    // width: 100%;
     height: 100%;
-    max-height: 62rem;
-    max-width: 110rem;
+    max-height: 64rem;
+    max-width: 112rem;
     display: flex;
   }
 }
@@ -280,6 +305,7 @@ export default {
   width: 60%;
   display: flex;
   justify-content: center;
+  overflow-y: auto;
   // align-items: center;
 
   & > div {
@@ -291,6 +317,7 @@ export default {
     width: 100%;
     text-align: center;
     transition: all 0.5s ease;
+    padding-bottom: 12px;
     .title {
       margin-bottom: 2rem;
       img {
@@ -327,11 +354,18 @@ export default {
         cursor: no-drop;
       }
     }
+    /deep/.last_item {
+      margin-bottom: 5px;
+      margin-top: 26px;
+      .read {
+        color: #428aff;
+        cursor: pointer;
+      }
+    }
   }
 }
 
 .v-button {
-  margin-top: 2rem;
   background: linear-gradient(
     90deg,
     rgba(97, 193, 254, 1) 0%,

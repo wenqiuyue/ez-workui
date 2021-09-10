@@ -1,6 +1,6 @@
 <template>
   <div id="memberProccess" v-loading="load">
-    <XHeader title="成员实况" titleEnglish="Member Live" class="baseHeader">
+    <XHeader title="成员实况" titleEnglish="Staffs' Status" class="baseHeader">
     </XHeader>
     <div class="select-conditions">
       <div class="sel_inline">

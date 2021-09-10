@@ -1,6 +1,6 @@
 <template>
   <div class="task-details">
-    <Header title="成员任务" titleEnglish="Member Tasks" class="baseHeader">
+    <Header title="成员任务" titleEnglish="Staffs' Tasks" class="baseHeader">
     </Header>
     <div class="baseViewPage">
       <BaseView :title_name="'成员任务'">
