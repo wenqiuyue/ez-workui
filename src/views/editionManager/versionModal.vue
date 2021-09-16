@@ -1,5 +1,10 @@
 <template>
-  <XModal name="versionModal" :width="'35%'" height="60%">
+  <XModal
+    name="versionModal"
+    :width="'35%'"
+    height="80%"
+    :closeOnDimmer="false"
+  >
     <c-win-tmp
       ref="winTmp"
       v-loading="loading"
@@ -83,6 +88,43 @@
             </el-form-item>
           </el-col>
           <el-col :sm="24" :md="24">
+            <el-form-item
+              label="存储方式："
+              prop="storageLimits"
+              style="width: 100%"
+            >
+              <el-input
+                v-model="formData.storageLimits"
+                placeholder="请填写存储方式"
+                v-if="editState"
+                :style="{ width: comWidth }"
+                clearable
+              >
+              </el-input>
+              <div v-else class="state-see">{{ formData.storageLimits }}</div>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="24" :md="24">
+            <el-form-item label="版本功能：" prop="function">
+              <el-select
+                v-model="formData.function"
+                multiple
+                placeholder="请选择"
+                v-if="editState"
+                style="width: 95%"
+              >
+                <el-option
+                  v-for="item in $D.LIST('ver_function')"
+                  :key="item.value"
+                  :label="item.name"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+              <div v-else class="state-see">{{ formData.storageLimits }}</div>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="24" :md="24">
             <el-form-item label="价格：" prop="price" style="width: 100%">
               <el-input
                 type="number"
@@ -138,6 +180,7 @@ export default {
         capacity: null, //可加入人数
         storageLimits: 0, //存储量
         creatTime: null,
+        function: [], //版本功能
       },
       Rules: {
         name: [
@@ -172,6 +215,13 @@ export default {
           {
             required: true,
             message: "请输入存储量",
+            trigger: "blur",
+          },
+        ],
+        function: [
+          {
+            required: true,
+            message: "请选择版本功能",
             trigger: "blur",
           },
         ],

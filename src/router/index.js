@@ -61,6 +61,27 @@ const routes = [
             icon: "hi-minganciku",
           },
           {
+            path: "/networkRequest",
+            name: "网络请求监控",
+            component: () => import("@/userview/network-request"),
+            layout: true,
+            icon: "hi-wangluo",
+          },
+          {
+            path: "/fileOperation",
+            name: "文件操作监控",
+            component: () => import("@/userview/file-operation"),
+            layout: true,
+            icon: "hi-folder",
+          },
+          {
+            path: "/print",
+            name: "打印监控",
+            component: () => import("@/userview/print"),
+            layout: true,
+            icon: "hi-dayin",
+          },
+          {
             path: "/attendanceStatistics",
             name: "考勤统计",
             component: () => import("@/userview/attendance-statistics"),

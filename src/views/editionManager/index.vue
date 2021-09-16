@@ -34,6 +34,25 @@
               {{ scope.row.StorageLimits }}
             </template>
           </el-table-column>
+          <el-table-column
+            label="存储方式"
+            prop="StorageLimits"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope"> 本地存储 </template>
+          </el-table-column>
+          <el-table-column
+            label="版本功能"
+            prop="StorageLimits"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+              <el-tooltip placement="right" effect="light">
+                <div slot="content">多行信息<br />第二行信息</div>
+                <span>版本功能</span>
+              </el-tooltip>
+            </template>
+          </el-table-column>
           <!-- <el-table-column label="购买人数" prop="m7" sortable
             ><template slot-scope="scope">
               {{ scope.row.m7 }}人
