@@ -23,7 +23,7 @@
           </div>
           <div class="send_con">
             <span class="lable">所在团队：</span>
-            <el-tag size="small">数据监测团队</el-tag>
+            <el-tag size="small">{{ selMsg.TeamName }}</el-tag>
           </div>
           <div class="send_con">
             <span class="lable">发送时间：</span>
