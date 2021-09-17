@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "9683237",
+      "name": "收件",
+      "font_class": "shoujian",
+      "unicode": "e6ab",
+      "unicode_decimal": 59051
+    },
+    {
+      "icon_id": "9683241",
+      "name": "发件",
+      "font_class": "fajian",
+      "unicode": "e6ac",
+      "unicode_decimal": 59052
+    },
+    {
       "icon_id": "23946658",
       "name": "邮件",
       "font_class": "youjian",

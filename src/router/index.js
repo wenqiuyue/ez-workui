@@ -68,6 +68,20 @@ const routes = [
             icon: "hi-wangluo",
           },
           {
+            path: "/flow",
+            name: "流量监控",
+            component: () => import("@/userview/flow"),
+            layout: true,
+            icon: "hi-liuliang",
+          },
+          {
+            path: "/mail",
+            name: "邮件监控",
+            component: () => import("@/userview/mail"),
+            layout: true,
+            icon: "hi-youjian",
+          },
+          {
             path: "/fileOperation",
             name: "文件操作监控",
             component: () => import("@/userview/file-operation"),

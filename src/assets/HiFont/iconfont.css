@@ -1,8 +1,8 @@
 @font-face {
   font-family: "hiFont"; /* Project id 1454976 */
-  src: url('iconfont.woff2?t=1631799140254') format('woff2'),
-       url('iconfont.woff?t=1631799140254') format('woff'),
-       url('iconfont.ttf?t=1631799140254') format('truetype');
+  src: url('iconfont.woff2?t=1631861168607') format('woff2'),
+       url('iconfont.woff?t=1631861168607') format('woff'),
+       url('iconfont.ttf?t=1631861168607') format('truetype');
 }
 
 .hiFont {
@@ -11,6 +11,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.hi-shoujian:before {
+  content: "\e6ab";
+}
+
+.hi-fajian:before {
+  content: "\e6ac";
 }
 
 .hi-youjian:before {
