@@ -55,7 +55,7 @@
             >
             <el-col :span="12" v-if="!editState"
               ><div class="info_list">
-                <span class="info_lable">注册时间：</span>
+                <span class="info_lable">加入时间：</span>
                 {{
                   selUser.CreatTime
                     ? selUser.CreatTime.timeFormat("yyyy-MM-dd HH:mm")

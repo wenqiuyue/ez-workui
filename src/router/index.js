@@ -137,14 +137,6 @@ const routes = [
             layout: true,
             icon: "hi-customer",
           },
-
-          // {
-          //   path: "/ruleSetting",
-          //   name: "规则设置",
-          //   component: () => import("@/userview/process-rulesver"),
-          //   layout: true,
-          //   icon: "hi-liuchengshezhi",
-          // },
         ],
       },
     ],

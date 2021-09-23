@@ -32,7 +32,87 @@
           <!-- 菜单列表 -->
           <div>
             <div>
-              <router-link
+              <el-menu
+                default-active="/profile"
+                class="el-menu-vertical-demo"
+                router
+              >
+                <el-menu-item index="/profile">
+                  <i class="hiFont hi-profile"></i>
+                  <span slot="title">个人信息</span>
+                </el-menu-item>
+                <el-menu-item index="/memberData">
+                  <i class="hiFont hi-statistic"></i>
+                  <span slot="title">数据分析</span>
+                </el-menu-item>
+                <el-menu-item index="/memberProccess">
+                  <i class="hiFont hi-overtime"></i>
+                  <span slot="title">成员实况</span>
+                </el-menu-item>
+                <el-menu-item index="/sensitiveword">
+                  <i class="hiFont hi-minganciku"></i>
+                  <span slot="title">敏感词记录</span>
+                </el-menu-item>
+                <!-- <el-submenu index="1">
+                  <template slot="title">
+                    <i class="hiFont hi-relate"></i>
+                    <span>数据监控</span>
+                  </template>
+                  <el-menu-item index="/networkRequest">
+                    <i class="hiFont hi-wangluo"></i>
+                    <span slot="title">网络请求</span></el-menu-item
+                  >
+                  <el-menu-item index="/flow">
+                    <i class="hiFont hi-liuliang"></i>
+                    <span slot="title">流量监控</span></el-menu-item
+                  >
+                  <el-menu-item index="/mail">
+                    <i class="hiFont hi-youjian"></i>
+                    <span slot="title">邮件监控</span></el-menu-item
+                  >
+                  <el-menu-item index="/fileOperation">
+                    <i class="hiFont hi-folder"></i>
+                    <span slot="title">文件操作</span></el-menu-item
+                  >
+                  <el-menu-item index="/print">
+                    <i class="hiFont hi-dayin"></i>
+                    <span slot="title">打印监控</span></el-menu-item
+                  >
+                </el-submenu> -->
+                <el-menu-item index="/attendanceStatistics">
+                  <i class="hiFont hi-attendance"></i>
+                  <span slot="title">考勤统计</span>
+                </el-menu-item>
+                <el-menu-item index="/taskDetails">
+                  <i class="hiFont hi-task"></i>
+                  <span slot="title">成员任务</span>
+                </el-menu-item>
+                <el-menu-item index="/taskManager">
+                  <i class="hiFont hi-task-box"></i>
+                  <span slot="title">任务管理</span>
+                </el-menu-item>
+                <el-menu-item index="/salaryreport">
+                  <i class="hiFont hi-xinzipeizhi"></i>
+                  <span slot="title">薪资报表</span>
+                </el-menu-item>
+                <el-menu-item index="/msglist">
+                  <i class="hiFont hi-msg"></i>
+                  <span slot="title">消息列表</span>
+                </el-menu-item>
+                <el-menu-item index="/teamManagement">
+                  <i class="hiFont hi-customer"></i>
+                  <span slot="title">团队管理</span>
+                </el-menu-item>
+                <el-menu-item @click="handleManual">
+                  <i class="hiFont hi-Notebook"></i>
+                  <span slot="title">操作手册</span>
+                </el-menu-item>
+                <el-menu-item @click="exit">
+                  <i class="hiFont hi-signout"></i>
+                  <span slot="title">退出</span>
+                </el-menu-item>
+              </el-menu>
+              <!-- <router-link
                 v-for="{ path, name, icon } of layoutRoutesUser"
                 :key="path"
                 :to="path"
@@ -49,7 +129,7 @@
               </router-link>
               <a href="javascript:;" @click="exit" class="hiFont hi-signout">
                 <span>退出</span>
-              </a>
+              </a> -->
               <div class="title_bottom" @click="handleHome">
                 <!-- <img class="mb" src="@/assets/main/main_mb.png" />
                 <p>http://www.ezteams.cn</p> -->
@@ -62,6 +142,8 @@
     </div>
     <!-- 内容 -->
     <router-view />
+    <!-- 操作手册 -->
+    <Manual></Manual>
   </div>
 </template>
 
@@ -70,6 +152,9 @@ import { mapState, mapActions } from "vuex";
 import { layoutRoutesUser } from "@/router";
 import xSocketLink from "@/assets/xSocketLink";
 export default {
+  components: {
+    Manual: () => import("./manual"),
+  },
   data() {
     "#main";
     return {
@@ -97,6 +182,12 @@ export default {
         action: "all",
         value: false,
       });
+    },
+    /**
+     * 操作手册
+     */
+    handleManual() {
+      this.$modal.show("manual");
     },
     /**
      * 官网
@@ -168,6 +259,23 @@ export default {
 @import "../../assets/menu.less";
 </style>
 <style lang="less" scoped>
+#sub-work {
+  .el-menu {
+    .el-submenu__title {
+      .hiFont {
+        margin-right: 5px;
+      }
+    }
+    .el-menu-item {
+      height: 48px;
+      line-height: 48px;
+      .hiFont {
+        margin-right: 5px;
+      }
+    }
+  }
+}
+
 /deep/.title_bottom {
   position: absolute;
   bottom: 16px;
