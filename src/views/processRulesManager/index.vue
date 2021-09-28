@@ -33,6 +33,7 @@
       v-else-if="tabType == 7"
       :selRow="selRow"
     ></ShieldingSoftware>
+    <UrlSet v-else-if="tabType == 8" :selRow="selRow"></UrlSet>
   </div>
 </template>
 
@@ -47,6 +48,7 @@ export default {
     ActionRule: () => import("./actionRule"),
     SensitiveWords: () => import("./sensitiveWords"),
     ShieldingSoftware: () => import("./shieldingSoftware"),
+    UrlSet: () => import("./urlSet"),
   },
   props: {
     selRow: {
@@ -76,6 +78,10 @@ export default {
       {
         value: 2,
         label: "进程规则设置",
+      },
+      {
+        value: 8,
+        label: "网络请求分类",
       },
       {
         value: 3,

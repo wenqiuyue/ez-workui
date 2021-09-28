@@ -48,12 +48,12 @@
                   placeholder="请输入邮箱验证码"
                 ></el-input>
               </el-form-item>
-              <el-form-item class="padding_item last_item">
+              <!-- <el-form-item class="padding_item last_item">
                 <el-checkbox v-model="isRead"
                   >你已经详细阅读并同意
                 </el-checkbox>
                 <span class="read" @click="handleNotice">《隐私政策》</span>
-              </el-form-item>
+              </el-form-item> -->
             </el-form>
             <div class="hp-btn">
               <el-button class="v-button" @click="register" :loading="loading"
@@ -208,14 +208,14 @@ export default {
      * 注册
      */
     register() {
-      if (!this.isRead) {
-        this.$message({
-          showClose: true,
-          message: "请先仔细阅读隐私政策",
-          type: "error",
-        });
-        return;
-      }
+      // if (!this.isRead) {
+      //   this.$message({
+      //     showClose: true,
+      //     message: "请先仔细阅读隐私政策",
+      //     type: "error",
+      //   });
+      //   return;
+      // }
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           this.loading = true;

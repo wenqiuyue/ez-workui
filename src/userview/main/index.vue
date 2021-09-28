@@ -53,7 +53,7 @@
                   <i class="hiFont hi-minganciku"></i>
                   <span slot="title">敏感词记录</span>
                 </el-menu-item>
-                <!-- <el-submenu index="1">
+                <el-submenu index="1">
                   <template slot="title">
                     <i class="hiFont hi-relate"></i>
                     <span>数据监控</span>
@@ -78,7 +78,7 @@
                     <i class="hiFont hi-dayin"></i>
                     <span slot="title">打印监控</span></el-menu-item
                   >
-                </el-submenu> -->
+                </el-submenu>
                 <el-menu-item index="/attendanceStatistics">
                   <i class="hiFont hi-attendance"></i>
                   <span slot="title">考勤统计</span>
