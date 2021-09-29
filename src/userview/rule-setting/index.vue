@@ -108,10 +108,10 @@ export default {
         value: 2,
         label: "进程规则设置",
       },
-      {
-        value: 8,
-        label: "网络请求分类",
-      },
+      // {
+      //   value: 8,
+      //   label: "网络请求分类",
+      // },
       {
         value: 3,
         label: "进程标记",
