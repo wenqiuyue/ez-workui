@@ -1,9 +1,9 @@
 <template>
   <div class="team-info">
-    <el-row :gutter="20">
+    <el-row :gutter="10" v-loading="infoData ? false : true">
       <!-- 左边 -->
       <el-col :span="7"
-        ><div class="info_left" v-loading="loading">
+        ><div class="info_left">
           <h3 class="info-title">
             <span>团队信息</span
             ><el-button
@@ -15,32 +15,52 @@
           </h3>
           <div class="info_form" v-if="infoData">
             <ul style="padding: 0 15px">
+              <li class="num_row">
+                <p>
+                  <span class="lable_1">团队号：</span>
+                  <span>{{
+                    infoData.Teamdata.Code ? infoData.Teamdata.Code : "无"
+                  }}</span>
+                </p>
+                <p class="tips" v-if="setOne">用户可通过团队号加入团队</p>
+                <p
+                  style="margin-top: 5px"
+                  v-if="infoData.Teamdata.InvitationCode"
+                >
+                  <span class="lable_1">邀请口令：</span>
+                  <span>{{
+                    infoData.Teamdata.InvitationCode
+                      ? infoData.Teamdata.InvitationCode
+                      : "无"
+                  }}</span>
+                </p>
+              </li>
               <li>
-                <span class="lable">团队名称：</span>
+                <span class="lable_1">团队名称：</span>
                 <span>{{ infoData.Teamdata.Name }}</span>
               </li>
               <li>
-                <span class="lable">当前人数：</span>
+                <span class="lable_1">当前人数：</span>
                 <span
                   >{{
                     infoData.Membersdata && infoData.Membersdata.length
                       ? infoData.Membersdata.length
                       : 0
-                  }}人</span
+                  }}人 / 10人</span
                 >
               </li>
               <li class="img_row">
-                <span class="lable">创建人：</span>
+                <span class="lable_1">创建人：</span>
                 <span class="number">
-                  <el-avatar
+                  <!-- <el-avatar
                     size="small"
                     :src="imgChange(infoData.Teamdata.UserPicture, true)"
-                  ></el-avatar>
+                  ></el-avatar> -->
                   <span>{{ infoData.Teamdata.UserName }}</span>
                 </span>
               </li>
               <li class="img_row_list">
-                <span class="lable">管理员：</span>
+                <span class="lable_1">管理员：</span>
                 <div
                   class="number_list"
                   v-if="infoData.Membersdata && infoData.Membersdata.length"
@@ -50,10 +70,10 @@
                     :key="index"
                   >
                     <span class="number" v-if="item.MType == 2">
-                      <el-avatar
+                      <!-- <el-avatar
                         size="small"
                         :src="imgChange(item.Picture, true)"
-                      ></el-avatar>
+                      ></el-avatar> -->
                       <span>{{ item.Name }}</span>
                     </span>
                   </span>
@@ -61,7 +81,7 @@
                 <div v-else>无</div>
               </li>
               <li>
-                <span class="lable">创建时间：</span>
+                <span class="lable_1">创建时间：</span>
                 <span>{{
                   infoData.Teamdata.CreateTime
                     ? infoData.Teamdata.CreateTime.timeFormat(
@@ -71,7 +91,7 @@
                 }}</span>
               </li>
               <li v-if="infoData.Teamdata.ExpireTime">
-                <span class="lable">过期时间：</span>
+                <span class="lable_1">过期时间：</span>
                 <span>{{
                   infoData.Teamdata.ExpireTime
                     ? infoData.Teamdata.ExpireTime.timeFormat("yyyy-MM-dd")
@@ -79,19 +99,13 @@
                 }}</span>
               </li>
               <li v-if="infoData.Teamdata.Describe">
-                <span class="lable">团队描述：</span>
+                <span class="lable_1">团队描述：</span>
                 <span>{{
                   infoData.Teamdata.Describe ? infoData.Teamdata.Describe : "无"
                 }}</span>
               </li>
               <li>
-                <span class="lable">成员是否可以添加成员：</span>
-                <span>{{
-                  infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
-                }}</span>
-              </li>
-              <li>
-                <span class="lable">存储量：</span>
+                <span class="lable_1">存储量：</span>
                 <span
                   >{{
                     infoData.Teamdata.OrderData.StorageLimits
@@ -101,8 +115,8 @@
                 >
               </li>
               <li class="set_rule">
-                <span class="lable"
-                  >应用的设置：{{
+                <span class="lable_2"
+                  >应用设置：{{
                     infoData.Teamdata.TeamConfigName
                       ? infoData.Teamdata.TeamConfigName
                       : "无"
@@ -117,28 +131,11 @@
                   >设置</el-button
                 >
               </li>
-              <li class="num_row">
-                <p>
-                  <span class="lable">团队号：</span>
-                  <span>{{
-                    infoData.Teamdata.Code ? infoData.Teamdata.Code : "无"
-                  }}</span>
-                </p>
-                <p class="tips" v-if="setOne">用户可通过团队号加入团队</p>
-                <p
-                  style="margin-top: 5px"
-                  v-if="
-                    infoData.Teamdata.UserMemberMType == 1 &&
-                    infoData.Teamdata.InvitationCode
-                  "
-                >
-                  <span class="lable">邀请口令：</span>
-                  <span>{{
-                    infoData.Teamdata.InvitationCode
-                      ? infoData.Teamdata.InvitationCode
-                      : "无"
-                  }}</span>
-                </p>
+              <li>
+                <span class="lable_2">成员是否可以添加成员：</span>
+                <span>{{
+                  infoData.Teamdata.IsAgree == 1 ? "允许" : "禁止"
+                }}</span>
               </li>
             </ul>
             <div v-if="infoData.Teamdata.UserMemberMType == 2" class="card_li">
@@ -147,6 +144,10 @@
                 <li class="set_row">
                   <span>可否开启摄像头截图</span>
                   <el-switch v-model="setFour" @change="changeSet"> </el-switch>
+                </li>
+                <li class="set_row">
+                  <span>是否需要审批后才能加入团队</span>
+                  <el-switch v-model="setOne" @change="changeSet"> </el-switch>
                 </li>
                 <li class="set_row">
                   <span>可否通过团队号加入</span>
@@ -167,7 +168,7 @@
                     v-if="setThree"
                     v-model="passwordVal"
                     placeholder="请输入邀请口令(按Enter键保存)"
-                    @keyup.enter.native="changeSet"
+                    @blur="changeSet"
                   ></el-input>
                 </li>
                 <li>
@@ -283,7 +284,7 @@
               </ul>
             </div>
           </div>
-          <div class="invi_btn">
+          <!-- <div class="invi_btn">
             <el-button
               type="primary"
               style="width: 100%"
@@ -291,22 +292,23 @@
               @click="handleInvit"
               >邀请成员加入</el-button
             >
-          </div>
+          </div> -->
         </div></el-col
       >
       <!-- 右边 -->
       <el-col :span="17">
-        <InvitationList
-          :teamId="selRow.Id"
-          :UserMemberMType="infoData ? infoData.Teamdata.UserMemberMType : null"
-        ></InvitationList>
+        <UserList
+          :selRow="selRow"
+          :infoData="infoData"
+          @loadData="$emit('getData')"
+        ></UserList>
       </el-col>
     </el-row>
     <!-- 邀请成员 -->
     <InvitationUser :teamId="selRow.Id" :mName="'infoInvit'"></InvitationUser>
     <!-- 创建团队 -->
     <AddTeam
-      @success="getData"
+      @success="$emit('getData')"
       :modalName="'editTeam'"
       :editData="infoData ? infoData.Teamdata : null"
     ></AddTeam>
@@ -316,7 +318,7 @@
       :dataClear="
         infoData && infoData.DataClearSeting ? infoData.DataClearSeting : null
       "
-      @success="getData"
+      @success="$emit('getData')"
     ></InitdataModal>
   </div>
 </template>
@@ -324,7 +326,8 @@
 import { imgChange, numChange } from "@/commons";
 export default {
   components: {
-    InvitationList: () => import("./invitation-list"),
+    UserList: () => import("./user-list"),
+
     InvitationUser: () => import("./invitation-user"),
     AddTeam: () => import("./add-team"),
     InitdataModal: () => import("./initdata-modal"),
@@ -335,10 +338,14 @@ export default {
       type: Object,
       default: null,
     },
+    //团队详情
+    infoData: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
-      infoData: null, //详细信息
       loading: false,
       setOne: true,
       setTwo: true,
@@ -349,12 +356,37 @@ export default {
       addressArray: [],
     };
   },
+  watch: {
+    infoData(val, oval) {
+      if (val != oval) {
+        this.setOne = this.infoData.Teamdata.IsTeamCode == 1 ? true : false;
+        this.setTwo = this.infoData.Teamdata.IsAgree == 1 ? true : false;
+        this.setThree =
+          this.infoData.Teamdata.IsInvitationCode == 1 ? true : false;
+        this.passwordVal = this.infoData.Teamdata.InvitationCode;
+        this.setFour = this.infoData.Teamdata.IsStartCamera == 1 ? true : false;
+        this.setFive = this.infoData.Teamdata.IsWarn;
+        this.addressArray =
+          this.infoData.Teamdata.WarnEmails &&
+          this.infoData.Teamdata.WarnEmails.length
+            ? this.infoData.Teamdata.WarnEmails.map((m) => {
+                return {
+                  inputVal: m,
+                };
+              })
+            : [];
+      }
+    },
+  },
   mounted() {
-    this.getData();
+    this.$nextTick(() => {});
   },
   methods: {
     imgChange,
     numChange,
+    loadingChange(val) {
+      this.loading = val;
+    },
     /**
      * 删除某一个邮箱
      */
@@ -433,39 +465,6 @@ export default {
     handleInvit() {
       this.$modal.show("infoInvit");
     },
-    /**
-     * 获取团队信息
-     */
-    getData() {
-      this.loading = true;
-      this.$http
-        .get("/Teams/TeamManagementDetail.ashx", {
-          params: { teamId: this.selRow.Id },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.infoData = resp.data;
-            this.setOne = this.infoData.Teamdata.IsTeamCode == 1 ? true : false;
-            this.setTwo = this.infoData.Teamdata.IsAgree == 1 ? true : false;
-            this.setThree =
-              this.infoData.Teamdata.IsInvitationCode == 1 ? true : false;
-            this.passwordVal = this.infoData.Teamdata.InvitationCode;
-            this.setFour =
-              this.infoData.Teamdata.IsStartCamera == 1 ? true : false;
-            this.setFive = this.infoData.Teamdata.IsWarn;
-            this.addressArray =
-              this.infoData.Teamdata.WarnEmails &&
-              this.infoData.Teamdata.WarnEmails.length
-                ? this.infoData.Teamdata.WarnEmails.map((m) => {
-                    return {
-                      inputVal: m,
-                    };
-                  })
-                : [];
-          }
-        })
-        .finally(() => (this.loading = false));
-    },
   },
 };
 </script>
@@ -506,7 +505,7 @@ export default {
       }
     }
     .info_form {
-      height: calc(100% - 98px);
+      height: calc(100% - 52px);
       overflow-y: scroll;
       margin-top: 12px;
 
@@ -515,16 +514,26 @@ export default {
           margin-bottom: 12px;
           font-size: 14px;
           color: #303133;
-          .lable {
+          .lable_1 {
             // width: 80px;
             display: inline-block;
             color: #000000;
             margin-right: 5px;
+            text-align: right;
+            width: 70px;
+          }
+          .lable_2 {
+            // width: 80px;
+            display: inline-block;
+            color: #000000;
+            margin-right: 5px;
+            text-align: right;
           }
         }
         .img_row {
           display: flex;
           align-items: center;
+
           .number {
             display: flex;
             flex-direction: column;
@@ -532,13 +541,13 @@ export default {
             margin-right: 10px;
             span {
               margin-top: 2px;
-              font-size: 12px;
             }
           }
         }
         .img_row_list {
           display: flex;
           flex-direction: row;
+          align-items: center;
           .number_list {
             width: calc(100% - 80px);
             display: flex;
@@ -552,7 +561,6 @@ export default {
               margin-bottom: 5px;
               span {
                 margin-top: 2px;
-                font-size: 12px;
               }
             }
           }

@@ -19,17 +19,41 @@
         <span
           @click="handleViewChange(2)"
           :class="viewType == 2 ? ' active_span' : ''"
-          >团队成员</span
+          >申请列表</span
+        >
+      </div>
+      <div
+        class="screen_left"
+        v-if="
+          viewType == 2 && infoData && infoData.Teamdata.UserMemberMType == 2
+        "
+      >
+        <el-button type="success" size="small" @click="invitationBtn(1)"
+          >全部同意</el-button
+        >
+        <el-button type="danger" size="small" @click="invitationBtn(-1)"
+          >全部拒绝</el-button
+        >
+        <el-button type="info" size="small" @click="handleInvitationDel"
+          >清空记录</el-button
         >
       </div>
     </div>
-    <!-- 团队成员列表 -->
-    <UserList v-if="viewType == 2" :selRow="selRow"></UserList>
+    <!-- 团队申请列表 -->
+    <InvitationList
+      v-if="viewType == 2"
+      :teamId="selRow.Id"
+      :UserMemberMType="infoData ? infoData.Teamdata.UserMemberMType : null"
+      ref="InvitationList"
+    ></InvitationList>
+
     <!-- 团队详情 -->
     <TeamInfo
       v-else-if="viewType == 1"
       :selRow="selRow"
       @handleViewChange="handleViewChange"
+      :infoData="infoData"
+      @getData="getData"
     ></TeamInfo>
     <!-- 规则设置 -->
     <RuleSetting
@@ -44,7 +68,7 @@
 <script>
 export default {
   components: {
-    UserList: () => import("./user-list"),
+    InvitationList: () => import("./invitation-list"),
     TeamInfo: () => import("./team-info"),
     RuleSetting: () => import("@/userview/process-rulesver"),
   },
@@ -58,15 +82,47 @@ export default {
   data() {
     return {
       viewType: 1,
+      infoData: null, //详细信息
     };
   },
-  created() {},
+  mounted() {
+    this.getData();
+  },
   methods: {
+    /**
+     * 邀请列表清空按钮
+     */
+    handleInvitationDel() {
+      this.$refs.InvitationList.handleDel();
+    },
+    /**
+     * 邀请列表的按钮
+     */
+    invitationBtn(val) {
+      this.$refs.InvitationList.handleInv(null, val);
+    },
     /**
      * 视图切换
      */
     handleViewChange(val) {
       this.viewType = val;
+      if (this.viewType == 1) {
+        this.getData();
+      }
+    },
+    /**
+     * 获取团队信息
+     */
+    getData() {
+      this.$http
+        .get("/Teams/TeamManagementDetail.ashx", {
+          params: { teamId: this.selRow.Id },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.infoData = resp.data;
+          }
+        });
     },
   },
 };

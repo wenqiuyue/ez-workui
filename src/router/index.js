@@ -29,9 +29,16 @@ const routes = [
         props: {
           menu: 0,
         },
-        redirect: "/profile",
+        redirect: "/home",
         component: () => import("@/userview/main/content"),
         children: [
+          {
+            path: "/home",
+            name: "首页",
+            component: () => import("@/userview/home"),
+            layout: true,
+            icon: "hi-profile",
+          },
           {
             path: "/profile",
             name: "个人信息",

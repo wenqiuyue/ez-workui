@@ -98,7 +98,7 @@
     <UserInfo
       :selUser="selUser"
       :teamId="selRow ? selRow.Id : null"
-      @success="getTeamList"
+      @success="$emit('loadData')"
       :userMemberMType="userMemberMType"
     ></UserInfo>
     <HourlyWage
@@ -115,6 +115,11 @@ export default {
     HourlyWage: () => import("./hourlywage-modal.vue"),
   },
   props: {
+    //团队详情
+    infoData: {
+      type: Object,
+      default: null,
+    },
     selRow: {
       type: Object,
       default: null,
@@ -128,9 +133,15 @@ export default {
       userMemberMType: null,
     };
   },
-  mounted() {
-    this.getTeamList();
+  watch: {
+    infoData(val, oval) {
+      if (val != oval) {
+        this.tableData = this.infoData.Membersdata;
+        this.userMemberMType = this.infoData.Teamdata.UserMemberMType;
+      }
+    },
   },
+  mounted() {},
   filters: {
     getShape(val) {
       if (val == 1) {
@@ -171,7 +182,7 @@ export default {
                 type: "success",
                 message: "删除成功!",
               });
-              this.getTeamList();
+              this.$emit("loadData");
             }
           });
         })
@@ -182,25 +193,25 @@ export default {
           });
         });
     },
-    /**
-     * 获取团队成员列表
-     */
-    getTeamList() {
-      this.loading = true;
-      this.$http
-        .get("/Teams/TeamManagementDetail.ashx", {
-          params: { teamId: this.selRow.Id },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.tableData = resp.data.Membersdata;
-            this.userMemberMType = resp.data.Teamdata.UserMemberMType;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
+    // /**
+    //  * 获取团队成员列表
+    //  */
+    // getTeamList() {
+    //   this.loading = true;
+    //   this.$http
+    //     .get("/Teams/TeamManagementDetail.ashx", {
+    //       params: { teamId: this.selRow.Id },
+    //     })
+    //     .then((resp) => {
+    //       if (resp.res == 0) {
+    //         this.tableData = resp.data.Membersdata;
+    //         this.userMemberMType = resp.data.Teamdata.UserMemberMType;
+    //       }
+    //     })
+    //     .finally(() => {
+    //       this.loading = false;
+    //     });
+    // },
     /**
      * 查看成员详情
      */
@@ -214,10 +225,11 @@ export default {
 <style lang="less" scoped>
 .user-list {
   // margin-top: 10px;
-  height: calc(100% - 90px);
+  height: calc(100% - 2px);
   background: #ffffff;
   display: flex;
   flex-direction: column;
+  border: 1px solid #dcdfe6;
   .mem_count {
     cursor: pointer;
     &:hover {

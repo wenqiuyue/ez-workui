@@ -2,7 +2,12 @@
   <div id="teamManagement">
     <Header title="团队管理" titleEnglish="Team Management" class="baseHeader">
       <div slot="btnGroup">
-        <el-dropdown trigger="click" @command="handleCommand">
+        <a v-for="item in tabList" :key="item.value">
+          <span @click="tabChange(item.value)" class="el-dropdown-link">
+            <label>{{ item.label }}</label>
+          </span>
+        </a>
+        <!-- <el-dropdown trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
             更多操作<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
@@ -11,7 +16,7 @@
             <el-dropdown-item command="2">创建团队</el-dropdown-item>
             <el-dropdown-item command="3">加入团队</el-dropdown-item>
           </el-dropdown-menu>
-        </el-dropdown>
+        </el-dropdown> -->
       </div></Header
     >
     <!-- 列表页 -->
@@ -258,6 +263,20 @@ export default {
         pageSize: 10,
         totalNum: 0,
       },
+      tabList: [
+        {
+          value: 1,
+          label: "创建团队",
+        },
+        {
+          value: 2,
+          label: "邀请成员加入",
+        },
+        {
+          value: 3,
+          label: "加入团队",
+        },
+      ],
     };
   },
   mounted() {
@@ -333,14 +352,14 @@ export default {
     },
     /**
      * 右边顶部更多操作
-     * 1 邀请他人  2 创建团队  3 加入团队 4 清理团队数据库
+     * 2 邀请他人  1 创建团队  3 加入团队
      */
-    handleCommand(val) {
-      if (val == 2) {
+    tabChange(val) {
+      if (val == 1) {
         this.$modal.show("addTeam");
       } else if (val == 3) {
         this.$modal.show("joinTeam");
-      } else if (val == 1) {
+      } else if (val == 2) {
         this.$modal.show("invitation");
       }
     },

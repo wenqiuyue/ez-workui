@@ -36,10 +36,13 @@
                 default-active="/profile"
                 class="el-menu-vertical-demo"
                 router
-              >
-                <el-menu-item index="/profile">
-                  <i class="hiFont hi-profile"></i>
-                  <span slot="title">个人信息</span>
+                ><el-menu-item index="/home">
+                  <i class="hiFont hi-home"></i>
+                  <span slot="title">首页</span>
+                </el-menu-item>
+                <el-menu-item index="/teamManagement">
+                  <i class="hiFont hi-customer"></i>
+                  <span slot="title">团队管理</span>
                 </el-menu-item>
                 <el-menu-item index="/memberData">
                   <i class="hiFont hi-statistic"></i>
@@ -99,13 +102,18 @@
                   <i class="hiFont hi-msg"></i>
                   <span slot="title">消息列表</span>
                 </el-menu-item>
-                <el-menu-item index="/teamManagement">
-                  <i class="hiFont hi-customer"></i>
-                  <span slot="title">团队管理</span>
+
+                <el-menu-item index="/profile">
+                  <i class="hiFont hi-profile"></i>
+                  <span slot="title">个人信息</span>
                 </el-menu-item>
                 <el-menu-item @click="handleManual">
                   <i class="hiFont hi-Notebook"></i>
-                  <span slot="title">操作手册</span>
+                  <span slot="title">使用说明</span>
+                </el-menu-item>
+                <el-menu-item @click="handleDowload">
+                  <i class="hiFont hi-download"></i>
+                  <span slot="title">下载客户端</span>
                 </el-menu-item>
                 <el-menu-item @click="exit">
                   <i class="hiFont hi-signout"></i>
@@ -144,6 +152,14 @@
     <router-view />
     <!-- 操作手册 -->
     <Manual></Manual>
+    <el-drawer
+      title="使用说明"
+      :visible.sync="drawerManual"
+      direction="rtl"
+      size="60%"
+    >
+      <span>我来啦!</span>
+    </el-drawer>
   </div>
 </template>
 
@@ -163,6 +179,7 @@ export default {
       layoutRoutesUser,
       applyCount: null, //申请数量
       informationCount: null, //消息数量
+      drawerManual: false, //使用手册抽屉
     };
   },
   computed: {
@@ -170,6 +187,12 @@ export default {
   },
   methods: {
     ...mapActions(["mobile_ToggleState"]),
+    /**
+     * 下载客户端
+     */
+    handleDowload() {
+      window.location.href = "http://admin.ezteams.cn/download.ashx";
+    },
     hideMobileMenu(notPro = true) {
       if (navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)) {
         this.menuIndex = null;
@@ -187,7 +210,8 @@ export default {
      * 操作手册
      */
     handleManual() {
-      this.$modal.show("manual");
+      this.drawerManual = true;
+      // this.$modal.show("manual");
     },
     /**
      * 官网
@@ -267,8 +291,8 @@ export default {
       }
     }
     .el-menu-item {
-      height: 48px;
-      line-height: 48px;
+      height: 44px;
+      line-height: 44px;
       .hiFont {
         margin-right: 5px;
       }

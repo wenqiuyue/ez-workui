@@ -1,7 +1,7 @@
 <template>
   <div class="info_right" v-loading="loading">
     <!-- 右边标题 -->
-    <h3 class="info-title">
+    <!-- <h3 class="info-title">
       <span>团队邀请管理</span>
       <div class="screen_left" v-if="UserMemberMType == 2">
         <el-button type="success" size="small" @click="handleInv(null, 1)"
@@ -14,7 +14,7 @@
           >清空记录</el-button
         >
       </div>
-    </h3>
+    </h3> -->
     <!-- 右边搜索 -->
     <div class="r_screen">
       <div class="screen_right">
