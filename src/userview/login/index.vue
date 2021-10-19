@@ -207,7 +207,7 @@ export default {
                   });
                 } else {
                   this.$router.push({
-                    path: "/profile",
+                    path: "/home",
                   });
                 }
               }

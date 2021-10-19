@@ -138,12 +138,10 @@
   </div>
 </template>
 <script>
-import { imgChange, getEfficiencyColor, getbehaviorColor } from "@/commons";
+import { imgChange } from "@/commons";
 export default {
   components: {
     Header: () => import("@/components/Header"),
-    CPages: () => import("@/components/CPages"),
-    MemberSelect: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   data() {
     var validateQQ = (rule, value, callback) => {

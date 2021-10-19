@@ -41,7 +41,7 @@ router.beforeEach((to, from, next) => {
       if (role.role.indexOf("管理员") != -1) {
         next({ path: "/manager" });
       } else {
-        next({ path: "/profile" });
+        next({ path: "/home" });
       }
     } else {
       next();

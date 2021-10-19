@@ -50,25 +50,7 @@ const task = {
 /**
  * 当前登录的个人用户，实际使用
  */
-const user = {
-  id: 0, //用户ID
-  img: "", //个人信息头像地址
-  name: "", //个人信息名字
-  departments: [], //所在部门信息
-  positions: [], //所属职位信息
-  qq: "", //个人信息QQ
-  phone: "", //个人信息电话号码
-  email: "", //个人信息email
-  whb: "", //个人信息whb账号
-  rsTime: null, //午休开始时间
-  reTime: null, //午休结束时间
-  onTime1: null, //最早应上班时间
-  onTime2: null, //最晚应上班时间
-  onTimeActual: null, //实际上班时间
-  offTime: null, //应下班时间
-  offTimeActual: null, //实际下班时间
-  fn: [], //拥有的功能
-};
+const user = null;
 
 /**
  * 合同状态

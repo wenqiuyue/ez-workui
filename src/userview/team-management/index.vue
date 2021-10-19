@@ -7,20 +7,14 @@
             <label>{{ item.label }}</label>
           </span>
         </a>
-        <!-- <el-dropdown trigger="click" @command="handleCommand">
-          <span class="el-dropdown-link">
-            更多操作<i class="el-icon-arrow-down el-icon--right"></i>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="1">邀请他人进入</el-dropdown-item>
-            <el-dropdown-item command="2">创建团队</el-dropdown-item>
-            <el-dropdown-item command="3">加入团队</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown> -->
       </div></Header
     >
+
     <!-- 列表页 -->
-    <CContent v-if="!isInfoView" v-loading="loading">
+    <CContent
+      v-if="!isInfoView && user && user.TeamCount > 0"
+      v-loading="loading"
+    >
       <template #search>
         <div class="screen">
           <el-select
@@ -224,10 +218,25 @@
     </CContent>
     <!-- 详情页 -->
     <TeamInfoUser
-      v-else
+      v-else-if="isInfoView && user && user.TeamCount > 0"
       @viewChange="viewChange"
       :selRow="selRow"
     ></TeamInfoUser>
+    <!-- 没有团队时 -->
+    <div v-else class="new_user">
+      <div class="img">
+        <el-image
+          :src="require('../../assets/img/noTeam.png')"
+          fit="scale-down"
+        ></el-image>
+      </div>
+      <p class="tips">您还没有团队，请先创建或加入一个团队</p>
+      <div class="btn">
+        <el-button type="primary" @click="tabChange(1)">创建团队</el-button>
+        <el-button type="warning" @click="tabChange(3)">加入团队</el-button>
+      </div>
+    </div>
+
     <!-- 创建团队 -->
     <AddTeam @success="handleSearch"></AddTeam>
     <!-- 加入团队 -->
@@ -240,6 +249,7 @@
 <script>
 import _ from "lodash";
 import { getEfficiencyColor, getbehaviorColor } from "@/commons";
+import { mapState, mapActions } from "vuex";
 export default {
   components: {
     Header: () => import("@/components/Header"),
@@ -279,18 +289,38 @@ export default {
       ],
     };
   },
+  computed: {
+    ...mapState(["user"]),
+  },
   mounted() {
     this.getTeamList();
+    console.log(this.user);
   },
   methods: {
     getEfficiencyColor,
     getbehaviorColor,
+    ...mapActions(["user_setUser"]),
     /**
      * 搜索
      */
     handleSearch() {
       this.pageData.pageIndex = 1;
       this.getTeamList();
+      //如果是加的第一个团队，则重新存个人信息
+      if (this.user.TeamCount == 0) {
+        this.$http
+          .get("/Management/UserManagement/GetUserDetail.ashx", {
+            params: { usId: null },
+          })
+          .then((resp) => {
+            if (resp.res == 0) {
+              this.user_setUser(resp.data);
+              if (this.user.TeamCount == 0) {
+                this.$router.push("/teamManagement");
+              }
+            }
+          });
+      }
     },
     /**
      * 获取团队列表
@@ -405,6 +435,30 @@ export default {
     padding: 0.1rem 1rem;
     background: linear-gradient(-55deg, #448ef5, #69a4f7);
     border-radius: 1rem 0.8rem;
+  }
+  .new_user {
+    height: 100%;
+    overflow-y: auto;
+    .img {
+      .el-image {
+        width: 100%;
+        height: 65vh;
+        border-radius: 4px 4px 0 0;
+      }
+    }
+    .tips {
+      font-weight: bold;
+      font-size: 16px;
+      color: #606266;
+      text-align: center;
+    }
+    .btn {
+      margin-top: 32px;
+      text-align: center;
+      .el-button {
+        width: 40%;
+      }
+    }
   }
 }
 </style>

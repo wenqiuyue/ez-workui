@@ -97,20 +97,6 @@ const userActions = {
   user_setInfo(context, data) {
     context.commit("user_setInfo", data);
   },
-  /**
-   * 修改当前登录用户的应下班时间
-   * @param {Date} offTime 应下班时间
-   */
-  user_setOffTime(context, data) {
-    context.commit("user_setOffTime", data);
-  },
-  /**
-   * 修改当前登录用户的实际下班时间
-   * @param {Date} offTime 实际下班时间
-   */
-  user_setOffTimeActual(context, data) {
-    context.commit("user_setOffTimeActual", data);
-  },
 };
 /**
  * 审核数量

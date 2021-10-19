@@ -76,7 +76,7 @@ const msgMutations = {
         break;
       case 9: //即时消息
         state.msg.immediateCount = fn.changeNum(state.msg.immediateCount, data);
-      break;
+        break;
     }
   },
 
@@ -182,27 +182,6 @@ const userMutations = {
     state.user.whb = data.whb; //whb账号
     state.user.power = data.power; //权限
   },
-  /**
-   * 修改当前登录用户的实际上班时间
-   * @param {Date} time 实际上班时间
-   */
-  user_setOnTimeActual(state, time) {
-    state.user.onTimeActual = time;
-  },
-  /**
-   * 修改当前登录用户的应下班时间（打上班卡时用）
-   * @param {Date} time 应下班时间
-   */
-  user_setOffTime(state, time) {
-    state.user.offTime = time;
-  },
-  /**
-   * 修改当前登录用户的实际下班时间
-   * @param {Date} time 实际下班时间
-   */
-  user_setOffTimeActual(state, time) {
-    state.user.offTimeActual = time;
-  },
 };
 
 /**
@@ -288,10 +267,10 @@ const contractMutations = {
    */
   con_deleteContract(state, data) {
     let stateList = {
-      "1": state.contracts.draftContract,
-      "2": state.contracts.signingContract,
-      "3": state.contracts.inProgressContract,
-      "4": state.contracts.closedContract,
+      1: state.contracts.draftContract,
+      2: state.contracts.signingContract,
+      3: state.contracts.inProgressContract,
+      4: state.contracts.closedContract,
     };
     stateList[data.state].splice(data.index, 1);
   },

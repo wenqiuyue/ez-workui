@@ -485,6 +485,9 @@ export default {
           margin: 0 2.3rem 1rem 0;
         }
       }
+      .info_lable {
+        flex-shrink: 0;
+      }
     }
     /deep/.edit {
       .avatar_medium img {

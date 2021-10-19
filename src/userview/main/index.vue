@@ -33,7 +33,9 @@
           <div>
             <div>
               <el-menu
-                default-active="/profile"
+                :default-active="
+                  user && user.TeamCount == 0 ? '/teamManagement' : '/home'
+                "
                 class="el-menu-vertical-demo"
                 router
                 ><el-menu-item index="/home">
@@ -44,15 +46,24 @@
                   <i class="hiFont hi-customer"></i>
                   <span slot="title">团队管理</span>
                 </el-menu-item>
-                <el-menu-item index="/memberData">
+                <el-menu-item
+                  index="/memberData"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-statistic"></i>
                   <span slot="title">数据分析</span>
                 </el-menu-item>
-                <el-menu-item index="/memberProccess">
+                <el-menu-item
+                  index="/memberProccess"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-overtime"></i>
                   <span slot="title">成员实况</span>
                 </el-menu-item>
-                <el-menu-item index="/sensitiveword">
+                <el-menu-item
+                  index="/sensitiveword"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-minganciku"></i>
                   <span slot="title">敏感词记录</span>
                 </el-menu-item>
@@ -82,23 +93,38 @@
                     <span slot="title">打印监控</span></el-menu-item
                   >
                 </el-submenu> -->
-                <el-menu-item index="/attendanceStatistics">
+                <el-menu-item
+                  index="/attendanceStatistics"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-attendance"></i>
                   <span slot="title">考勤统计</span>
                 </el-menu-item>
-                <el-menu-item index="/taskDetails">
+                <el-menu-item
+                  index="/taskDetails"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-task"></i>
                   <span slot="title">成员任务</span>
                 </el-menu-item>
-                <el-menu-item index="/taskManager">
+                <el-menu-item
+                  index="/taskManager"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-task-box"></i>
                   <span slot="title">任务管理</span>
                 </el-menu-item>
-                <el-menu-item index="/salaryreport">
+                <el-menu-item
+                  index="/salaryreport"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-xinzipeizhi"></i>
                   <span slot="title">薪资报表</span>
                 </el-menu-item>
-                <el-menu-item index="/msglist">
+                <el-menu-item
+                  index="/msglist"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
                   <i class="hiFont hi-msg"></i>
                   <span slot="title">消息列表</span>
                 </el-menu-item>
@@ -150,16 +176,27 @@
     </div>
     <!-- 内容 -->
     <router-view />
-    <!-- 操作手册 -->
-    <Manual></Manual>
     <el-drawer
-      title="使用说明"
       :visible.sync="drawerManual"
       direction="rtl"
       size="60%"
+      class="drawer_manual"
     >
-      <span>我来啦!</span>
+      <div slot="title">
+        <div>
+          <span style="margin-right: 10px">使用说明</span
+          ><el-radio-group v-model="roleType">
+            <el-radio :label="1">管理员</el-radio>
+            <el-radio :label="2">员工</el-radio>
+          </el-radio-group>
+        </div>
+      </div>
+      <!-- 操作手册 -->
+      <Manual :roleType="roleType" ref="manual"></Manual>
     </el-drawer>
+    <div class="quickBox quick-add" @click="handleManual">
+      <i class="hiFont hi-Notebook"></i>
+    </div>
   </div>
 </template>
 
@@ -174,6 +211,7 @@ export default {
   data() {
     "#main";
     return {
+      roleType: 1, //角色
       menuIndex: this.$menuIndex,
       showBtn: true,
       layoutRoutesUser,
@@ -183,10 +221,34 @@ export default {
     };
   },
   computed: {
-    ...mapState(["mobile"]),
+    ...mapState(["mobile", "user"]),
+  },
+  watch: {
+    roleType(val, oval) {
+      if (val != oval) {
+        this.$refs.manual.initSelStep();
+      }
+    },
   },
   methods: {
-    ...mapActions(["mobile_ToggleState"]),
+    ...mapActions(["mobile_ToggleState", "user_setUser"]),
+    /**
+     * 获取用户信息
+     */
+    getUserInfo() {
+      this.$http
+        .get("/Management/UserManagement/GetUserDetail.ashx", {
+          params: { usId: null },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.user_setUser(resp.data);
+            if (resp.data.TeamCount == 0) {
+              this.$router.push("/teamManagement");
+            }
+          }
+        });
+    },
     /**
      * 下载客户端
      */
@@ -211,7 +273,6 @@ export default {
      */
     handleManual() {
       this.drawerManual = true;
-      // this.$modal.show("manual");
     },
     /**
      * 官网
@@ -249,6 +310,7 @@ export default {
   },
   mounted() {
     this.getCount();
+    this.getUserInfo();
     //建立Socket链接
     // return;
     this.$http.get("/User/GetLocalIP.ashx").then((resp) => {

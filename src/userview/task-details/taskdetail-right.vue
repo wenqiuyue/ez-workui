@@ -242,7 +242,8 @@ export default {
       }
       .el-tag {
         width: 100%;
-        overflow-x: hidden;
+        height: auto;
+        white-space: pre-wrap;
       }
     }
   }
