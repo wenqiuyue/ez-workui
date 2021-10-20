@@ -122,6 +122,13 @@
                   <span slot="title">薪资报表</span>
                 </el-menu-item>
                 <el-menu-item
+                  index="/applyAudit"
+                  :disabled="user && user.TeamCount == 0 ? true : false"
+                >
+                  <i class="hiFont hi-reviews"></i>
+                  <span slot="title">事务审批</span>
+                </el-menu-item>
+                <el-menu-item
                   index="/msglist"
                   :disabled="user && user.TeamCount == 0 ? true : false"
                 >

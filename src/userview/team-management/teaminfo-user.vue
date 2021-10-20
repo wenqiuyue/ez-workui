@@ -1,25 +1,40 @@
 <template>
   <div id="teaminfo-user">
     <!-- 列表页 -->
-    <div class="info_header" v-if="viewType != 3">
+    <!-- <div class="info_header" v-if="viewType != 3">
       <div class="h_left">
         <span @click="$emit('viewChange')"
           ><i class="el-icon-d-arrow-left"></i>返回</span
         >
       </div>
-    </div>
+    </div> -->
     <div class="info_header" v-if="viewType != 3" style="margin-top: 5px">
       <div class="h_left">
+        <span @click="$emit('viewChange')"
+          ><i class="el-icon-d-arrow-left"></i>返回</span
+        >
         <span
           @click="handleViewChange(1)"
           :class="viewType == 1 ? ' active_span' : ''"
           >团队信息</span
         >
-        <el-divider direction="vertical"></el-divider>
+        <!-- <el-divider direction="vertical"></el-divider> -->
         <span
           @click="handleViewChange(2)"
           :class="viewType == 2 ? ' active_span' : ''"
           >申请列表</span
+        >
+        <!-- <el-divider direction="vertical"></el-divider> -->
+        <span
+          @click="handleViewChange(4)"
+          :class="viewType == 4 ? ' active_span' : ''"
+          >考勤异常申诉</span
+        >
+        <!-- <el-divider direction="vertical"></el-divider> -->
+        <span
+          @click="handleViewChange(5)"
+          :class="viewType == 5 ? ' active_span' : ''"
+          >排班设置</span
         >
       </div>
       <div
@@ -55,6 +70,10 @@
       :infoData="infoData"
       @getData="getData"
     ></TeamInfo>
+    <!-- 考勤申诉 -->
+    <Apply v-else-if="viewType == 4" :selRow="selRow"></Apply>
+    <!-- 排班设置 -->
+    <Scheduling v-else-if="viewType == 5" :selRow="selRow"></Scheduling>
     <!-- 规则设置 -->
     <RuleSetting
       v-else
@@ -70,6 +89,8 @@ export default {
   components: {
     InvitationList: () => import("./invitation-list"),
     TeamInfo: () => import("./team-info"),
+    Apply: () => import("./apply"),
+    Scheduling: () => import("./scheduling"),
     RuleSetting: () => import("@/userview/process-rulesver"),
   },
   props: {
@@ -147,12 +168,17 @@ export default {
         font-size: 16px;
         font-weight: bold;
         cursor: pointer;
+        margin-right: 22px;
         &:hover {
           color: #409eff;
         }
       }
       .active_span {
         color: #409eff;
+      }
+      .el-divider {
+        margin: 0 12px;
+        height: 2rem;
       }
     }
   }

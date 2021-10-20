@@ -144,6 +144,11 @@ const routes = [
             layout: true,
             icon: "hi-customer",
           },
+          {
+            path: "/applyAudit",
+            name: "事务审批",
+            component: () => import("@/userview/apply-audit"),
+          },
         ],
       },
     ],

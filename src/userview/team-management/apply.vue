@@ -1,0 +1,288 @@
+<template>
+  <div class="apply">
+    <el-row :gutter="10">
+      <el-col :span="24" :md="9">
+        <el-card class="custom-card audit-form" shadow="never">
+          <el-row class="audit-form-body" v-loading="loadingForm">
+            <!--  考勤申诉-->
+            <el-form
+              label-width="auto"
+              class="custom-form"
+              :model="customForm"
+              ref="customForm"
+              :rules="customRules"
+            >
+              <el-form-item label="申诉日期：">
+                <el-date-picker
+                  style="width: 70%"
+                  v-model="customForm.date"
+                  type="date"
+                  placeholder="选择日期"
+                  value-format="yyyy-MM-dd"
+                  :clearable="false"
+                ></el-date-picker>
+                <div class="el-form-item__error" v-show="showError">
+                  当天暂无考勤记录
+                </div>
+              </el-form-item>
+              <el-form-item label="申述类型：">
+                <el-checkbox-group v-model="customForm.DateType">
+                  <el-checkbox :label="1">上班</el-checkbox>
+                  <el-checkbox :label="2">下班</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item
+                label="上班时间："
+                v-if="customForm.DateType.includes(1)"
+              >
+                <el-date-picker
+                  v-model="customForm.StartTime"
+                  type="datetime"
+                  placeholder="选择日期时间"
+                  style="width: 70%"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item
+                label="上班状态："
+                v-if="customForm.DateType.includes(1)"
+              >
+                <el-select v-model="customForm.StartStatus" style="width: 70%">
+                  <el-option
+                    v-for="item in $D.LIST('at_state')"
+                    :key="item.value"
+                    :label="item.name"
+                    :value="item.value"
+                    :disabled="filterOption(item)"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item
+                label="下班时间："
+                v-if="customForm.DateType.includes(2)"
+              >
+                <el-date-picker
+                  v-model="customForm.EndTime"
+                  type="datetime"
+                  placeholder="选择日期时间"
+                  style="width: 70%"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item
+                label="下班状态："
+                v-if="customForm.DateType.includes(2)"
+              >
+                <el-select v-model="customForm.EndStatus" style="width: 70%">
+                  <el-option
+                    v-for="item in $D.LIST('at_state')"
+                    :key="item.value"
+                    :label="item.custom"
+                    :value="item.value"
+                    :disabled="filterOption(item)"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="申诉原因：" prop="Reason">
+                <el-input
+                  type="textarea"
+                  style="width: 70%"
+                  v-model="customForm.Reason"
+                ></el-input>
+              </el-form-item>
+              <el-form-item style="margin-top: 3rem">
+                <el-button @click="resetForm('customForm')">重置</el-button>
+                <el-button
+                  type="primary"
+                  @click="submitForm('customForm')"
+                  :loading="subLoading"
+                  :disabled="showError"
+                  >提交</el-button
+                >
+              </el-form-item>
+            </el-form>
+          </el-row>
+        </el-card>
+      </el-col>
+      <el-col :span="24" :md="15"
+        ><audit-table
+          title="我的申请记录"
+          tableType="apply"
+          ref="table"
+          :isApply="true"
+        ></audit-table
+      ></el-col>
+    </el-row>
+  </div>
+</template>
+
+<script>
+export default {
+  components: {
+    AuditTable: () => import("@/userview/apply-audit"),
+  },
+  data() {
+    return {
+      subLoading: false,
+      showError: false,
+      // 考勤
+      customForm: {
+        date: new Date().timeFormat("yyyy-MM-dd"),
+        DateType: [],
+        StartTime: null,
+        StartStatus: null,
+        EndTime: null,
+        EndStatus: null,
+        Reason: null,
+      },
+      customRules: {
+        Reason: [{ required: true, message: "请输入申诉理由" }],
+      },
+      type: 1,
+      loadingForm: false,
+    };
+  },
+  watch: {
+    "customForm.date": {
+      handler(newval) {
+        this.$http
+          .get("/Work/Attendance/GetAttendanceByDate.ashx", {
+            params: { date: newval },
+          })
+          .then((resp) => {
+            if (resp.data && resp.data.ArId) {
+              this.showError = false;
+              this.customForm.fromRecordID = resp.data.ArId;
+            } else {
+              this.showError = true;
+            }
+          });
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+    submitForm(formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          this.subLoading = true;
+          let resp = null;
+          if (this.formType == -1) {
+            //提交申述
+            let params = {};
+            params.Date = this.customForm.date;
+            params.Reason = this.customForm.Reason;
+            params.DateType = this.customForm.DateType;
+            //勾选了上午的内容
+            if (
+              this.customForm.DateType.includes(1) &&
+              this.customForm.StartTime
+            ) {
+              params.StartTime = this.customForm.StartTime;
+              params.StartStatus = this.customForm.StartStatus;
+            }
+            if (
+              this.customForm.DateType.includes(2) &&
+              this.customForm.EndTime
+            ) {
+              params.EndTime = this.customForm.EndTime;
+              params.EndStatus = this.customForm.EndStatus;
+            }
+            resp = await this.$http.post(
+              "/Work/TransactionAudit/AddAttendanceComplaint.ashx",
+              {
+                customFormID: 35,
+                data: params,
+                fromRecordType: 1,
+                fromRecordID: this.customForm.fromRecordID,
+              }
+            );
+          } else {
+            resp = await this.$http.post("/MGT/Process/SubmitAuditFrom.ashx", {
+              customFormID: this.formID[1],
+              data: this.ruleForm,
+            });
+          }
+          if (resp.res == 0) {
+            this.$notify({
+              message: resp.msg,
+              type: "success",
+            });
+            this.$emit("upData");
+          }
+          this.subLoading = false;
+        } else {
+          return false;
+        }
+      });
+    },
+    filterOption(item) {
+      return item.value == -1 || item.value == 3;
+    },
+    upTable() {
+      this.$refs.table.loadData();
+    },
+  },
+};
+</script>
+
+<style lang="less" scoped>
+.apply {
+  width: 100%;
+  box-sizing: border-box;
+  height: calc(100% - 46px);
+  /deep/.el-row {
+    .el-col:first-child {
+      padding-left: 0 !important;
+    }
+    .el-col:last-child {
+      padding-right: 0 !important;
+    }
+  }
+  .audit-form {
+    width: 100%;
+    height: 100%;
+    .el-card__body {
+      height: calc(100% - 106px);
+      overflow-y: auto;
+    }
+    &-body {
+      header {
+        padding: 0 0 1rem 0;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: rgba(68, 142, 245, 1);
+        border-bottom: 1px solid rgba(221, 221, 221, 1);
+      }
+      .custom-form {
+        padding: 20px 0 0 20px;
+        width: 100%;
+      }
+      .fieds-form {
+        padding: 20px;
+        text-align: left;
+      }
+    }
+  }
+  /deep/.el-row {
+    margin: 0 !important;
+    height: 100%;
+    @media all and (max-width: 1024px) {
+      height: auto;
+    }
+    .el-col {
+      height: 100%;
+    }
+  }
+
+  /deep/.audit-table .el-card__body {
+    @media all and (max-width: 1024px) {
+      height: 400px;
+      padding-bottom: 30px;
+    }
+  }
+}
+</style>

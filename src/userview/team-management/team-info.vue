@@ -49,15 +49,13 @@
                   }}人 / 10人</span
                 >
               </li>
-              <li class="img_row">
-                <span class="lable_1">创建人：</span>
-                <span class="number">
-                  <!-- <el-avatar
-                    size="small"
-                    :src="imgChange(infoData.Teamdata.UserPicture, true)"
-                  ></el-avatar> -->
-                  <span>{{ infoData.Teamdata.UserName }}</span>
-                </span>
+              <li class="set_rule">
+                <span class="lable_2"
+                  >主管理员：{{ infoData.Teamdata.UserName }}</span
+                >
+                <el-button type="text" size="medium" style="padding: 0px"
+                  >转让主管理员</el-button
+                >
               </li>
               <li class="img_row_list">
                 <span class="lable_1">管理员：</span>
@@ -471,14 +469,14 @@ export default {
 <style lang="less" scoped>
 .team-info {
   // margin-top: 10px;
-  height: calc(100% - 80px);
+  height: calc(100% - 46px);
   .el-row {
     height: 100%;
   }
   .el-col-7,
   .el-col-17 {
     height: 100%;
-    padding-bottom: 10px;
+    // padding-bottom: 10px;
   }
   .info_left {
     height: 100%;
