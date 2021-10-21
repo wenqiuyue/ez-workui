@@ -81,14 +81,14 @@
             type="success"
             size="small"
             @click="handleHourlyWage(scope.row)"
-            v-if="userMemberMType == 2"
+            v-if="userMemberMType != 1"
             >设置时薪</el-button
           >
           <el-button
             type="danger"
             size="small"
             @click="handleDel(scope.row)"
-            v-if="userMemberMType == 2"
+            v-if="userMemberMType != 1"
             >删除</el-button
           >
         </template>

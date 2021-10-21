@@ -238,7 +238,7 @@
     </div>
 
     <!-- 创建团队 -->
-    <AddTeam @success="handleSearch"></AddTeam>
+    <AddTeam @success="addTeamSuccess"></AddTeam>
     <!-- 加入团队 -->
     <JoinTeam></JoinTeam>
     <!-- 邀请成员 -->
@@ -301,11 +301,10 @@ export default {
     getbehaviorColor,
     ...mapActions(["user_setUser"]),
     /**
-     * 搜索
+     * 添加团队成功
      */
-    handleSearch() {
-      this.pageData.pageIndex = 1;
-      this.getTeamList();
+    addTeamSuccess(id) {
+      this.handleSearch();
       //如果是加的第一个团队，则重新存个人信息
       if (this.user.TeamCount == 0) {
         this.$http
@@ -320,7 +319,19 @@ export default {
               }
             }
           });
+
+        this.selRow = {
+          Id: id,
+        };
+        this.isInfoView = true;
       }
+    },
+    /**
+     * 搜索
+     */
+    handleSearch() {
+      this.pageData.pageIndex = 1;
+      this.getTeamList();
     },
     /**
      * 获取团队列表

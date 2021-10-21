@@ -250,57 +250,34 @@
                       v-text="parseInt(data.day.split('-').slice(2))"
                     ></p>
                   </el-col>
-                  <el-col :sm="24" :md="18" class="hidden-md-and-up">
-                    <p
-                      class="cell-title-right"
-                      @click="
-                        attendanceCellPcClick(
-                          $event,
-                          attenceData[
-                            parseInt(data.day.split('-').slice(2)) - 1
-                          ]
-                        )
-                      "
-                    >
-                      {{
-                        attenceData[parseInt(data.day.split("-").slice(2)) - 1]
-                          .Type
-                          ? attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].Type.slice(0, -1)
-                          : ""
-                      }}
-                    </p>
-                  </el-col>
-                  <el-col :sm="24" :md="20" class="hidden-sm-and-down">
-                    <!-- <p
-                      class="cell-title-right"
-                      v-if="
-                        !attenceData[parseInt(data.day.split('-').slice(2)) - 1]
-                          .Flag
-                      "
-                      @click="
-                        attendanceCellPcClick(
-                          $event,
-                          attenceData[
-                            parseInt(data.day.split('-').slice(2)) - 1
-                          ]
-                        )
-                      "
-                    >
-                      {{
-                        attenceData[parseInt(data.day.split("-").slice(2)) - 1]
-                          .Type
-                      }}
-                    </p> -->
+                  <el-col
+                    :sm="24"
+                    :md="20"
+                    class="hidden-sm-and-down"
+                    v-if="parseInt(data.day.split('-').slice(2)) == 5"
+                  >
                     <p
                       class="cell-title-right"
                       v-show="Boolean(new Date() > new Date(date))"
                     >
-                      当日办公：{{
-                        attenceData[parseInt(data.day.split("-").slice(2)) - 1]
-                          .DayTime
-                      }}小时
+                      审核中
+                    </p>
+                  </el-col>
+                  <el-col :sm="24" :md="20" class="hidden-sm-and-down" v-else>
+                    <p
+                      class="cell-title-right apply"
+                      v-show="Boolean(new Date() > new Date(date))"
+                    >
+                      <span
+                        @click.stop="
+                          handlApply(
+                            attenceData[
+                              parseInt(data.day.split('-').slice(2)) - 1
+                            ]
+                          )
+                        "
+                        >我要申诉</span
+                      >
                     </p>
                   </el-col>
                 </el-row>
@@ -431,6 +408,17 @@
                       >
                     </p>
                   </el-col>
+                  <el-col :span="24">
+                    <p
+                      class="cell-info-right"
+                      v-show="Boolean(new Date() > new Date(date))"
+                    >
+                      当日办公：{{
+                        attenceData[parseInt(data.day.split("-").slice(2)) - 1]
+                          .DayTime
+                      }}小时
+                    </p>
+                  </el-col>
                 </el-row>
               </div>
             </template>
@@ -482,1154 +470,19 @@
         </div>
       </div>
     </div>
-
-    <!-- 考勤组统计 -->
-    <XModal
-      name="attenceStatic"
-      title="考勤统计"
-      width="98%"
-      height="90%"
-      :showCrossBtn="true"
-      @opened="openStatic"
-      class="attence-static"
-      @closed="closeStatic"
-    >
-      <div v-loading="modalLoading">
-        <div class="time-pick">
-          <div style="display: flex">
-            <el-select
-              v-model="selectType"
-              style="width: 120px"
-              :clearable="false"
-              @change="selectTypeChange"
-            >
-              <el-option label="按考勤组" :value="1"></el-option>
-              <el-option label="按成员" :value="2"></el-option>
-            </el-select>
-            <el-select
-              v-model="listType"
-              v-if="selectType == 1"
-              style="width: 200px"
-            >
-              <el-option
-                v-for="(item, index) in attenceGroup"
-                :value="item.AgId"
-                :label="item.Name"
-                :key="index"
-              ></el-option>
-            </el-select>
-            <selMember
-              size="small"
-              @Confirm="getSelAttenceMember"
-              :selRange="1"
-              :arrays="selAttenceMem"
-              v-if="selectType == 2"
-              :showLength="5"
-            ></selMember>
-            <el-date-picker
-              style="margin-left: 1rem"
-              v-model="selectMonth"
-              type="month"
-              placeholder="请选择月份"
-              value-format="yyyy-MM"
-              :clearable="false"
-              format="yyyy-MM"
-            ></el-date-picker>
-            <label class="exclude">
-              <el-checkbox v-model="Attend">排除未出勤人员</el-checkbox>
-              <el-checkbox v-model="Quit">排除离职人员</el-checkbox>
-            </label>
-            <el-button
-              type="primary"
-              size="medium"
-              @click="handleSearch"
-              style="margin-left: 1rem"
-            >
-              <i class="hiFont hi-search"></i>查询
-            </el-button>
-          </div>
-          <div style="display: flex" class="select-time">
-            <div style="margin-right: 2rem"></div>
-            <el-button type="primary" size="medium" @click="exportFile">
-              <i class="el-icon-download"></i>导出
-            </el-button>
-          </div>
-        </div>
-        <el-table
-          :data="attenceGroupTable"
-          border
-          style="width: 100%; margin: 1.5rem 0"
-          :header-row-class-name="tableHeaderStyle"
-          :cell-style="attenceCellStyle"
-          :header-cell-style="attenceHeaderStyle"
-        >
-          <el-table-column
-            prop="PerScore"
-            label="平均绩效"
-            class="table-header"
-          >
-            <template slot-scope="scope">
-              <span>{{ scope.row.PerScore }}分</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="出勤" class="table-header">
-            <el-table-column
-              prop="ShouldAttendance"
-              label="应出勤"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.ShouldAttendance ? scope.row.ShouldAttendance : 0
-                }}天</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="ActualAttendance"
-              label="实际出勤"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.ActualAttendance ? scope.row.ActualAttendance : 0
-                }}天</template
-              >
-            </el-table-column>
-            <el-table-column prop="Leave" label="请假" class="table-header">
-              <template slot-scope="scope"
-                >{{ scope.row.Leave ? scope.row.Leave : 0 }}天</template
-              >
-            </el-table-column>
-            <el-table-column prop="Adjust" label="调休" class="table-header">
-              <template slot-scope="scope"
-                >{{ scope.row.Adjust ? scope.row.Adjust : 0 }}天</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="OutsideTotalHour"
-              label="外出"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.OutsideTotalHour ? scope.row.OutsideTotalHour : 0
-                }}小时</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="Absenteeism"
-              label="旷工"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.Absenteeism ? scope.row.Absenteeism : 0
-                }}天</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="DeductionLeave"
-              label="抵扣后的请假"
-              class="table-header"
-              width="120"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.DeductionLeave ? scope.row.DeductionLeave : 0
-                }}天</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="缺卡" class="table-header">
-            <el-table-column prop="StartCard" label="上班" class="table-header">
-              <template slot-scope="scope"
-                >{{ scope.row.StartCard ? scope.row.StartCard : 0 }}次</template
-              >
-            </el-table-column>
-            <el-table-column prop="EndCard" label="下班" class="table-header">
-              <template slot-scope="scope"
-                >{{ scope.row.EndCard ? scope.row.EndCard : 0 }}次</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="早退" class="table-header">
-            <el-table-column
-              prop="LeaveEarly"
-              label="早退"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.LeaveEarly ? scope.row.LeaveEarly : 0
-                }}次</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="SeriousLeaveEarly"
-              label="严重早退"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.SeriousLeaveEarly ? scope.row.SeriousLeaveEarly : 0
-                }}次</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="迟到" class="table-header">
-            <el-table-column prop="Late" label="迟到" class="table-header">
-              <template slot-scope="scope"
-                >{{ scope.row.Late ? scope.row.Late : 0 }}次</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="SeriousLate"
-              label="严重迟到"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.SeriousLate ? scope.row.SeriousLate : 0
-                }}次</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="加班" class="table-header">
-            <el-table-column
-              prop="OverTime"
-              label="总时长"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{ scope.row.OverTime ? scope.row.OverTime : 0 }}小时</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="EffectiveOverTime"
-              label="有效时长"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.EffectiveOverTime ? scope.row.EffectiveOverTime : 0
-                }}小时</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="DeductionOver"
-              label="抵扣后的时长"
-              class="table-header"
-              width="120"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.DeductionOver ? scope.row.DeductionOver : 0
-                }}小时</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="简报" class="table-header">
-            <el-table-column
-              prop="NotSubBulletin"
-              label="未提交"
-              class="table-header"
-            ></el-table-column>
-            <el-table-column
-              prop="RejectBulletin"
-              label="被驳回"
-              class="table-header"
-            ></el-table-column>
-            <el-table-column
-              prop="NotAuditBulletin"
-              label="未审批"
-              class="table-header"
-            ></el-table-column>
-            <el-table-column
-              prop="NotApprovedBulletin"
-              label="未被审批"
-              class="table-header"
-            ></el-table-column>
-          </el-table-column>
-          <el-table-column prop="ReimbursementPrice" label="金额">
-            <el-table-column prop="ReimbursementPrice" label="报销">
-              <template slot-scope="scope"
-                >￥ {{ scope.row.ReimbursementPrice }}</template
-              >
-            </el-table-column>
-            <el-table-column prop="Fine" label="罚款">
-              <template slot-scope="scope">￥ {{ scope.row.Fine }}</template>
-            </el-table-column>
-            <el-table-column prop="bonus" label="奖金">
-              <template slot-scope="scope">￥ {{ scope.row.Bonus }}</template>
-            </el-table-column>
-          </el-table-column>
-        </el-table>
-        <h3 style="text-align: center">成员列表</h3>
-        <el-table
-          :data="attenceGroupList"
-          border
-          style="width: 100%; margin: 1.5rem 0"
-          :header-row-class-name="tableHeaderStyle"
-          :cell-style="attenceCellStyle"
-          :header-cell-style="attenceHeaderStyle"
-          @cell-click="toDetail"
-        >
-          <el-table-column prop="Name" label="成员姓名"></el-table-column>
-          <el-table-column
-            prop="PerScore"
-            label="绩效分数"
-            class="table-header"
-            sortable
-            width="90"
-          >
-            <template slot-scope="scope">
-              <span>
-                {{ scope.row.PerScore }}分
-                <span title="KPI记录">
-                  <i
-                    class="hiFont hi-task record_icon"
-                    @click="handleKPI(scope.row)"
-                  ></i>
-                </span>
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column label="出勤" class="table-header">
-            <el-table-column
-              prop="ShouldAttendance"
-              label="应出勤"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope"
-                >{{ scope.row.ShouldAttendance }}天</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="ActualAttendance"
-              label="实际出勤"
-              class="table-header"
-              sortable
-              width="90"
-            >
-              <template slot-scope="scope">
-                {{ scope.row.ActualAttendance }}天
-                <span title="考勤记录">
-                  <i
-                    class="hiFont hi-task record_icon"
-                    @click="handleAttendance(scope.row, 1, 99)"
-                  ></i>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="Leave"
-              label="请假"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                {{ scope.row.Leave }}天
-                <span title="请假记录">
-                  <i
-                    class="hiFont hi-task record_icon"
-                    @click="handleAttendance(scope.row, 2, 5)"
-                  ></i>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="Adjust"
-              label="调休"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                {{ scope.row.Adjust }}天
-                <span title="调休记录">
-                  <i
-                    class="hiFont hi-task record_icon"
-                    @click="handleAttendance(scope.row, 10, 5)"
-                  ></i>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="OutsideTotalHour"
-              label="外出"
-              class="table-header"
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.OutsideTotalHour ? scope.row.OutsideTotalHour : 0
-                }}小时</template
-              >
-            </el-table-column>
-            <el-table-column
-              prop="Absenteeism"
-              label="旷工"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                {{ scope.row.Absenteeism }}天
-                <span title="旷工记录">
-                  <i
-                    class="hiFont hi-task record_icon"
-                    @click="handleAttendance(scope.row, 3, 3)"
-                  ></i>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="DeductionLeave"
-              label="抵扣后的请假"
-              class="table-header"
-              width="120"
-              sortable
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.DeductionLeave ? scope.row.DeductionLeave : 0
-                }}天</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="缺卡" class="table-header">
-            <el-table-column
-              prop="StartCard"
-              label="上班"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                <div>
-                  {{ scope.row.StartCard }}次
-                  <span title="上班缺卡记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleAttendance(scope.row, 6, 2)"
-                    ></i>
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="EndCard"
-              label="下班"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                <div>
-                  {{ scope.row.EndCard }}次
-                  <span title="下班缺卡记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleAttendance(scope.row, 7, 2)"
-                    ></i>
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="早退" class="table-header">
-            <el-table-column
-              prop="LeaveEarly"
-              label="早退"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                <div>
-                  {{ scope.row.LeaveEarly }}次
-                  <span title="早退记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleAttendance(scope.row, 4, 1)"
-                    ></i>
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="SeriousLeaveEarly"
-              label="严重早退"
-              class="table-header"
-              sortable
-              width="90"
-            >
-              <template slot-scope="scope">
-                <div>
-                  {{ scope.row.SeriousLeaveEarly }}次
-                  <span title="严重早退记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleAttendance(scope.row, 8, 4)"
-                    ></i>
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="迟到" class="table-header">
-            <el-table-column
-              prop="Late"
-              label="迟到"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                <div>
-                  {{ scope.row.Late }}次
-                  <span title="迟到记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleAttendance(scope.row, 5, 1)"
-                    ></i>
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="SeriousLate"
-              label="严重迟到"
-              class="table-header"
-              sortable
-              width="90"
-            >
-              <template slot-scope="scope">
-                <div>
-                  {{ scope.row.SeriousLate }}次
-                  <span title="严重迟到记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleAttendance(scope.row, 9, 4)"
-                    ></i>
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="加班" class="table-header">
-            <el-table-column
-              prop="OverTime"
-              label="总时长"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                <span>{{ scope.row.OverTime }}小时</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="EffectiveOverTime"
-              label="有效时长"
-              class="table-header"
-              sortable
-              width="90"
-            >
-              <template slot-scope="scope">
-                <span>
-                  {{ scope.row.EffectiveOverTime }}小时
-                  <span title="加班记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleCalc(scope.row)"
-                    ></i>
-                  </span>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="DeductionOver"
-              label="抵扣后的时长"
-              class="table-header"
-              width="120"
-              sortable
-            >
-              <template slot-scope="scope"
-                >{{
-                  scope.row.DeductionOver ? scope.row.DeductionOver : 0
-                }}小时</template
-              >
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="简报" class="table-header">
-            <el-table-column prop="NotSubBulletin" label="未提交" sortable>
-              <template slot-scope="scope">
-                <span>
-                  {{ scope.row.NotSubBulletin }}
-                  <span title="未提交简报记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleBriefingInfo(scope.row, 1)"
-                    ></i>
-                  </span>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="RejectBulletin"
-              label="被驳回"
-              class="table-header"
-              sortable
-            >
-              <template slot-scope="scope">
-                <span>
-                  {{ scope.row.RejectBulletin }}
-                  <span title="被驳回简报记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleBriefingInfo(scope.row, 4)"
-                    ></i>
-                  </span>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="NotAuditBulletin" label="未审批" sortable>
-              <template slot-scope="scope">
-                <span>
-                  {{ scope.row.NotAuditBulletin }}
-                  <span title="未审批简报记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleBriefingInfo(scope.row, 3)"
-                    ></i>
-                  </span>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="NotApprovedBulletin"
-              label="未被审批"
-              sortable
-              width="90"
-            >
-              <template slot-scope="scope">
-                <span>
-                  {{ scope.row.NotApprovedBulletin }}
-                  <span title="未被审批简报记录">
-                    <i
-                      class="hiFont hi-task record_icon"
-                      @click="handleBriefingInfo(scope.row, 2)"
-                    ></i>
-                  </span>
-                </span>
-              </template>
-            </el-table-column>
-          </el-table-column>
-          <el-table-column label="金额" width="90">
-            <el-table-column prop="ReimbursementPrice" label="报销" sortable>
-              <template slot-scope="scope">
-                ￥ {{ scope.row.ReimbursementPrice }}
-                <span title="报销记录">
-                  <i
-                    class="hiFont hi-task record_icon"
-                    @click="handleReimbursement(scope.row)"
-                  ></i>
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="Fine" label="罚款" sortable>
-              <template slot-scope="scope"> ￥ {{ scope.row.Fine }} </template>
-            </el-table-column>
-            <el-table-column prop="Bonus" label="奖金" sortable>
-              <template slot-scope="scope"> ￥ {{ scope.row.Bonus }} </template>
-            </el-table-column>
-          </el-table-column>
-        </el-table>
-      </div>
-    </XModal>
-    <!-- 加班记录 -->
-    <XModal
-      title="加班记录"
-      confirmBtnText="确认"
-      @onConfirm="handleCalcConfirm()"
-      name="calcTime"
-      :showCrossBtn="true"
-      height="65%"
-      :isFixed="true"
-    >
-      <table class="calc-content">
-        <tr style="font-weight: bold">
-          <td>
-            日期
-            <el-date-picker
-              v-model="calcConMonth"
-              type="month"
-              placeholder="请选择月份"
-              value-format="yyyy-MM"
-              :clearable="false"
-              format="yyyy-MM"
-              @change="getCalcDate"
-            ></el-date-picker>
-          </td>
-          <td>加班时长</td>
-        </tr>
-        <tbody v-if="calcTableData && calcTableData.List.length > 0">
-          <tr
-            v-for="(item, index) in calcTableData.List"
-            :key="index"
-            @click="handleCalcInfo(item)"
-          >
-            <td>{{ item.day | dateFormat }}</td>
-            <td>{{ item.time }}h</td>
-          </tr>
-          <tr>
-            <td>有效加班时长:</td>
-            <td>{{ calcTableData.totalTime }}小时</td>
-          </tr>
-        </tbody>
-        <tr v-else>
-          <td>该月没有加班记录</td>
-        </tr>
-      </table>
-    </XModal>
-    <!-- <XModal
-      name="report"
-      width="95%"
-      height="95%"
-      :url="'/attendances/' + obj.id + '/' + obj.day"
-      referer="/attendances"
-    >
-      <Report :obj="obj" :detail="fatherDetail" :isMember="true"></Report>
-    </XModal> -->
-    <XModal
-      name="attencePersonStatic"
-      :title="activePerson + '的考勤'"
-      width="95%"
-      height="90%"
-      :showCrossBtn="true"
-      class="attence-static"
-    >
-      <div v-loading="personAttenceLoading">
-        <h3>考勤汇总</h3>
-        <el-table
-          :data="attencePersonTable"
-          border
-          style="width: 100%; margin: 1.5rem 0"
-          :header-row-class-name="tableHeaderStyle"
-          :cell-style="attenceCellStyle"
-          :header-cell-style="attenceHeaderStyle"
-        >
-          <el-table-column
-            prop="ShouldAttendance"
-            label="应出勤工时"
-            class="table-header"
-          >
-            <template slot-scope="scope"
-              >{{
-                scope.row.ShouldAttendance ? scope.row.ShouldAttendance : 0
-              }}小时</template
-            >
-          </el-table-column>
-          <el-table-column
-            prop="ActualAttendance"
-            label="出勤工时"
-            class="table-header"
-          >
-            <template slot-scope="scope"
-              >{{
-                scope.row.ActualAttendance ? scope.row.ActualAttendance : 0
-              }}小时</template
-            >
-          </el-table-column>
-          <el-table-column
-            prop="StartCard"
-            label="上班缺卡"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="EndCard"
-            label="下班缺卡"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="LeaveEarly"
-            label="早退"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="Late"
-            label="迟到"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="Absenteeism"
-            label="旷工"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="Adjust"
-            label="调休天数"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="OutsideTotalHour"
-            label="外出"
-            class="table-header"
-          >
-            <template slot-scope="scope"
-              >{{
-                scope.row.OutsideTotalHour ? scope.row.OutsideTotalHour : 0
-              }}小时</template
-            >
-          </el-table-column>
-          <el-table-column
-            prop="OverTime"
-            label="加班总时长"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="EffectiveOverTime"
-            label="有效加班时长"
-            class="table-header"
-          ></el-table-column>
-          <el-table-column
-            prop="SubmitreportNumber"
-            label="应提交简报"
-          ></el-table-column>
-          <el-table-column
-            prop="ActualSubmitreportNumber"
-            label="实际提交简报"
-          ></el-table-column>
-        </el-table>
-        <h3>考勤详情</h3>
-        <el-table
-          :data="attencePersonList"
-          border
-          style="width: 100%; margin: 1.5rem 0"
-          :header-row-class-name="tableHeaderStyle"
-          :cell-style="attenceCellStyle"
-          :header-cell-style="attenceHeaderStyle"
-        >
-          <el-table-column prop="Date" label="日期" class="table-header">
-            <template slot-scope="scope">{{
-              scope.row.Date.timeFormat("yyyy年MM月dd日")
-            }}</template>
-          </el-table-column>
-          <el-table-column
-            prop="StartTime"
-            label="上班时间"
-            class="table-header"
-          >
-            <template slot-scope="scope">{{
-              scope.row.StartTime
-                ? scope.row.StartTime.timeFormat("HH:mm")
-                : "无"
-            }}</template>
-          </el-table-column>
-          <el-table-column
-            prop="StartStatus"
-            label="上班状态"
-            class="table-header"
-          >
-            <template slot-scope="scope">{{
-              scope.row.StartStatus
-                ? $D.ITEM("at_state", scope.row.StartStatus).name
-                : ""
-            }}</template>
-          </el-table-column>
-          <el-table-column prop="EndTime" label="下班时间" class="table-header">
-            <template slot-scope="scope">{{
-              scope.row.EndTime ? scope.row.EndTime.timeFormat("HH:mm") : "无"
-            }}</template>
-          </el-table-column>
-          <el-table-column
-            prop="EndStatus"
-            label="下班状态"
-            class="table-header"
-          >
-            <template slot-scope="scope">{{
-              scope.row.EndStatus
-                ? $D.ITEM("at_state", scope.row.EndStatus).custom
-                : ""
-            }}</template>
-          </el-table-column>
-          <el-table-column
-            prop="Type"
-            label="日期类型"
-            class="table-header"
-          ></el-table-column>
-        </el-table>
-      </div>
-    </XModal>
-    <XModal
-      name="applyAuditList"
-      ref="applyAuditList"
-      :title="activeItem"
-      width="95%"
-      height="90%"
-      :showCrossBtn="true"
-      @opened="openApplyList"
-      @closed="closeModal"
-    >
-      <div slot="sel" v-if="activeItem == '审核列表'">
-        <el-select v-model="applyType" class="sel-apply-type">
-          <el-option label="未审批" :value="1"></el-option>
-          <el-option label="已审批" :value="2"></el-option>
-        </el-select>
-      </div>
-      <div class="attence-table">
-        <el-table
-          :cell-class-name="cellStyle"
-          :data="tableData"
-          class="footer-table"
-          ref="attendances"
-          style="width: 100%"
-          @sort-change="sortChange"
-          v-loading="attendanceLoading"
-        >
-          <template slot="empty" style="font-size: 0">
-            <div style="height: 100%">
-              <img
-                src="../../assets/img/emptyTask.png"
-                style="display: inline-block; width: 50%; margin-top: 100px"
-              />
-            </div>
-          </template>
-          <el-table-column type="expand">
-            <template slot-scope="props">
-              <el-form label-position="left" inline class="demo-table-expand">
-                <el-form-item label="申诉人">
-                  <span>{{ props.row.UserName }}</span>
-                </el-form-item>
-                <el-form-item label="申诉日期">
-                  <span>{{
-                    props.row.Date
-                      ? props.row.Date.timeFormat("yyyy-MM-dd HH:mm")
-                      : "--:--:--"
-                  }}</span>
-                </el-form-item>
-                <el-form-item label="申诉原因">
-                  <span>{{ props.row.Reason }}</span>
-                </el-form-item>
-                <el-form-item label="审核状态">
-                  <span>{{
-                    $D.ITEM("affair_filter", props.row.AuditResult).name
-                  }}</span>
-                </el-form-item>
-                <el-form-item label="审核人">
-                  <span>{{ props.row.CurrentAuditorName }}</span>
-                </el-form-item>
-                <el-form-item label="驳回原因">
-                  <span>{{
-                    props.row.ComReason ? props.row.ComReason : "无"
-                  }}</span>
-                </el-form-item>
-                <el-form-item
-                  :label="
-                    props.row.AuditResult !== 4 && props.row.AuditResult !== 3
-                      ? '申诉前'
-                      : '审核前'
-                  "
-                >
-                  <p>
-                    上午状态：
-                    {{ $D.ITEM("at_state", props.row.BeForeStartStatus).name }}
-                  </p>
-                  <p>
-                    下午状态：
-                    {{ $D.ITEM("at_state", props.row.BeForeEndStatus).custom }}
-                  </p>
-                  <p>
-                    上班时间：{{
-                      props.row.BeForeStartTime
-                        ? props.row.BeForeStartTime.timeFormat(
-                            "yyyy-MM-dd HH:mm"
-                          )
-                        : "--:--:--"
-                    }}
-                  </p>
-                  <p>
-                    下班时间：{{
-                      props.row.BeForeEndTime
-                        ? props.row.BeForeEndTime.timeFormat("yyyy-MM-dd HH:mm")
-                        : "--:--:--"
-                    }}
-                  </p>
-                </el-form-item>
-                <el-form-item
-                  :label="
-                    props.row.AuditResult !== 4 && props.row.AuditResult !== 3
-                      ? '申诉后'
-                      : '审核后'
-                  "
-                >
-                  <p>
-                    上午状态：
-                    {{ $D.ITEM("at_state", props.row.StartStatus).name }}
-                  </p>
-                  <p>
-                    下午状态：
-                    {{ $D.ITEM("at_state", props.row.EndStatus).custom }}
-                  </p>
-                  <p>
-                    上班时间：{{
-                      props.row.StartTime
-                        ? props.row.StartTime.timeFormat("yyyy-MM-dd HH:mm")
-                        : "--:--:--"
-                    }}
-                  </p>
-                  <p>
-                    下班时间：{{
-                      props.row.EndTime
-                        ? props.row.EndTime.timeFormat("yyyy-MM-dd HH:mm")
-                        : "--:--:--"
-                    }}
-                  </p>
-                </el-form-item>
-              </el-form>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="Date"
-            min-width="100"
-            label="申诉日期"
-            :show-overflow-tooltip="true"
-            sortable="custom"
-          >
-            <template slot-scope="scope">
-              <span>{{
-                scope.row.Date
-                  ? scope.row.Date.timeFormat("yyyy-MM-dd")
-                  : "--:--"
-              }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            min-width="100"
-            label="申诉人"
-            :show-overflow-tooltip="true"
-            v-if="activeItem == '审核列表'"
-          >
-            <template slot-scope="scope">
-              <div>
-                <span style="display: inline-block; vertical-align: middle">{{
-                  scope.row.UserName
-                }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="Reason"
-            min-width="100"
-            label="申诉原因"
-            :show-overflow-tooltip="true"
-          ></el-table-column>
-          <el-table-column
-            min-width="100"
-            label="AM/PM"
-            :show-overflow-tooltip="true"
-          >
-            <template slot-scope="scope">
-              <span slot="reference">
-                <p>
-                  上午：
-                  {{ $D.ITEM("at_state", scope.row.BeForeStartStatus).name }}
-                </p>
-                <p>
-                  下午：
-                  {{ $D.ITEM("at_state", scope.row.BeForeEndStatus).custom }}
-                </p>
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            min-width="100"
-            label="审核状态"
-            :show-overflow-tooltip="true"
-          >
-            <template slot-scope="scope">
-              <span>{{
-                $D.ITEM("affair_filter", scope.row.AuditResult).name
-              }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="ComReason"
-            min-width="100"
-            label="驳回原因"
-            :show-overflow-tooltip="true"
-          ></el-table-column>
-          <el-table-column
-            prop="CurrentAuditorName"
-            min-width="100"
-            label="审核人"
-            :show-overflow-tooltip="true"
-          ></el-table-column>
-          <el-table-column label="操作" min-width="100" v-if="applyType !== 2">
-            <template slot-scope="scope">
-              <c-btn v-if="activeItem == '申诉列表'">
-                <span
-                  @click="handleDeltCancel(scope.$index, scope.row)"
-                  v-if="
-                    scope.row.AuditResult !== 4 && scope.row.AuditResult !== 3
-                  "
-                  >取消申诉</span
-                >
-                <i v-else style="color: #ddd; cursor: initial">取消申诉</i>
-              </c-btn>
-              <c-btn v-if="activeItem == '审核列表'">
-                <span
-                  @click="handleDelt(scope.$index, scope.row)"
-                  v-if="
-                    scope.row.AuditResult !== 4 && scope.row.AuditResult !== 3
-                  "
-                  >审核</span
-                >
-                <!-- <i v-else style="color: #DDD;cursor: initial;">审核</i> -->
-              </c-btn>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <c-pages
-        class="footer-page"
-        v-model="pageData"
-        @changeEvent="pageChange"
-        v-if="tableData.length > 0"
-        v-show="childData.menuType === 'publicAttendance'"
-      ></c-pages>
-    </XModal>
     <!-- 打卡时间线弹窗 -->
     <TimeLineModal
       :selDateTimeLine="selDateTimeLine"
       :IsRealTimeScreenshot="IsRealTimeScreenshot"
     ></TimeLineModal>
     <!-- 申诉审核弹窗 -->
-    <!-- <appeal
+    <appeal
       :popData="popData"
       ref="myAppeal"
-      @appealSubmit="appealSubmit"
-      :Type="appealType"
-      @appealChange="appealChange"
-    ></appeal> -->
-    <!-- 考勤日历 -->
-    <!-- <AttendanceCalendar
-      :selUser="selUser"
-      :timeHeaderToggle="selectMonth"
-      :usid="selUser ? selUser.UsId : null"
-      @getAppealData="appealData"
-      @getCalendarModalData="getCalendarModal"
-      ref="cale"
-    ></AttendanceCalendar> -->
-    <!-- 考核记录 -->
-    <!-- <MyAssessmentModal
-      :usid="selUser ? selUser.UsId : null"
-    ></MyAssessmentModal> -->
-    <!-- 报销记录 -->
-    <!-- <ReimbursementModal
-      :reimbursementData="selUser ? selUser.ReimbursementData.ProjectData : []"
-    ></ReimbursementModal> -->
-    <!-- 简报记录 -->
-    <!-- <BriefingModal
-      :briefingTypeData="briefingType"
-      :usid="selUser ? selUser.UsId : null"
-      :briefingDate="selectMonth"
-      @reportData="reportData"
-    ></BriefingModal> -->
+      @appealSubmit="handleSearch"
+      :Type="1"
+      @appealChange="handleSearch"
+    ></appeal>
   </div>
 </template>
 <script>
@@ -1638,9 +491,7 @@ export default {
   props: ["childLoading", "fatData", "changeTab", "activeItem"],
   components: {
     TimeLineModal: () => import("./timeline-modal"),
-    CBtn: () => import("@/components/CBtn"),
-    CPages: () => import("@/components/CPages"),
-    XModal: () => import("@/components/XModal"),
+    appeal: () => import("./appeal"),
     selMember: () => import("@/components/Selectors/MemberSelectCopy"),
   },
   data() {
@@ -1660,22 +511,10 @@ export default {
 
       moblieOlData: {}, // 移动端的时候这个数据才利用
       popData: {}, // 需要传递给弹层的数据
-      noPass: false, // 默允许用户通过 申诉
-
       timeAttence: [],
       timeHeaderToggle: "",
       memberName: "",
 
-      // 2020 02 13新增考勤申述审批功能
-      tableData: [],
-      pageData: {
-        pageIndex: 1,
-        pageSize: 10,
-        totalNum: 0,
-      },
-      myOptions: ["考勤"],
-      memOptions: ["考勤"],
-      appealType: 1,
       //考勤汇总
       attenceTable: [], //个人考勤和成员考勤 日历对象
       // selectTimeYear: new Date().toLocaleString(),
@@ -1683,7 +522,6 @@ export default {
       // selectTimeMonth: new Date().getMonth() + 1,
       // selectTime: new Date(),
       selMem: [], //时间视图  选择成语
-      selDep: [], //时间视图  选择部门
       selectMonth: new Date(), //考勤查询时间
       Attend: true, //未考勤
       Quit: true, //未离职
@@ -1691,25 +529,15 @@ export default {
       modalLoading: false,
       attenceGroupList: [], //考勤统计 （考勤组，成员） 个人列表
       attenceGroupTable: [], //考勤统计(考勤组，成员) 汇总
-      attencePersonTable: [], //成员详情  个人汇总
-      attencePersonList: [], //成员详情 每日详情列表
-      personAttenceLoading: false, //考勤成员详情loading
-      activePerson: "", //考勤成员详情成员名
+
       selectType: 1, //考勤类型
       selAttenceMem: [], //考勤统计选择成员
-      formParams: {},
-      applyType: 1,
-      sortOrder: null,
-      calcConMonth: null, //加班月份
-      selUser: null, //要查看的人
-      calcTableData: null, //加班记录
+
       obj: {
         id: "",
         day: "",
       },
-      fatherDetail: {},
-      isCalendarModal: 0,
-      briefingType: null, //选择查看的简报类型
+
       isShowTeam: true,
     };
   },
@@ -1746,9 +574,6 @@ export default {
       immediate: true,
       handler: function (newV, oldV) {},
     },
-    applyType() {
-      this.getTableList();
-    },
   },
   filters: {
     dateFormat(day) {
@@ -1757,6 +582,13 @@ export default {
   },
   methods: {
     imgChange,
+    /**
+     * 申诉
+     */
+    handlApply(obj) {
+      this.popData = obj;
+      this.$modal.show("appeal"); // 这个打开弹层的原理仔细看下
+    },
     /**
      * 成员考勤团队切换
      */
@@ -1773,13 +605,6 @@ export default {
       }
     },
     /**
-     * 分页
-     */
-    pageChange(val) {
-      this.pageData = val;
-      this.getTableList();
-    },
-    /**
      * 选择团队后的搜索
      */
     handleSearchData() {
@@ -1794,11 +619,8 @@ export default {
       this.childData.reqsTime = this.timeHeaderToggle;
       this.attenceData = {};
       this.getAttendance();
-      // this.showData();
     },
-    // teamOptionsData() {
-    //   return this.teamOptions;
-    // },
+
     /**
      * 获取团队
      */
@@ -1815,10 +637,7 @@ export default {
           });
       }
     },
-    selectTypeChange() {
-      this.Attend = true;
-      this.Quit = true;
-    },
+
     /**
      * 查询考勤
      */
@@ -1829,125 +648,7 @@ export default {
         this.getuserList();
       }
     },
-    reportData(obj, fData) {
-      this.obj = obj;
-      this.fatherDetail = fData;
-      this.$modal.show("report");
-    },
-    /**
-     * 查看简报记录
-     * type:1 未提交 3 未审批 2 未被审批
-     */
-    handleBriefingInfo(row, type) {
-      this.briefingType = type;
-      this.selUser = row;
-      this.$modal.show("briefing");
-    },
-    /**
-     * 查看报销记录
-     */
-    handleReimbursement(row) {
-      this.selUser = row;
-      this.$modal.show("reimbursementModal");
-    },
-    /**
-     * 查看绩效
-     */
-    handleKPI(row) {
-      this.selUser = row;
-      this.$modal.show("myAssessmentModal");
-    },
-    /**
-     * 查看考勤
-     * row:选择的表格行数据
-     * type：区分查看的记录
-     * state：对应的考勤异常状态
-     */
-    handleAttendance(row, type, state) {
-      this.selUser = row;
-      this.selUser.type = type;
-      this.selUser.stateData = state;
-      if (type === 1) {
-        this.selUser.typeData = `${this.selUser.Name}的考勤记录`;
-      } else if (type === 2) {
-        this.selUser.typeData = `${this.selUser.Name}的请假记录`;
-      } else if (type === 3) {
-        this.selUser.typeData = `${this.selUser.Name}的旷工记录`;
-      } else if (type === 4) {
-        this.selUser.typeData = `${this.selUser.Name}的早退记录`;
-      } else if (type === 5) {
-        this.selUser.typeData = `${this.selUser.Name}的迟到记录`;
-      } else if (type === 6) {
-        this.selUser.typeData = `${this.selUser.Name}的上班缺卡记录`;
-      } else if (type === 7) {
-        this.selUser.typeData = `${this.selUser.Name}的下班缺卡记录`;
-      } else if (type === 8) {
-        this.selUser.typeData = `${this.selUser.Name}的严重早退记录`;
-      } else if (type === 9) {
-        this.selUser.typeData = `${this.selUser.Name}的严重迟到记录`;
-      } else if (type === 10) {
-        this.selUser.typeData = `${this.selUser.Name}的调休记录`;
-      }
-      this.$modal.show("attendanceCalendar");
-    },
-    getCalendarModal(val) {
-      this.isCalendarModal = val;
-    },
-    /**
-     * 查看加班记录简报
-     */
-    handleCalcInfo(calc) {
-      this.obj = {
-        id: this.selUser.UsId,
-        day: calc.day,
-      };
-      if (this.obj.id && this.obj.day) {
-        this.$modal.show("report");
-      }
-      this.fatherDetail = {
-        list: null,
-        // index,
-        // fatherIndex,
-        isSuccess: false,
-        isApprove: false,
-        time: 0,
-        isReject: false,
-        IsOverwork: true,
-        endTime: "",
-      };
-    },
-    /**
-     * 查看加班记录
-     */
-    handleCalc(row) {
-      this.calcConMonth = this.selectMonth;
-      this.selUser = row;
-      //获取加班记录
-      this.getCalcDate();
-      this.$modal.show("calcTime");
-    },
-    /**
-     * 获取加班记录数据
-     */
-    getCalcDate(usid) {
-      this.$http
-        .get("/work/report/GetUserOverTime.ashx", {
-          params: {
-            month: this.calcConMonth,
-            usid: this.selUser.UsId,
-          },
-        })
-        .then((res) => {
-          if (res.res == 0) {
-            this.calcTableData = res.data;
-            console.log(this.calcTableData);
-          }
-        });
-    },
-    //加班记录确认
-    handleCalcConfirm() {
-      this.$modal.hide("calcTime");
-    },
+
     //个人考勤表
     tableHeaderStyle(row) {
       return "table-header";
@@ -1965,79 +666,12 @@ export default {
         color: "#333",
       };
     },
-    closeModal() {
-      this.applyType = 1;
-    },
-    exportFile() {
-      if (this.selectType == 1) {
-        window.location.href =
-          this.$url +
-          "/Work/Attendance/AttendanceSumExport.ashx?Token=" +
-          JSON.parse(window.localStorage.getItem("token")).data +
-          "&SDate=" +
-          this.selectMonth.timeFormat("yyyy-MM") +
-          "&Type=1&GroupId=" +
-          this.listType +
-          "&Attend=" +
-          this.Attend +
-          "&Quit=" +
-          this.Quit;
-      } else {
-        let arr = [];
-        this.selAttenceMem.forEach((item) => {
-          arr.push(item.UId);
-        });
-        arr = JSON.stringify(arr);
-        window.location.href =
-          this.$url +
-          "/Work/Attendance/AttendanceSumExport.ashx?Token=" +
-          JSON.parse(window.localStorage.getItem("token")).data +
-          "&SDate=" +
-          this.selectMonth.timeFormat("yyyy-MM") +
-          "&Type=2&Ids=" +
-          arr +
-          "&Attend=" +
-          this.Attend +
-          "&Quit=" +
-          this.Quit;
-      }
-    },
+
     getSelMember(arr) {
       this.selMem = arr;
       this.getTimeAttendance();
     },
-    getSelAttenceMember(arr) {
-      this.selAttenceMem = arr;
-      // this.getuserList();
-    },
-    // PC单击cell 右上角li 才触发
-    attendanceCellPcClick(e, obj) {
-      // console.log('ajldfjalj')
-      if (
-        document.body.clientWidth > 991 &&
-        e.currentTarget.textContent.trim() === "我要申诉"
-      ) {
-        this.appealType = 1;
-        this.appealShow(obj); // 直接就打开弹层
-      }
-      if (
-        document.body.clientWidth > 991 &&
-        e.currentTarget.textContent.trim() === "修改考勤"
-      ) {
-        this.appealType = 2;
-        this.appealShow(obj);
-      }
-    },
 
-    // CX 我要申述 弹层（只 ‘工作日’ 类型才弹出）
-    appealShow(obj) {
-      let s1 = obj.EndStatus;
-      let s2 = obj.StartStatus;
-      // this.popData = obj;
-      if (obj.Flag || Boolean(new Date() < new Date(obj.Date))) return false; // 审核中 节假类型 正常类型 日期大于‘今天’的类型 不让继续操作
-      this.popData = obj;
-      this.$modal.show("appeal"); // 这个打开弹层的原理仔细看下
-    },
     // 点击日历,查看时间线
     handleDateInfo(bool, obj) {
       if (!bool) {
@@ -2116,23 +750,7 @@ export default {
         }
       }
     },
-    //申诉或审批触发改变列表方法
-    appealSubmit() {
-      if (this.activeItem == "审核列表") {
-        this.getTableList();
-      } else {
-        this.attenceData = {};
-        this.getAttendance();
-      }
-    },
-    appealChange() {
-      if (this.isCalendarModal === 0) {
-        this.attenceData = {};
-        this.getAttendance();
-      } else {
-        this.$refs.cale.monthChange();
-      }
-    },
+
     // 使用父组件传递的时间参数 timeYMD，请求日历接口
     // 请求单个成员 某月30天的考勤
     getAttendance() {
@@ -2175,21 +793,7 @@ export default {
           }
         });
     },
-    //获取个人申诉列表
-    getPersonApplyList() {
-      this.attendanceLoading = true;
-      this.$http
-        .post("/Work/Attendance/QueryMyAttendanceComplaint.ashx", {
-          Date: this.childData.reqsTime,
-          IsAsc: this.sortOrder,
-        })
-        .then((res) => {
-          if (res.res == 0) {
-            this.attendanceLoading = false;
-            this.tableData = res.data;
-          }
-        });
-    },
+
     //获得个人考勤汇总
     getPersonGatherData() {
       if (
@@ -2211,31 +815,6 @@ export default {
           if (res.res == 0) {
             this.attendanceLoading = false;
             this.attenceTable.splice(0, 1, res.data);
-          }
-        });
-    },
-    openStatic() {
-      //打开考勤模态框
-
-      if (this.attenceGroup.length) {
-        this.listType = this.attenceGroup[0].AgId;
-        // console.log(this.listType)
-        // this.getAttenceGroupList();
-        this.handleSearch();
-      }
-    },
-    closeStatic() {},
-    getAttenceList() {
-      //获取考勤组列表
-      this.modalLoading = true;
-      this.$http
-        .post("/Work/Attendance/AttendanceGroupListSummary.ashx#")
-        .then((res) => {
-          if (res.res == 0) {
-            // this.attenceData = [];
-            this.modalLoading = false;
-            this.attenceGroup = res.data;
-            // console.log(this.attenceGroup)
           }
         });
     },
@@ -2283,80 +862,7 @@ export default {
           }
         });
     },
-    toDetail(row, column) {
-      //列表点击个人
 
-      // console.log(column)
-      if (column.label !== "成员姓名") {
-        return;
-      }
-      this.activePerson = row.Name;
-      this.$modal.show("attencePersonStatic");
-      this.personAttenceLoading = true;
-      if (row.UsId) {
-        let arr = [];
-        arr.push(row.UsId);
-        this.$http
-          .post("/MGT/Personnel/Work/AttendanceSummary.ashx", {
-            SDate: this.selectMonth,
-            // EDate:this.selectMonth,
-            Ids: arr,
-          })
-          .then((res) => {
-            if (res.res == 0) {
-              this.personAttenceLoading = false;
-              this.attencePersonTable = [];
-              this.attencePersonTable.push(res.data.SunmmaryData);
-              this.attencePersonList = res.data.UsersData;
-            }
-          });
-      }
-    },
-    openApplyList() {
-      this.tableData = [];
-      console.log(this.activeItem);
-      if (this.activeItem == "审核列表") {
-        Object.assign(this.$data.pageData, this.$options.data().pageData);
-        this.getTableList();
-      } else {
-        this.getPersonApplyList();
-      }
-    },
-    // 获得审核列表
-    getTableList() {
-      this.attendanceLoading = true;
-      let params = {
-        PageIndex: this.pageData.pageIndex,
-        PageSize: this.pageData.pageSize,
-        Type: this.applyType,
-        IsAsc: this.sortOrder,
-      };
-      this.$http
-        .get("/Work/Attendance/QueryUsersAttendanceComplaintByAudit.ashx", {
-          params: params,
-        })
-        .then((res) => {
-          if (res.res == 0) {
-            this.attendanceLoading = false;
-            this.tableData = res.data.Data;
-            this.pageData.totalNum = res.data.TotalCount;
-          }
-        });
-    },
-    sortChange({ column, prop, order }) {
-      if (order == "ascending") {
-        this.sortOrder = 1;
-      } else if (order == null) {
-        this.sortOrder = null;
-      } else {
-        this.sortOrder = 2;
-      }
-      if (this.activeItem == "审核列表") {
-        this.getTableList();
-      } else {
-        this.getPersonApplyList();
-      }
-    },
     // 时间视图考勤
     getTimeAttendance() {
       this.attendanceLoading = true;
@@ -2391,131 +897,6 @@ export default {
           }
         });
     },
-    // 打开审核窗口
-    handleDelt(i, row) {
-      // console.log(row)
-      this.appealType = 3;
-      this.popData = row;
-      this.$modal.show("appeal");
-      // this.formData.CId = row.CId
-    },
-    handleDeltCancel(i, row) {
-      this.$confirm("确定取消此申诉?", "", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          this.$http
-            .post("/MGT/Process/AuditBack.ashx", {
-              auditID: row.ID,
-            })
-            .then((res) => {
-              // console.log(res)
-              if (res.res == 0) {
-                this.getPersonApplyList();
-                this.getAttendance();
-              }
-            });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    // 鼠标hover处理 ’我要申述‘ 细节
-    toggleWorkStateTxt(e, txt, type, date, bool, item) {
-      let _this = e.currentTarget;
-      // 1 单元格状态都是‘审核中’的不让通过
-      // 2 单元格是休息日不让通过 3 格子日期大于今天的不让通过
-      if (!item.ArId) {
-        //没有考勤记录
-        return false;
-      }
-      if (bool) {
-        //审核中不能提交申述
-        return false;
-      }
-      if (
-        document.body.clientWidth <= 991 ||
-        Boolean(new Date() < new Date(date))
-      ) {
-        return false;
-      }
-      if (
-        item.UserId == this.user.id &&
-        this.childData.menuType !== "publicAttendance"
-      ) {
-        switch (type) {
-          case "over":
-            _this.firstElementChild.lastElementChild.firstElementChild.textContent =
-              "我要申诉";
-            break;
-          case "out":
-            if (
-              _this.firstElementChild.lastElementChild.firstElementChild.textContent.trim() ===
-              "我要申诉"
-            ) {
-              _this.firstElementChild.lastElementChild.firstElementChild.textContent =
-                txt;
-            }
-            break;
-        }
-      } else if (item.UserId !== this.user.id) {
-        switch (type) {
-          case "over":
-            _this.firstElementChild.lastElementChild.firstElementChild.textContent =
-              "修改考勤";
-            break;
-          case "out":
-            if (
-              _this.firstElementChild.lastElementChild.firstElementChild.textContent.trim() ===
-              "修改考勤"
-            ) {
-              _this.firstElementChild.lastElementChild.firstElementChild.textContent =
-                txt;
-            }
-            break;
-        }
-      }
-    },
-    // 只看异常考勤 按钮click
-    toggleBtn() {
-      this.onlyUnusual = !this.onlyUnusual;
-      // 以下代码有用。别删，如果只看异常要求做重新排列，这的代码就有用（暂时注释，
-      // 主要原因还是移动端没可能出现点击只看异常按钮的情况，在PC端不采用下面的代码个人感觉排版反而好看点，全屏情况）
-      // 连贯效果：指定删除某一个
-      // this.$nextTick(() => {
-      //     if (this.onlyUnusual) {
-      //         setTimeout(() => {
-      //             let dom = document.getElementsByClassName('see-unusual not-unusual')
-      //             for (let i = 0; i < dom.length; i++) {
-      //                 dom[i].style.display = 'none'
-      //             }
-      //         }, 100)
-      //         // 这个时间尽量短，在落下来之前就处理完，看起来就连贯些
-      //     } else {
-      //        let dom = document.getElementsByClassName('see-all')
-      //         for (let i = 0; i < dom.length; i++) {
-      //             dom[i].style.display = 'block'
-      //         }
-      //     }
-      // })
-    },
-    // 行状态
-    cellStyle({ row, column, rowIndex, columnIndex }) {
-      if (columnIndex !== 4) return false;
-      if (row.Status === 1) {
-        return "is-check";
-      } else if (row.Status === 2) {
-        return "is-close";
-      } else if (row.Status === 0) {
-        return "is-more";
-      }
-    },
-    appealData(pop, type) {
-      this.popData = pop;
-      this.appealType = type;
-    },
   },
   mounted() {
     const role = this.$xStorage.getItem("user-role");
@@ -2528,7 +909,6 @@ export default {
     this.showData();
     this.getTeams();
     // console.log(this.fatData)
-    // this.getAttenceList();
   },
 };
 </script>
@@ -3041,9 +1421,25 @@ body .el-table colgroup.gutter {
         text-align: right;
         font-size: 1.2rem;
       }
+      &.apply {
+        display: none;
+      }
     }
   }
-
+  &:hover {
+    .cell-title {
+      p {
+        &.apply {
+          display: block;
+          span {
+            &:hover {
+              color: #409eff;
+            }
+          }
+        }
+      }
+    }
+  }
   /*非工作日(节假日 休息日)的头部样式 全为暗色，且没主体部分*/
   &.is-rest {
     .cell-title p {
@@ -3056,41 +1452,49 @@ body .el-table colgroup.gutter {
   }
 
   /*常态展示*/
-  .cell-info p {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.2rem;
-    margin-top: 0.5rem;
-    transition: all 0.4s ease;
-
-    &.last-p {
-      padding-bottom: 0.5rem;
-    }
-
-    color: rgba(109, 109, 109, 1);
-
-    /*普通文字 灰色*/
-    span {
-      flex: 2;
-      text-align: left;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    em {
-      flex: 1;
+  .cell-info {
+    .cell-info-right {
       text-align: right;
-      color: rgba(27, 196, 196, 1);
-      /*正常 蓝色*/
-      // overflow: hidden;
-      white-space: nowrap;
-      // text-overflow: ellipsis;
-    }
+      margin-top: 0;
 
-    &.is-unusual em {
-      color: rgba(255, 122, 69, 1);
-      /*异常 亮色*/
+      margin-bottom: 0.5rem;
+    }
+    p {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      transition: all 0.4s ease;
+
+      &.last-p {
+        padding-bottom: 0.5rem;
+      }
+
+      color: rgba(109, 109, 109, 1);
+
+      /*普通文字 灰色*/
+      span {
+        flex: 2;
+        text-align: left;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      em {
+        flex: 1;
+        text-align: right;
+        color: rgba(27, 196, 196, 1);
+        /*正常 蓝色*/
+        // overflow: hidden;
+        white-space: nowrap;
+        // text-overflow: ellipsis;
+      }
+
+      &.is-unusual em {
+        color: rgba(255, 122, 69, 1);
+        /*异常 亮色*/
+      }
     }
   }
 

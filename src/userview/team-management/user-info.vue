@@ -90,7 +90,9 @@
             >
             <el-col :span="24" v-if="!editState"
               ><div class="info_list">
-                <span class="info_lable">是否接收成员每日报表：</span>
+                <span class="info_lable" style="width: auto"
+                  >是否接收成员每日报表：</span
+                >
                 {{ selUser.IsAccept ? "是" : "否" }}
               </div></el-col
             >
@@ -166,7 +168,18 @@
             ></el-col>
             <el-col :span="24" v-if="editState"
               ><div class="info_list edit">
-                <span class="info_lable">是否接收成员每日报表：</span>
+                <span class="info_lable">考勤审核人：</span>
+                <mb
+                  @Confirm="getAuditor"
+                  :arrays="AuditorByMember"
+                  :teamId="teamId"
+                ></mb></div
+            ></el-col>
+            <el-col :span="24" v-if="editState"
+              ><div class="info_list edit">
+                <span class="info_lable" style="width: auto"
+                  >是否接收成员每日报表：</span
+                >
                 <el-radio-group v-model="formData.IsAccept">
                   <el-radio :label="true">是</el-radio>
                   <el-radio :label="false">否</el-radio>
@@ -253,6 +266,7 @@ export default {
         IsAccept: true,
         AcceptMember: [],
       },
+      AuditorByMember: [], //审核人
     };
   },
   filters: {
@@ -269,6 +283,12 @@ export default {
   methods: {
     imgChange,
     numChange,
+    /**
+     * 获取审核人
+     */
+    getAuditor(val) {
+      this.AuditorByMember = val;
+    },
     /**
      * 删除某一个邮箱
      */
@@ -315,6 +335,7 @@ export default {
         IsAccept: this.formData.IsAccept,
         AcceptMembers: this.formData.AcceptMember.map((m) => m.UsId),
         AcceptEmails: address.map((m) => m.inputVal),
+        AuditorByMember: this.AuditorByMember.map((m) => m.UsId),
       };
       this.$http.post("/Teams/EditMember.ashx", data).then((resp) => {
         if (resp.res == 0) {
@@ -337,13 +358,14 @@ export default {
           this.formData[m] = true;
         }
       });
+      this.AuditorByMember = [];
     },
     /**
      * 弹窗打开回调
      */
     opened() {
       this.$nextTick(() => {
-        if (this.userMemberMType == 2) {
+        if (this.userMemberMType != 1) {
           this.indexData.type = "Edit";
         } else {
           this.indexData.type = "";
@@ -487,6 +509,8 @@ export default {
       }
       .info_lable {
         flex-shrink: 0;
+        width: 84px;
+        text-align: right;
       }
     }
     /deep/.edit {

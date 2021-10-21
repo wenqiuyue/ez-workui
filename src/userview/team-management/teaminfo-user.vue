@@ -40,7 +40,17 @@
       <div
         class="screen_left"
         v-if="
-          viewType == 2 && infoData && infoData.Teamdata.UserMemberMType == 2
+          viewType == 1 && infoData && infoData.Teamdata.UserMemberMType != 1
+        "
+      >
+        <el-button type="primary" size="small" @click="handleAddUser"
+          >添加成员</el-button
+        >
+      </div>
+      <div
+        class="screen_left"
+        v-if="
+          viewType == 2 && infoData && infoData.Teamdata.UserMemberMType != 1
         "
       >
         <el-button type="success" size="small" @click="invitationBtn(1)"
@@ -81,6 +91,8 @@
       :team="selRow"
       @handleViewChange="handleViewChange(1)"
     ></RuleSetting>
+    <!-- 管理员创建成员 -->
+    <CreateUser :teamValue="selRow.Id" @success="getData"></CreateUser>
   </div>
 </template>
 
@@ -92,6 +104,7 @@ export default {
     Apply: () => import("./apply"),
     Scheduling: () => import("./scheduling"),
     RuleSetting: () => import("@/userview/process-rulesver"),
+    CreateUser: () => import("./create-user"),
   },
   props: {
     //选择的团队
@@ -110,6 +123,12 @@ export default {
     this.getData();
   },
   methods: {
+    /**
+     * 管理员添加成员
+     */
+    handleAddUser() {
+      this.$modal.show("createUser");
+    },
     /**
      * 邀请列表清空按钮
      */

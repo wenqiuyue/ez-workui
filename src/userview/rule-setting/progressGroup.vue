@@ -177,15 +177,15 @@ export default {
     },
     // 编辑
     handleEdit(row) {
-      this.openWin("ed", row.Id, row.Name);
+      this.openWin("ed", row.Id, row);
     },
     // 打开窗口
-    openWin(ty, code, proName) {
+    openWin(ty, code, row) {
       this.indexData = {
         type: ty === "ad" ? "Add" : "Edit",
         name: ty === "ad" ? "添加部门" : "编辑部门",
         departmentCode: code,
-        proName: proName,
+        row: row,
         xModalName: "proGroupWindow",
       };
       this.$modal.show("proGroupWindow");

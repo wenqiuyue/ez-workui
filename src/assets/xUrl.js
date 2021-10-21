@@ -12,7 +12,8 @@ if (window.location.protocol === "https:") {
 if (process.env.NODE_ENV === "development" || window.location.port === "773") {
   //***** 测试 *****
   SocketUrl += "47.106.90.178:711";
-  axios.BaseUrl = "http://47.106.90.178:711";
+  // axios.BaseUrl = "http://47.106.90.178:711";
+  axios.BaseUrl = "http://192.168.1.105:8081";
 } else {
   //***** 线上 *****
   SocketUrl += window.location.host;

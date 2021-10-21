@@ -19,7 +19,7 @@
         ref="editForm"
         :model="formData"
         :rules="Rules"
-        label-width="100px"
+        label-width="130px"
       >
         <!-- 必填项 -->
         <el-row>
@@ -35,6 +35,19 @@
               </el-input>
               <div v-else class="state-see">
                 {{ formData.name }}
+              </div>
+            </el-form-item>
+            <el-form-item
+              label="是否是默认部门："
+              prop="isdefault"
+              style="width: 100%"
+            >
+              <el-radio-group v-model="formData.isdefault" v-if="editState">
+                <el-radio :label="true">是</el-radio>
+                <el-radio :label="false">否</el-radio>
+              </el-radio-group>
+              <div v-else class="state-see">
+                {{ formData.isdefault ? "是" : "否" }}
               </div>
             </el-form-item>
           </el-col>
@@ -70,7 +83,8 @@ export default {
 
       formData: {
         id: "", // 编辑窗口才用ID
-        name: "", // 标签名称
+        name: "", // 名称
+        isdefault: false,
       },
       Rules: {
         name: [
@@ -93,9 +107,10 @@ export default {
     // 改变窗口状态的，搭配index页 添加和编辑按钮
     changeEditState() {
       this.editState = this.indexData.type === "Add" ? true : false;
-      if (this.indexData.proName) {
-        this.formData.name = this.indexData.proName;
+      if (this.indexData.row) {
+        this.formData.name = this.indexData.row.Name;
         this.formData.id = this.indexData.departmentCode;
+        this.formData.isdefault = this.indexData.row.IsDefault;
       }
     },
 
@@ -120,6 +135,7 @@ export default {
                 {
                   name: this.formData.name,
                   configId: this.selRow.Id,
+                  isdefault: this.formData.isdefault,
                 }
               )
               .then((res) => {
@@ -140,6 +156,7 @@ export default {
               Id: this.formData.id, // 添加时值是 undefined
               name: this.formData.name,
               configId: this.selRow.Id,
+              isdefault: this.formData.isdefault,
             };
             this.$http
               .post(
@@ -179,6 +196,7 @@ export default {
       this.formData = {
         id: "", // 编辑窗口才用ID
         name: "", // 标签名称
+        isdefault: false,
       };
     },
   },

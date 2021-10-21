@@ -9,7 +9,7 @@
             ><el-button
               type="text"
               @click="handleEditTeam"
-              v-if="infoData && infoData.Teamdata.UserMemberMType == 2"
+              v-if="infoData && infoData.Teamdata.UserMemberMType != 1"
               >编辑团队基础信息</el-button
             >
           </h3>
@@ -46,16 +46,29 @@
                     infoData.Membersdata && infoData.Membersdata.length
                       ? infoData.Membersdata.length
                       : 0
-                  }}人 / 10人</span
+                  }}人 / {{ infoData.Teamdata.OrderData.Capacity }}人</span
                 >
               </li>
               <li class="set_rule">
                 <span class="lable_2"
                   >主管理员：{{ infoData.Teamdata.UserName }}</span
                 >
-                <el-button type="text" size="medium" style="padding: 0px"
-                  >转让主管理员</el-button
+                <selMember
+                  size="small"
+                  @Confirm="getTransferMember"
+                  :arrays="transferMember"
+                  :teamId="selRow.Id"
+                  :isSelection="false"
+                  :showActive="false"
                 >
+                  <el-button
+                    type="text"
+                    size="medium"
+                    style="padding: 0px"
+                    slot="button"
+                    >转让主管理员</el-button
+                  >
+                </selMember>
               </li>
               <li class="img_row_list">
                 <span class="lable_1">管理员：</span>
@@ -124,7 +137,7 @@
                   type="primary"
                   size="mini"
                   icon="el-icon-setting"
-                  v-if="infoData && infoData.Teamdata.UserMemberMType == 2"
+                  v-if="infoData && infoData.Teamdata.UserMemberMType != 1"
                   @click="$emit('handleViewChange', 3)"
                   >设置</el-button
                 >
@@ -136,17 +149,15 @@
                 }}</span>
               </li>
             </ul>
-            <div v-if="infoData.Teamdata.UserMemberMType == 2" class="card_li">
+            <div v-if="infoData.Teamdata.UserMemberMType != 1" class="card_li">
               <ul>
                 <li class="card_title"><span>设置</span></li>
+
                 <li class="set_row">
                   <span>可否开启摄像头截图</span>
                   <el-switch v-model="setFour" @change="changeSet"> </el-switch>
                 </li>
-                <li class="set_row">
-                  <span>是否需要审批后才能加入团队</span>
-                  <el-switch v-model="setOne" @change="changeSet"> </el-switch>
-                </li>
+
                 <li class="set_row">
                   <span>可否通过团队号加入</span>
                   <el-switch v-model="setOne" @change="changeSet"> </el-switch>
@@ -154,6 +165,16 @@
                 <li class="set_row">
                   <span>成员可否邀请其他人加入</span>
                   <el-switch v-model="setTwo" @change="changeSet"> </el-switch>
+                </li>
+                <li class="set_row">
+                  <span>是否开启打卡功能</span>
+                  <el-switch v-model="IsOpenChick" @change="changeSet">
+                  </el-switch>
+                </li>
+                <li class="set_row">
+                  <span>成员申请是否需要审核</span>
+                  <el-switch v-model="IsNeedCheck" @change="changeSet">
+                  </el-switch>
                 </li>
                 <li>
                   <p class="set_row">
@@ -206,6 +227,30 @@
                     >
                   </p>
                 </li>
+                <li class="set_row">
+                  <span>客户端启动类型</span>
+                  <el-radio-group v-model="ClientRunType" @change="changeSet">
+                    <el-radio :label="1">开机自动运行</el-radio>
+                    <el-radio :label="2">开机自动运行并隐藏</el-radio>
+                  </el-radio-group>
+                </li>
+              </ul>
+            </div>
+            <div class="card_li" v-if="infoData.Teamdata.UserMemberMType != 1">
+              <ul>
+                <li class="card_title">
+                  <span>考勤审核人设置</span>
+                </li>
+                <li>
+                  <selMember
+                    :teamId="selRow.Id"
+                    size="small"
+                    @Confirm="getSelApplyMember"
+                    :selRange="1"
+                    :arrays="selApplyMem"
+                  >
+                  </selMember>
+                </li>
               </ul>
             </div>
             <div class="card_li" v-if="infoData.DataClearSeting">
@@ -214,7 +259,7 @@
                   <span>团队数据库清理</span
                   ><el-button
                     type="text"
-                    v-if="infoData.Teamdata.UserMemberMType == 2"
+                    v-if="infoData.Teamdata.UserMemberMType != 1"
                     @click="handleDataClearSeting"
                     >设置</el-button
                   >
@@ -325,7 +370,7 @@ import { imgChange, numChange } from "@/commons";
 export default {
   components: {
     UserList: () => import("./user-list"),
-
+    selMember: () => import("@/components/Selectors/MemberSelectCopy"),
     InvitationUser: () => import("./invitation-user"),
     AddTeam: () => import("./add-team"),
     InitdataModal: () => import("./initdata-modal"),
@@ -344,6 +389,8 @@ export default {
   },
   data() {
     return {
+      transferMember: [], //主管理员
+      selApplyMem: [], //审核人
       loading: false,
       setOne: true,
       setTwo: true,
@@ -352,6 +399,9 @@ export default {
       setFive: false,
       passwordVal: null, //口令
       addressArray: [],
+      IsOpenChick: true, //是否开启打卡功能
+      IsNeedCheck: true, //成员申请是否需要审核
+      ClientRunType: 1,
     };
   },
   watch: {
@@ -373,6 +423,10 @@ export default {
                 };
               })
             : [];
+        this.IsOpenChick = this.infoData.Teamdata.IsOpenChick;
+        this.IsNeedCheck = this.infoData.Teamdata.IsNeedCheck;
+        this.ClientRunType = this.infoData.Teamdata.ClientRunType;
+        // this.selApplyMem = this.AuditorByTeam;
       }
     },
   },
@@ -384,6 +438,33 @@ export default {
     numChange,
     loadingChange(val) {
       this.loading = val;
+    },
+    /**
+     * 转让主审核人
+     */
+    getTransferMember(val) {
+      this.transferMember = val;
+      this.$http
+        .post("/Teams/TransferMember.ashx", {
+          teamId: this.selRow.Id,
+          memberId: this.transferMember[0].UsId,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              message: "设置成功",
+              type: "success",
+            });
+            this.$emit("getData");
+          }
+        });
+    },
+    /**
+     * 审核人设置
+     */
+    getSelApplyMember(val) {
+      this.selApplyMem = val;
+      this.changeSet();
     },
     /**
      * 删除某一个邮箱
@@ -447,6 +528,10 @@ export default {
         IsStartCamera: this.setFour ? 1 : 0,
         IsWarn: this.setFive,
         WarnEmail: address.map((m) => m.inputVal),
+        IsOpenChick: this.IsOpenChick,
+        IsNeedCheck: this.IsNeedCheck,
+        ClientRunType: this.ClientRunType,
+        AuditorByTeam: this.selApplyMem.map((m) => m.UsId),
       };
       this.$http.post("/Teams/TeamSet.ashx", data).then((resp) => {
         if (resp.res == 0) {
@@ -581,6 +666,25 @@ export default {
           justify-content: space-between;
           margin-bottom: 8px;
           font-size: 13px;
+          flex-wrap: wrap;
+          span {
+            flex-shrink: 0;
+          }
+          .el-radio-group {
+            display: flex;
+            flex-direction: row;
+            /deep/.el-radio {
+              margin-right: 0px;
+
+              .el-radio__label {
+                font-size: 13px;
+                padding-left: 3px;
+              }
+            }
+            /deep/.el-radio:last-child {
+              margin-left: 6px;
+            }
+          }
         }
         .set_input {
           /deep/.el-input__inner {

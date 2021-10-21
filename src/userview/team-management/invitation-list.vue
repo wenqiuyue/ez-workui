@@ -86,7 +86,7 @@
         </el-table-column>
         <el-table-column label="状态" width="120" align="center">
           <template slot-scope="scope">
-            <c-btn v-if="scope.row.InvitedStatus == 0 && UserMemberMType == 2">
+            <c-btn v-if="scope.row.InvitedStatus == 0 && UserMemberMType != 1">
               <span @click="handleInv(scope.row, 1)">同意</span>
               <span @click="handleInv(scope.row, -1)">拒绝</span>
             </c-btn>

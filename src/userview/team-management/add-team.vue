@@ -113,7 +113,7 @@ export default {
                   type: "success",
                 });
                 this.$modal.hide(this.modalName);
-                this.$emit("success");
+                this.$emit("success", resp.data.teamId);
               }
             })
             .finally(() => this.$refs.modal.loadBtn(false));

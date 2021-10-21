@@ -66,7 +66,12 @@
                   {{ scope.row.Database ? scope.row.Database : "无" }}
                 </template></el-table-column
               > -->
-            <el-table-column label="我的部门" prop="gName" align="center">
+            <el-table-column
+              label="我的部门"
+              prop="gName"
+              align="center"
+              show-overflow-tooltip
+            >
               <template slot-scope="scope">
                 <span v-if="scope.row.gName">{{ scope.row.gName }}</span>
                 <el-tag v-else size="medium" type="danger"> 暂无部门 </el-tag>
@@ -307,10 +312,15 @@ export default {
   height: 100%;
   .h_con {
     height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
     .warp-right-top,
     .warp-right-bottom {
       background-color: #ffffff;
-      height: 50%;
+      height: 100%;
+      width: 49.5%;
+      border: 1px solid #e4e7ed;
     }
     .warp-right-top {
       margin-bottom: 5px;
