@@ -10,36 +10,23 @@
     @closed="closed"
     id="applyAudit"
   >
-    <div v-loading="formLoading">
-      <div class="audit_header" v-if="pageData.member.applicantTime">
+    <div v-if="auditInfo">
+      <div class="audit_header">
         <div>
-          <img v-lazy="$url + pageData.member.applicantHead" />
-          <span>{{ pageData.member.applicantName }}</span>
+          <img v-lazy="$url + auditInfo.ApplyPicture" />
+          <span>{{ auditInfo.ApplyName }}</span>
         </div>
-        <p>
-          申请时间:{{ pageData.member.applicantTime.timeFormat("yyyy-MM-dd") }}
-        </p>
+        <p>申请时间:{{ auditInfo.CreateTime.timeFormat("yyyy-MM-dd") }}</p>
       </div>
-      <div class="audit_header" v-else-if="pageData.form.Name">
-        <div>
-          <img v-lazy="$url + pageData.form.Picture" />
-          <span>{{ pageData.form.Name }}</span>
-        </div>
-        <p v-if="pageData.form.CreateTime">
-          申请时间:{{ pageData.form.CreateTime.timeFormat("yyyy-MM-dd") }}
-        </p>
-      </div>
-      <el-form
-        class="custom_content"
-        v-if="pageType == -1 && pageData.form.DateType"
-        label-width="90px"
-      >
+      <el-form class="custom_content" label-width="90px">
         <el-form-item label="申诉日期：">{{
-          pageData.form.Date.timeFormat("yyyy-MM-dd")
+          auditInfo.AnomalyTime
+            ? auditInfo.AnomalyTime.timeFormat("yyyy-MM-dd")
+            : ""
         }}</el-form-item>
         <el-form-item label="申述类型：">
           <el-checkbox-group
-            v-model="pageData.form.DateType"
+            v-model="auditInfo.AnomalyType"
             :disabled="readOnly"
           >
             <el-checkbox :label="1">上班</el-checkbox>
@@ -48,10 +35,10 @@
         </el-form-item>
         <el-form-item
           label="上班时间："
-          v-if="pageData.form.DateType.includes(1)"
+          v-if="auditInfo.AnomalyType.includes(1)"
         >
           <el-date-picker
-            v-model="pageData.form.StartTime"
+            v-model="auditInfo.ClockInTime"
             type="datetime"
             placeholder="选择日期时间"
             style="width: 70%"
@@ -62,10 +49,10 @@
         </el-form-item>
         <el-form-item
           label="上班状态："
-          v-if="pageData.form.DateType.includes(1)"
+          v-if="auditInfo.AnomalyType.includes(1)"
         >
           <el-select
-            v-model="pageData.form.StartStatus"
+            v-model="auditInfo.ClockInStatus"
             style="width: 70%"
             :disabled="readOnly"
           >
@@ -80,10 +67,10 @@
         </el-form-item>
         <el-form-item
           label="下班时间："
-          v-if="pageData.form.DateType.includes(2)"
+          v-if="auditInfo.AnomalyType.includes(2)"
         >
           <el-date-picker
-            v-model="pageData.form.EndTime"
+            v-model="auditInfo.ClockOutTime"
             type="datetime"
             placeholder="选择日期时间"
             style="width: 70%"
@@ -94,10 +81,10 @@
         </el-form-item>
         <el-form-item
           label="下班状态："
-          v-if="pageData.form.DateType.includes(2)"
+          v-if="auditInfo.AnomalyType.includes(2)"
         >
           <el-select
-            v-model="pageData.form.EndStatus"
+            v-model="auditInfo.ClockOutStatus"
             style="width: 70%"
             :disabled="readOnly"
           >
@@ -111,45 +98,9 @@
           </el-select>
         </el-form-item>
         <el-form-item label="申诉原因：" prop="Reason">{{
-          pageData.form.Reason
+          auditInfo.Reason
         }}</el-form-item>
       </el-form>
-      <el-timeline class="audit_history">
-        <el-timeline-item
-          v-for="(h, index) in pageData.history"
-          :color="stepColor(h.AuditResult)"
-          :timestamp="showDetail(h.AuditTime, index)"
-          placement="top"
-          :key="index"
-        >
-          <el-card>
-            <h4 v-if="h.AuditResult == 4">
-              {{ h.Auditor && h.Auditor.AuditorName }}
-              <label class="modal_lable">通过</label> (步骤名称:{{
-                h.StepName
-              }})
-            </h4>
-            <h4 v-else-if="h.AuditResult == 3">
-              {{ h.Auditor && h.Auditor.AuditorName }}
-              <label class="modal_lable">驳回</label> (步骤名称:{{
-                h.StepName
-              }})
-            </h4>
-            <h4 v-else>
-              {{ h.Auditor && h.Auditor.AuditorName }} 待审核(步骤名称:{{
-                h.StepName
-              }})
-            </h4>
-            <p style="height: 0.5rem"></p>
-            <p v-if="h.AuditResult == 4 && h.AuditRemark">
-              <label class="modal_lable">留言：</label>{{ h.AuditRemark }}
-            </p>
-            <p v-else-if="h.AuditResult == 3">
-              <label class="modal_lable">理由：</label>{{ h.AuditRemark }}
-            </p>
-          </el-card>
-        </el-timeline-item>
-      </el-timeline>
       <el-form
         v-if="!readOnly"
         class="audit_bottom"
@@ -187,6 +138,12 @@
 export default {
   components: {
     XM: () => import("@/components/XModal"),
+  },
+  props: {
+    auditInfo: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
@@ -228,7 +185,7 @@ export default {
         TotalTimes: null,
         Pass: true,
       },
-      formLoading: false,
+
       pageData: {
         form: [],
         member: {
@@ -237,8 +194,7 @@ export default {
         },
         history: [],
       },
-      pageType: null,
-      typeList: null,
+
       readOnly: false,
     };
   },
@@ -267,65 +223,14 @@ export default {
         return "";
       }
     },
-    //获取数据
-    showModal(audit) {
-      this.$modal.show("applyAudit");
-      this.formLoading = true;
-      this.$http
-        .get("/MGT/Process/LoadApplicationForm.ashx", {
-          params: {
-            auditID: audit.auditID,
-          },
-        })
-        .then((resp) => {
-          if (resp.res == 0) {
-            this.pageData.form = JSON.parse(resp.data.content);
-            if (this.pageData.form.DateType != undefined) {
-              this.pageType = -1;
-            } else if (this.pageData.form.LeaveType != undefined) {
-              this.pageType = -2;
-            } else if (resp.data.type == "加班申请") {
-              this.pageType = -4;
-              this.overTimeData.reach = resp.data.reach;
-              this.overTimeData.overtime = resp.data.overtime;
-            } else if (resp.data.type == "外出申请") {
-              this.pageType = -5;
-            } else {
-              this.pageType = null;
-            }
-            this.readOnly = !resp.data.canAudit;
-            this.pageData.member = audit;
-            this.pageData.history = resp.data.history;
-            this.elForm.auditID = audit.auditID;
-            this.formLoading = false;
-          }
-        });
-    },
+
     submit() {
       this.$refs.elForm.validate(async (vaild) => {
         if (vaild) {
           this.$refs.xmodal.loadBtn(true);
           let url = "";
-          if (this.pageType == -1) {
-            url = "/Work/TransactionAudit/AuditAttendanceComplaint.ashx";
-            this.elForm.data = this.pageData.form;
-          } else if (this.pageType == -2) {
-            url = "/Work/Leave/AuditLeave.ashx";
-            this.elForm.pass = this.elForm.isPass;
-          } else if (this.pageType == -4) {
-            url = "/Work/OverTimeAudit/AuditOverTimeComplaint.ashx";
-            this.elFormData.Message = this.elForm.remark;
-            this.elFormData.Pass = this.elForm.isPass;
-            this.elForm.data = this.elFormData;
-          } else if (this.pageType == -5) {
-            url = "/Work/Outside/AuditOutsideComplaint.ashx";
-            this.elForm.data = {
-              Message: this.elForm.remark,
-              Pass: this.elForm.isPass,
-            };
-          } else {
-            url = "/MGT/Process/LoadApplicationForm.ashx";
-          }
+          url = "/Work/TransactionAudit/AuditAttendanceComplaint.ashx";
+          this.elForm.data = this.pageData.form;
           let resp = await this.$http.post(url, this.elForm);
           this.$refs.xmodal.loadBtn(false);
           if (resp.res == 0) {
@@ -345,18 +250,7 @@ export default {
     closed() {
       Object.assign(this.$data.elForm, this.$options.data().elForm);
     },
-    //获取类型列表
-    getTypeList() {
-      this.$http.get("/Work/Leave/GetLeaveType.ashx").then((res) => {
-        if (res.res == 0) {
-          let obj = {};
-          for (let item of res.data) {
-            obj[item.value] = item.name;
-          }
-          this.typeList = obj;
-        }
-      });
-    },
+
     filterOption(item) {
       return item.value == -1 || item.value == 3;
     },

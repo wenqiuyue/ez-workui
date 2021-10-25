@@ -21,7 +21,7 @@
       <div slot="content" class="s_content">
         <div class="screen">
           <div class="s_item">
-            <span class="title">月份：</span>
+            <!-- <span class="title">月份：</span>
             <el-date-picker
               size="medium"
               v-model="screenMonth"
@@ -29,7 +29,7 @@
               placeholder="选择月"
               format="yyyy年MM月"
             >
-            </el-date-picker>
+            </el-date-picker> -->
           </div>
           <el-button type="primary" size="medium" @click="batchSettings"
             >批量设置</el-button

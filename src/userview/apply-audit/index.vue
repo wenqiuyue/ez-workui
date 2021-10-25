@@ -10,21 +10,22 @@
       <el-row slot="header" type="flex" justify="space-between">
         <span class="header-title">事务流程审批</span>
         <div class="header-tab">
-          <div>
-            <span class="header-tab-text" v-if="!isApply"> 团队： </span>
+          <div v-if="!isApply">
+            <span class="header-tab-text"> 团队： </span>
             <el-select
-              v-if="!isApply"
-              size="small"
-              v-model="applyStatus"
-              placeholder="请选择"
-              @change="loadData(null)"
+              v-model="teamValue"
+              filterable
+              placeholder="请选择团队"
+              @change="initData"
+              style="width: 180px"
             >
               <el-option
-                v-for="item in auditOperateOptions2"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
+                v-for="item in teamOptions"
+                :key="item.Id"
+                :label="item.Name"
+                :value="item.Id"
+              >
+              </el-option>
             </el-select>
           </div>
           <div>
@@ -33,7 +34,7 @@
               size="small"
               v-model="applyStatus"
               placeholder="请选择"
-              @change="loadData(null)"
+              @change="initData"
               v-if="!isApply"
             >
               <el-option
@@ -47,7 +48,7 @@
               size="small"
               v-model="applyStatus"
               placeholder="请选择"
-              @change="loadData(null)"
+              @change="initData"
               v-else
             >
               <el-option
@@ -70,8 +71,8 @@
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            <img :src="$url + scope.row.applicantHead" />
-            <span>{{ scope.row.applicantName }}</span>
+            <img :src="$url + scope.row.ApplyPicture" />
+            <span>{{ scope.row.ApplyName }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -84,16 +85,6 @@
           第三团队
         </el-table-column>
         <el-table-column
-          label="申请类型"
-          header-align="center"
-          align="center"
-          show-overflow-tooltip
-        >
-          <template slot-scope="scope">
-            <p>{{ scope.row.applicationType }}</p>
-          </template>
-        </el-table-column>
-        <el-table-column
           label="申请时间"
           header-align="center"
           align="center"
@@ -102,23 +93,8 @@
           <template slot-scope="scope">
             <p>
               {{
-                scope.row.applicantTime &&
-                scope.row.applicantTime.timeFormat("M月d日 HH:mm")
-              }}
-            </p>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="审批期限"
-          header-align="center"
-          align="center"
-          show-overflow-tooltip
-        >
-          <template slot-scope="scope">
-            <p>
-              {{
-                scope.row.overtime &&
-                scope.row.overtime.timeFormat("M月d日 HH:mm")
+                scope.row.CreateTime &&
+                scope.row.CreateTime.timeFormat("M月d日 HH:mm")
               }}
             </p>
           </template>
@@ -160,7 +136,7 @@
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            <p>{{ scope.row.auditResult | auditResultFilters }}</p>
+            <p>{{ scope.row.AuditStatus | auditResultFilters }}</p>
           </template>
         </el-table-column>
 
@@ -173,8 +149,8 @@
           <template slot-scope="scope">
             <p>
               {{
-                scope.row.applicatTime &&
-                scope.row.applicatTime.timeFormat("M月d日 HH:mm")
+                scope.row.CreateTime &&
+                scope.row.CreateTime.timeFormat("M月d日 HH:mm")
               }}
             </p>
           </template>
@@ -188,8 +164,9 @@
           <template slot-scope="scope">
             <p>
               {{
-                scope.row.recentlyAuditTime &&
-                scope.row.recentlyAuditTime.timeFormat("M月d日 HH:mm")
+                scope.row.AuditTime
+                  ? scope.row.AuditTime.timeFormat("M月d日 HH:mm")
+                  : "--"
               }}
             </p>
           </template>
@@ -202,9 +179,7 @@
         >
           <template slot-scope="scope">
             <el-row type="flex" align="middle" justify="center">
-              <span>{{
-                (scope.row.auditor && scope.row.auditor.Name) || "--"
-              }}</span>
+              <span>{{ scope.row.AuditName }}</span>
             </el-row>
           </template>
         </el-table-column>
@@ -215,7 +190,7 @@
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            <el-button type="text" @click="handleAudit(scope.$index, scope.row)"
+            <el-button type="text" @click="handleAudit(sscope.row)"
               >查看</el-button
             >
             <el-button type="text" @click="auditCancel(scope.$index, scope.row)"
@@ -235,6 +210,7 @@
         ref="modalForm"
         @upData="getData(auditData.length > 1 ? pageData.pageIndex : 1)"
         @successHandle="$emit('successHandle')"
+        :auditInfo="auditInfo"
       />
     </el-card>
   </div>
@@ -251,10 +227,17 @@ export default {
       type: Boolean,
       default: false,
     },
+    teamId: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
-      auditData: [{}],
+      auditInfo: null,
+      teamOptions: [], //团队选择器
+      teamValue: null, //选择的团队
+      auditData: [],
       tableLoading: false,
       pageData: {
         pageIndex: 1,
@@ -262,6 +245,7 @@ export default {
         totalNum: 0,
       },
       applyStatus: 1, //审核状态
+
       auditOperateOptions: [
         {
           value: null,
@@ -273,15 +257,11 @@ export default {
         },
         {
           value: 2,
-          label: "审核中",
+          label: "通过",
         },
         {
           value: 3,
           label: "驳回",
-        },
-        {
-          value: 4,
-          label: "通过",
         },
       ],
       auditOperateOptions2: [
@@ -312,7 +292,34 @@ export default {
       }
     },
   },
+  mounted() {
+    this.getData();
+    if (!this.isApply) {
+      this.getTeams();
+    }
+  },
   methods: {
+    /**
+     * 团队切换
+     */
+    initData() {
+      this.pageData.pageIndex = 1;
+      this.getData();
+    },
+    /**
+     * 获取团队
+     */
+    getTeams() {
+      this.$http
+        .get("/Teams/GetAllTeams.ashx", {
+          params: { searchText: null, type: 2 },
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.teamOptions = resp.data;
+          }
+        });
+    },
     //取消申请
     auditCancel(index, audit) {
       this.$confirm("确认取消申请?", "提示", {
@@ -328,32 +335,32 @@ export default {
             type: "success",
             message: "取消成功",
           });
-          this.loadData();
+          this.initData();
         }
       });
     },
-    handleAudit(index, row) {
-      this.$refs.modalForm.showModal(row);
+    handleAudit(row) {
+      this.auditInfo = row;
+      this.$modal.show("applyAudit");
     },
     /**
      * 获取数据
      */
     getData() {
       this.tableLoading = true;
-      const data = {};
+      const data = {
+        teamId: this.isApply ? this.teamId : this.teamValue,
+        type: this.isApply ? 2 : 1,
+        aStatus: this.applyStatus,
+        pageIndex: this.pageData.pageIndex,
+        pageSize: this.pageData.pageSize,
+      };
       this.$http
-        .post("", data)
+        .post("/Attendance/AnomalyAppeals/GetAnomalyAppeals.ashx", data)
         .then((resp) => {
           if (resp.res == 0) {
-            this.auditData = resp.data.auditData;
-            if (this.auditData && this.auditData.length) {
-              this.auditData.forEach((m) => {
-                if (m.content) {
-                  m.content = JSON.parse(m.content);
-                }
-              });
-            }
-            this.pageData.totalNum = resp.data.pageData.TotalCount;
+            this.auditData = resp.data.Data;
+            this.pageData.totalNum = resp.data.TotalCount;
           }
         })
         .finally(() => (this.tableLoading = false));

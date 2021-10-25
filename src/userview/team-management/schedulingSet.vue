@@ -61,7 +61,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="一天内的时间区间：">
+          <!-- <el-form-item label="一天内的时间区间：">
             <ul>
               <li
                 v-for="(interval, intervalInd) in currencyForm.timeInterval"
@@ -80,7 +80,122 @@
             <el-button type="text" @click="addTimeInterval"
               >添加时间区间</el-button
             >
+          </el-form-item> -->
+          <div class="row_form_item">
+            <el-form-item label="上班：">
+              <el-time-picker
+                v-model="currencyForm.startWork"
+                placeholder="选择上班时间"
+              >
+              </el-time-picker>
+            </el-form-item>
+            <el-form-item label="下班：">
+              <el-time-picker
+                v-model="currencyForm.endWork"
+                placeholder="选择下班时间"
+              >
+              </el-time-picker>
+            </el-form-item>
+          </div>
+          <el-form-item label="休息时间：">
+            <ul>
+              <li
+                v-for="(interval, intervalInd) in currencyForm.timeInterval"
+                :key="intervalInd"
+              >
+                <el-time-picker
+                  v-model="interval.start"
+                  placeholder="开始休息时间"
+                >
+                </el-time-picker>
+                <span style="margin: 0 10px">-</span>
+                <el-time-picker
+                  v-model="interval.end"
+                  placeholder="结束休息时间"
+                >
+                </el-time-picker>
+                <el-button type="text" @click="cancleInterval(intervalInd)"
+                  >清除</el-button
+                >
+              </li>
+            </ul>
+            <el-button type="text" @click="addTimeInterval"
+              >添加休息时间区间</el-button
+            >
           </el-form-item>
+          <div class="form_item_group">
+            <h3>弹性打卡</h3>
+            <el-form-item label="上班最多可晚到：">
+              <el-input
+                placeholder="请输入内容"
+                v-model="currencyForm.lateWork"
+                type="number"
+              >
+                <template slot="append">
+                  <div>
+                    <span style="margin-right: 12px">分钟</span>
+                    <el-radio-group v-model="currencyForm.lateWorkRadio">
+                      <el-radio :label="1"
+                        >上班晚到几分钟，下班须晚走几分钟</el-radio
+                      >
+                      <el-radio :label="2"
+                        >晚到{{
+                          currencyForm.lateWork ? currencyForm.lateWork : "几"
+                        }}钟内不算迟到</el-radio
+                      >
+                    </el-radio-group>
+                  </div>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="下班最多可早走：">
+              <el-input
+                placeholder="请输入内容"
+                v-model="currencyForm.leaveEarly"
+                type="number"
+              >
+                <template slot="append">
+                  <div>
+                    <span style="margin-right: 12px">分钟</span>
+                    <el-radio-group v-model="currencyForm.leaveEarlyRadio">
+                      <el-radio :label="1"
+                        >上班早到几分钟，下班可早走几分钟</el-radio
+                      >
+                      <el-radio :label="2"
+                        >早走{{
+                          currencyForm.leaveEarly
+                            ? currencyForm.leaveEarly
+                            : "几"
+                        }}分钟内不算早退</el-radio
+                      >
+                    </el-radio-group>
+                  </div>
+                </template>
+              </el-input>
+            </el-form-item>
+          </div>
+          <!-- <el-form-item label="班次工时：">
+            <ul>
+              <li>
+                <el-input
+                  placeholder="请输入内容"
+                  v-model="input2"
+                  type="number"
+                >
+                  <template slot="prepend">合作工作时长</template>
+                  <template slot="append">分钟</template>
+                </el-input>
+                <el-input
+                  placeholder="请输入内容"
+                  v-model="input2"
+                  type="number"
+                >
+                  <template slot="prepend">计为</template>
+                  <template slot="append">天出勤</template>
+                </el-input>
+              </li>
+            </ul>
+          </el-form-item> -->
         </el-form>
       </div>
     </div>
@@ -90,6 +205,17 @@
         <div class="tag_item t_i_bg2" style="width: 17rem"></div>
         <div class="tag_item t_i_bg3" style="width: 16rem">
           <div>特殊排班设置</div>
+        </div>
+        <div class="s_item">
+          <span class="title">月份：</span>
+          <el-date-picker
+            size="medium"
+            v-model="screenMonth"
+            type="month"
+            placeholder="选择月"
+            format="yyyy年MM月"
+          >
+          </el-date-picker>
         </div>
       </div>
       <div class="set_form">
@@ -158,7 +284,18 @@ export default {
       currencyForm: {
         weekDay: [],
         timeZone: 1, //时区
-        timeInterval: [],
+        startWork: null, //上班
+        endWork: null, //下班
+        lateWork: null, //上班晚到
+        lateWorkRadio: null, //上班晚到条件选择
+        leaveEarly: null, //下班早走
+        leaveEarlyRadio: null, //下班早走条件选择
+        timeInterval: [
+          {
+            start: null,
+            end: null,
+          },
+        ],
       },
     };
   },
@@ -228,6 +365,21 @@ export default {
           font-size: 20px;
         }
       }
+      .s_item {
+        margin-right: 6px;
+        position: absolute;
+        right: 0;
+        top: -5px;
+        .title {
+          font-size: 13px;
+          font-weight: bold;
+          color: #606266;
+        }
+        .el-date-editor {
+          border: 1px solid #ebeef5;
+          border-radius: 4px;
+        }
+      }
       .tag_item {
         width: 11rem;
         height: 3.3rem;
@@ -263,10 +415,27 @@ export default {
     }
     .set_form {
       padding: 3px 6px;
+      .row_form_item {
+        display: flex;
+        flex-direction: row;
+      }
+      .form_item_group {
+        margin-top: -10px;
+        width: 80%;
+        h3 {
+          width: 140px;
+          text-align: right;
+          padding-right: 18px;
+          font-weight: bold;
+          font-size: 14px;
+          margin-bottom: 14px;
+        }
+      }
       .el-form-item {
         ul {
           li {
             margin-bottom: 10px;
+            display: flex;
             .el-button {
               margin-left: 10px;
             }
@@ -277,7 +446,7 @@ export default {
         }
       }
       .el-form-item:last-child {
-        margin-bottom: 10px;
+        // margin-bottom: 10px;
       }
       /deep/.el-calendar {
         .el-calendar__header {

@@ -167,6 +167,11 @@
                   <el-switch v-model="setTwo" @change="changeSet"> </el-switch>
                 </li>
                 <li class="set_row">
+                  <span>是否监测空闲时间</span>
+                  <el-switch v-model="IsMonitoringIdleTime" @change="changeSet">
+                  </el-switch>
+                </li>
+                <li class="set_row">
                   <span>是否开启打卡功能</span>
                   <el-switch v-model="IsOpenChick" @change="changeSet">
                   </el-switch>
@@ -174,6 +179,11 @@
                 <li class="set_row">
                   <span>成员申请是否需要审核</span>
                   <el-switch v-model="IsNeedCheck" @change="changeSet">
+                  </el-switch>
+                </li>
+                <li class="set_row">
+                  <span>成员是否可以隐藏开机启动</span>
+                  <el-switch v-model="CanCancelAutoStart" @change="changeSet">
                   </el-switch>
                 </li>
                 <li>
@@ -401,6 +411,8 @@ export default {
       addressArray: [],
       IsOpenChick: true, //是否开启打卡功能
       IsNeedCheck: true, //成员申请是否需要审核
+      CanCancelAutoStart: true, //成员是否可以隐藏开机启动
+      IsMonitoringIdleTime: true, //是否监测空闲时间
       ClientRunType: 1,
     };
   },
@@ -425,6 +437,8 @@ export default {
             : [];
         this.IsOpenChick = this.infoData.Teamdata.IsOpenChick;
         this.IsNeedCheck = this.infoData.Teamdata.IsNeedCheck;
+        this.CanCancelAutoStart = this.infoData.Teamdata.CanCancelAutoStart;
+        this.IsMonitoringIdleTime = this.infoData.Teamdata.IsMonitoringIdleTime;
         this.ClientRunType = this.infoData.Teamdata.ClientRunType;
         // this.selApplyMem = this.AuditorByTeam;
       }
@@ -530,6 +544,8 @@ export default {
         WarnEmail: address.map((m) => m.inputVal),
         IsOpenChick: this.IsOpenChick,
         IsNeedCheck: this.IsNeedCheck,
+        CanCancelAutoStart: this.CanCancelAutoStart,
+        IsMonitoringIdleTime: this.IsMonitoringIdleTime,
         ClientRunType: this.ClientRunType,
         AuditorByTeam: this.selApplyMem.map((m) => m.UsId),
       };

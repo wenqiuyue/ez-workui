@@ -15,7 +15,7 @@
               <el-form-item label="申诉日期：">
                 <el-date-picker
                   style="width: 70%"
-                  v-model="customForm.date"
+                  v-model="customForm.AnomalyTime"
                   type="date"
                   placeholder="选择日期"
                   value-format="yyyy-MM-dd"
@@ -26,17 +26,17 @@
                 </div>
               </el-form-item>
               <el-form-item label="申述类型：">
-                <el-checkbox-group v-model="customForm.DateType">
+                <el-checkbox-group v-model="customForm.AnomalyType">
                   <el-checkbox :label="1">上班</el-checkbox>
                   <el-checkbox :label="2">下班</el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
               <el-form-item
                 label="上班时间："
-                v-if="customForm.DateType.includes(1)"
+                v-if="customForm.AnomalyType.includes(1)"
               >
                 <el-date-picker
-                  v-model="customForm.StartTime"
+                  v-model="customForm.ClockInTime"
                   type="datetime"
                   placeholder="选择日期时间"
                   style="width: 70%"
@@ -46,9 +46,12 @@
               </el-form-item>
               <el-form-item
                 label="上班状态："
-                v-if="customForm.DateType.includes(1)"
+                v-if="customForm.AnomalyType.includes(1)"
               >
-                <el-select v-model="customForm.StartStatus" style="width: 70%">
+                <el-select
+                  v-model="customForm.ClockInStatus"
+                  style="width: 70%"
+                >
                   <el-option
                     v-for="item in $D.LIST('at_state')"
                     :key="item.value"
@@ -60,10 +63,10 @@
               </el-form-item>
               <el-form-item
                 label="下班时间："
-                v-if="customForm.DateType.includes(2)"
+                v-if="customForm.AnomalyType.includes(2)"
               >
                 <el-date-picker
-                  v-model="customForm.EndTime"
+                  v-model="customForm.ClockOutTime"
                   type="datetime"
                   placeholder="选择日期时间"
                   style="width: 70%"
@@ -73,9 +76,12 @@
               </el-form-item>
               <el-form-item
                 label="下班状态："
-                v-if="customForm.DateType.includes(2)"
+                v-if="customForm.AnomalyType.includes(2)"
               >
-                <el-select v-model="customForm.EndStatus" style="width: 70%">
+                <el-select
+                  v-model="customForm.ClockOutStatus"
+                  style="width: 70%"
+                >
                   <el-option
                     v-for="item in $D.LIST('at_state')"
                     :key="item.value"
@@ -112,6 +118,7 @@
           tableType="apply"
           ref="table"
           :isApply="true"
+          :teamId="selRow.Id"
         ></audit-table
       ></el-col>
     </el-row>
@@ -123,19 +130,26 @@ export default {
   components: {
     AuditTable: () => import("@/userview/apply-audit"),
   },
+  props: {
+    //团队
+    selRow: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
       subLoading: false,
       showError: false,
       // 考勤
       customForm: {
-        date: new Date().timeFormat("yyyy-MM-dd"),
-        DateType: [],
-        StartTime: null,
-        StartStatus: null,
-        EndTime: null,
-        EndStatus: null,
-        Reason: null,
+        AnomalyTime: new Date().timeFormat("yyyy-MM-dd"), //异常日期
+        AnomalyType: [], //1上班/2下班
+        ClockInTime: null, //上班时间
+        ClockInStatus: null, //上班状态
+        ClockOutTime: null, //下班时间
+        ClockOutStatus: null, //下班状态
+        Reason: null, //原因
       },
       customRules: {
         Reason: [{ required: true, message: "请输入申诉理由" }],
@@ -145,74 +159,54 @@ export default {
     };
   },
   watch: {
-    "customForm.date": {
-      handler(newval) {
-        this.$http
-          .get("/Work/Attendance/GetAttendanceByDate.ashx", {
-            params: { date: newval },
-          })
-          .then((resp) => {
-            if (resp.data && resp.data.ArId) {
-              this.showError = false;
-              this.customForm.fromRecordID = resp.data.ArId;
-            } else {
-              this.showError = true;
-            }
-          });
-      },
-      immediate: true,
-    },
+    // "customForm.AnomalyTime": {
+    //   handler(newval) {
+    //     this.$http
+    //       .get("/Work/Attendance/GetAttendanceByDate.ashx", {
+    //         params: { date: newval },
+    //       })
+    //       .then((resp) => {
+    //         if (resp.data && resp.data.ArId) {
+    //           this.showError = false;
+    //           this.customForm.fromRecordID = resp.data.ArId;
+    //         } else {
+    //           this.showError = true;
+    //         }
+    //       });
+    //   },
+    //   immediate: true,
+    // },
   },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           this.subLoading = true;
-          let resp = null;
-          if (this.formType == -1) {
-            //提交申述
-            let params = {};
-            params.Date = this.customForm.date;
-            params.Reason = this.customForm.Reason;
-            params.DateType = this.customForm.DateType;
-            //勾选了上午的内容
-            if (
-              this.customForm.DateType.includes(1) &&
-              this.customForm.StartTime
-            ) {
-              params.StartTime = this.customForm.StartTime;
-              params.StartStatus = this.customForm.StartStatus;
-            }
-            if (
-              this.customForm.DateType.includes(2) &&
-              this.customForm.EndTime
-            ) {
-              params.EndTime = this.customForm.EndTime;
-              params.EndStatus = this.customForm.EndStatus;
-            }
-            resp = await this.$http.post(
-              "/Work/TransactionAudit/AddAttendanceComplaint.ashx",
-              {
-                customFormID: 35,
-                data: params,
-                fromRecordType: 1,
-                fromRecordID: this.customForm.fromRecordID,
+          this.customForm.teamId = this.selRow.Id;
+          this.$http
+            .post(
+              "/Attendance/AnomalyAppeals/SaveAnomalyAppeal.ashx",
+              this.customForm
+            )
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$notify({
+                  message: resp.msg,
+                  type: "success",
+                });
+                Object.keys(this.customForm).forEach((m) => {
+                  if (m == "AnomalyTime") {
+                    this.customForm[m] = new Date().timeFormat("yyyy-MM-dd");
+                  } else if (m == "AnomalyType") {
+                    this.customForm[m] = [];
+                  } else {
+                    this.customForm[m] = null;
+                  }
+                });
+                this.$refs.table.initData();
               }
-            );
-          } else {
-            resp = await this.$http.post("/MGT/Process/SubmitAuditFrom.ashx", {
-              customFormID: this.formID[1],
-              data: this.ruleForm,
-            });
-          }
-          if (resp.res == 0) {
-            this.$notify({
-              message: resp.msg,
-              type: "success",
-            });
-            this.$emit("upData");
-          }
-          this.subLoading = false;
+            })
+            .finally(() => (this.subLoading = false));
         } else {
           return false;
         }
