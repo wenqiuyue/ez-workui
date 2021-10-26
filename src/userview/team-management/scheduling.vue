@@ -1,11 +1,17 @@
 <template>
   <div class="scheduling">
     <BaseView :title_name="selRow.Name" :load="loading">
-      <div slot="panes">
+      <div slot="panes" @keyup.enter="getMember">
         <el-input v-model="userSearch" placeholder="请输入成员搜索"></el-input>
         <div>
           <!--XBB: 分组折叠的话直接照搬以下格式 -->
-          <ul class="infinite-list">
+          <ul class="infinite-list" v-if="memberGroup && memberGroup.length">
+            <li
+              :class="{ activeList: generaId == null }"
+              @click="liClick(null)"
+            >
+              <span>团队考勤</span>
+            </li>
             <li
               v-for="(obj, index) in memberGroup"
               :key="index"
@@ -16,27 +22,24 @@
               <span>{{ obj.Name }}</span>
             </li>
           </ul>
+          <ul v-else>
+            <li>没有查到数据</li>
+          </ul>
         </div>
       </div>
       <div slot="content" class="s_content">
         <div class="screen">
-          <div class="s_item">
-            <!-- <span class="title">月份：</span>
-            <el-date-picker
-              size="medium"
-              v-model="screenMonth"
-              type="month"
-              placeholder="选择月"
-              format="yyyy年MM月"
-            >
-            </el-date-picker> -->
-          </div>
+          <div class="s_item"></div>
           <el-button type="primary" size="medium" @click="batchSettings"
             >批量设置</el-button
           >
         </div>
         <div class="set_con">
-          <SchedulingSet :screenMonth="screenMonth"></SchedulingSet>
+          <SchedulingSet
+            :timeZonesOptions="timeZonesOptions"
+            :teamValue="selRow.Id"
+            :generaId="generaId"
+          ></SchedulingSet>
         </div>
       </div>
     </BaseView>
@@ -50,9 +53,10 @@
       showCrossBtn
     >
       <SchedulingSet
-        :screenMonth="screenMonth"
         :typePage="'batch'"
         :teamValue="selRow.Id"
+        :timeZonesOptions="timeZonesOptions"
+        :generaId="generaId"
       ></SchedulingSet>
     </XModal>
   </div>
@@ -74,18 +78,31 @@ export default {
   },
   data() {
     return {
-      screenMonth: new Date(),
       userSearch: null, // 成员
       loading: false,
       memberGroup: [], //成员列表
       generaId: null, //人员Index
+      timeZonesOptions: [], //时区列表
     };
   },
   mounted() {
     this.getMember();
+    this.getTimeZones();
   },
   methods: {
     imgChange,
+    /**
+     * 获取时区
+     */
+    getTimeZones() {
+      this.$http
+        .post("/Teams/GetSystemTimeZones.ashx", { searchText: null })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.timeZonesOptions = resp.data;
+          }
+        });
+    },
     /**
      * 批量设置
      */
@@ -94,12 +111,16 @@ export default {
     },
     // 左侧li点击事件
     liClick(obj) {
-      this.generaId = obj.Id;
-      this.memb = JSON.parse(JSON.stringify(obj));
+      if (obj) {
+        this.generaId = obj.Id;
+      } else {
+        this.generaId = null;
+      }
     },
     getMember() {
       const data = {
         teamId: this.selRow.Id,
+        searchText: this.userSearch,
       };
       this.$http
         .post("/Management/TeamManagement/MenberSelects.ashx", data)

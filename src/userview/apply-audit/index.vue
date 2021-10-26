@@ -82,7 +82,11 @@
           align="center"
           show-overflow-tooltip
         >
-          第三团队
+          <template slot-scope="scope">
+            <p>
+              {{ scope.row.TeamName }}
+            </p>
+          </template>
         </el-table-column>
         <el-table-column
           label="申请时间"
@@ -109,13 +113,13 @@
             <el-button
               v-show="applyStatus == 1"
               type="primary"
-              @click="handleAudit(scope.$index, scope.row)"
+              @click="handleAudit(scope.row)"
               >审核</el-button
             >
             <el-button
               v-show="applyStatus == 2"
               type="primary"
-              @click="handleAudit(scope.$index, scope.row)"
+              @click="handleAudit(scope.row)"
               >查看</el-button
             >
           </template>
@@ -190,12 +194,12 @@
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            <el-button type="text" @click="handleAudit(sscope.row)"
+            <el-button type="text" @click="handleAudit(scope.row)"
               >查看</el-button
             >
-            <el-button type="text" @click="auditCancel(scope.$index, scope.row)"
+            <!-- <el-button type="text" @click="auditCancel(scope.$index, scope.row)"
               >取消申请</el-button
-            >
+            > -->
           </template>
         </el-table-column>
       </el-table>
@@ -208,10 +212,12 @@
       </div>
       <AuditModal
         ref="modalForm"
-        @upData="getData(auditData.length > 1 ? pageData.pageIndex : 1)"
+        @upData="getData"
         @successHandle="$emit('successHandle')"
         :auditInfo="auditInfo"
-      />
+        :isApply="applyStatus == 2 ? true : isApply"
+      >
+      </AuditModal>
     </el-card>
   </div>
 </template>
@@ -282,11 +288,9 @@ export default {
         case 1:
           return "待审核";
         case 2:
-          return "审核中";
+          return "通过";
         case 3:
           return "驳回";
-        case 4:
-          return "通过";
         default:
           break;
       }

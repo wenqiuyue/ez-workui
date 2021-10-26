@@ -94,17 +94,12 @@
         </template>
       </el-table-column>
     </el-table>
-
     <UserInfo
       :selUser="selUser"
       :teamId="selRow ? selRow.Id : null"
       @success="$emit('loadData')"
       :userMemberMType="userMemberMType"
     ></UserInfo>
-    <HourlyWage
-      :selUser="selUser"
-      :teamValue="selRow ? selRow.Id : null"
-    ></HourlyWage>
   </div>
 </template>
 <script>
@@ -112,7 +107,6 @@ import { imgChange } from "@/commons";
 export default {
   components: {
     UserInfo: () => import("./user-info"),
-    HourlyWage: () => import("./hourlywage-modal.vue"),
   },
   props: {
     //团队详情
@@ -155,13 +149,7 @@ export default {
   },
   methods: {
     imgChange,
-    /**
-     * 设置时薪
-     */
-    handleHourlyWage(val) {
-      this.selUser = val;
-      this.$modal.show("hourlywageM");
-    },
+
     /**
      * 删除成员
      */

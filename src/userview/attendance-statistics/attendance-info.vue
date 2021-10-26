@@ -254,7 +254,10 @@
                     :sm="24"
                     :md="20"
                     class="hidden-sm-and-down"
-                    v-if="parseInt(data.day.split('-').slice(2)) == 5"
+                    v-if="
+                      parseInt(data.day.split('-').slice(2)) == 5 &&
+                      childData.menuType == 'privateAttendance'
+                    "
                   >
                     <p
                       class="cell-title-right"
@@ -263,7 +266,12 @@
                       审核中
                     </p>
                   </el-col>
-                  <el-col :sm="24" :md="20" class="hidden-sm-and-down" v-else>
+                  <el-col
+                    :sm="24"
+                    :md="20"
+                    class="hidden-sm-and-down"
+                    v-else-if="childData.menuType == 'privateAttendance'"
+                  >
                     <p
                       class="cell-title-right apply"
                       v-show="Boolean(new Date() > new Date(date))"
@@ -480,8 +488,8 @@
       :popData="popData"
       ref="myAppeal"
       @appealSubmit="handleSearch"
-      :Type="1"
       @appealChange="handleSearch"
+      :teamValue="teamValue"
     ></appeal>
   </div>
 </template>

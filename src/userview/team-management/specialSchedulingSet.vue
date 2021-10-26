@@ -23,232 +23,169 @@
         </div>
         <div class="set_form">
           <el-form ref="form" :model="specialForm" label-width="140px">
-            <el-divider content-position="left">上班</el-divider>
-            <el-form-item label="时区：">
-              <el-select
-                v-model="specialForm.work.timeZone"
-                placeholder="请选择时区"
-              >
-                <el-option
-                  v-for="item in timeZoneOptions"
-                  :key="item.value"
-                  :label="item.name"
-                  :value="item.value"
-                >
-                </el-option>
-              </el-select>
+            <el-form-item label="排班类型：">
+              <el-radio-group v-model="specialForm.specialType">
+                <el-radio :label="1">上班</el-radio>
+                <el-radio :label="2">假期</el-radio>
+              </el-radio-group>
             </el-form-item>
-            <div class="row_form_item">
-              <el-form-item label="上班：">
-                <el-time-picker
-                  v-model="specialForm.work.startWork"
-                  placeholder="选择上班时间"
+            <div v-if="specialForm.specialType == 1">
+              <el-form-item label="时区：">
+                <el-select
+                  v-model="specialForm.timeZone"
+                  placeholder="请选择时区"
                 >
-                </el-time-picker>
+                  <el-option
+                    v-for="item in timeZonesOptions"
+                    :key="item.Id"
+                    :label="item.StandardName"
+                    :value="item.Id"
+                  >
+                  </el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item label="下班：">
-                <el-time-picker
-                  v-model="specialForm.work.endWork"
-                  placeholder="选择下班时间"
+              <div class="row_form_item">
+                <el-form-item label="上班：">
+                  <el-time-picker
+                    v-model="specialForm.startWork"
+                    placeholder="选择上班时间"
+                  >
+                  </el-time-picker>
+                </el-form-item>
+                <el-form-item label="下班：">
+                  <el-time-picker
+                    v-model="specialForm.endWork"
+                    placeholder="选择下班时间"
+                  >
+                  </el-time-picker>
+                </el-form-item>
+              </div>
+              <div class="row_form_item">
+                <el-form-item label="时薪：">
+                  <el-select
+                    v-model="specialForm.hourlyWage"
+                    placeholder="请选择时薪"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="加班时薪：">
+                  <el-select
+                    v-model="specialForm.hourlyWageOver"
+                    placeholder="请选择加班时薪"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </div>
+              <el-form-item label="休息时间：">
+                <ul>
+                  <li
+                    v-for="(interval, intervalInd) in specialForm.timeInterval"
+                    :key="intervalInd"
+                  >
+                    <el-time-picker
+                      v-model="interval.start"
+                      placeholder="开始休息时间"
+                    >
+                    </el-time-picker>
+                    <span style="margin: 0 10px">-</span>
+                    <el-time-picker
+                      v-model="interval.end"
+                      placeholder="结束休息时间"
+                    >
+                    </el-time-picker>
+                    <el-button
+                      type="text"
+                      @click="cancleInterval(1, intervalInd)"
+                      >清除</el-button
+                    >
+                  </li>
+                </ul>
+                <el-button type="text" @click="addTimeInterval(1)"
+                  >添加休息时间区间</el-button
                 >
-                </el-time-picker>
               </el-form-item>
+              <div class="form_item_group">
+                <h3>弹性打卡</h3>
+                <el-form-item label="上班最多可晚到：">
+                  <el-input
+                    placeholder="请输入内容"
+                    v-model="specialForm.lateWork"
+                    type="number"
+                  >
+                    <template slot="append">
+                      <div>
+                        <span style="margin-right: 12px">分钟</span>
+                        <el-radio-group v-model="specialForm.lateWorkRadio">
+                          <el-radio :label="1"
+                            >上班晚到几分钟，下班须晚走几分钟</el-radio
+                          >
+                          <el-radio :label="2"
+                            >晚到{{
+                              specialForm.lateWork
+                                ? specialForm.lateWork
+                                : "几"
+                            }}钟内不算迟到</el-radio
+                          >
+                        </el-radio-group>
+                      </div>
+                    </template>
+                  </el-input>
+                </el-form-item>
+                <el-form-item label="下班最多可早走：">
+                  <el-input
+                    placeholder="请输入内容"
+                    v-model="specialForm.leaveEarly"
+                    type="number"
+                  >
+                    <template slot="append">
+                      <div>
+                        <span style="margin-right: 12px">分钟</span>
+                        <el-radio-group v-model="specialForm.leaveEarlyRadio">
+                          <el-radio :label="1"
+                            >上班早到几分钟，下班可早走几分钟</el-radio
+                          >
+                          <el-radio :label="2"
+                            >早走{{
+                              specialForm.leaveEarly
+                                ? specialForm.leaveEarly
+                                : "几"
+                            }}分钟内不算早退</el-radio
+                          >
+                        </el-radio-group>
+                      </div>
+                    </template>
+                  </el-input>
+                </el-form-item>
+              </div>
             </div>
-            <el-form-item label="休息时间：">
-              <ul>
-                <li
-                  v-for="(interval, intervalInd) in specialForm.work
-                    .timeInterval"
-                  :key="intervalInd"
+            <div v-else>
+              <el-form-item label="时薪：">
+                <el-select
+                  v-model="specialForm.hourlyWage"
+                  placeholder="请选择时薪"
                 >
-                  <el-time-picker
-                    v-model="interval.start"
-                    placeholder="开始休息时间"
+                  <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
                   >
-                  </el-time-picker>
-                  <span style="margin: 0 10px">-</span>
-                  <el-time-picker
-                    v-model="interval.end"
-                    placeholder="结束休息时间"
-                  >
-                  </el-time-picker>
-                  <el-button type="text" @click="cancleInterval(1, intervalInd)"
-                    >清除</el-button
-                  >
-                </li>
-              </ul>
-              <el-button type="text" @click="addTimeInterval(1)"
-                >添加休息时间区间</el-button
-              >
-            </el-form-item>
-            <div class="form_item_group">
-              <h3>弹性打卡</h3>
-              <el-form-item label="上班最多可晚到：">
-                <el-input
-                  placeholder="请输入内容"
-                  v-model="specialForm.work.lateWork"
-                  type="number"
-                >
-                  <template slot="append">
-                    <div>
-                      <span style="margin-right: 12px">分钟</span>
-                      <el-radio-group v-model="specialForm.work.lateWorkRadio">
-                        <el-radio :label="1"
-                          >上班晚到几分钟，下班须晚走几分钟</el-radio
-                        >
-                        <el-radio :label="2"
-                          >晚到{{
-                            specialForm.work.lateWork
-                              ? specialForm.work.lateWork
-                              : "几"
-                          }}钟内不算迟到</el-radio
-                        >
-                      </el-radio-group>
-                    </div>
-                  </template>
-                </el-input>
-              </el-form-item>
-              <el-form-item label="下班最多可早走：">
-                <el-input
-                  placeholder="请输入内容"
-                  v-model="specialForm.work.leaveEarly"
-                  type="number"
-                >
-                  <template slot="append">
-                    <div>
-                      <span style="margin-right: 12px">分钟</span>
-                      <el-radio-group
-                        v-model="specialForm.work.leaveEarlyRadio"
-                      >
-                        <el-radio :label="1"
-                          >上班早到几分钟，下班可早走几分钟</el-radio
-                        >
-                        <el-radio :label="2"
-                          >早走{{
-                            specialForm.work.leaveEarly
-                              ? specialForm.work.leaveEarly
-                              : "几"
-                          }}分钟内不算早退</el-radio
-                        >
-                      </el-radio-group>
-                    </div>
-                  </template>
-                </el-input>
-              </el-form-item>
-            </div>
-            <el-divider content-position="left">假期</el-divider>
-            <el-form-item label="时区：">
-              <el-select
-                v-model="specialForm.vacation.timeZone"
-                placeholder="请选择时区"
-              >
-                <el-option
-                  v-for="item in timeZoneOptions"
-                  :key="item.value"
-                  :label="item.name"
-                  :value="item.value"
-                >
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <div class="row_form_item">
-              <el-form-item label="上班：">
-                <el-time-picker
-                  v-model="specialForm.vacation.startWork"
-                  placeholder="选择上班时间"
-                >
-                </el-time-picker>
-              </el-form-item>
-              <el-form-item label="下班：">
-                <el-time-picker
-                  v-model="specialForm.vacation.endWork"
-                  placeholder="选择下班时间"
-                >
-                </el-time-picker>
-              </el-form-item>
-            </div>
-            <el-form-item label="休息时间：">
-              <ul>
-                <li
-                  v-for="(interval, intervalInd) in specialForm.vacation
-                    .timeInterval"
-                  :key="intervalInd"
-                >
-                  <el-time-picker
-                    v-model="interval.start"
-                    placeholder="开始休息时间"
-                  >
-                  </el-time-picker>
-                  <span style="margin: 0 10px">-</span>
-                  <el-time-picker
-                    v-model="interval.end"
-                    placeholder="结束休息时间"
-                  >
-                  </el-time-picker>
-                  <el-button type="text" @click="cancleInterval(2, intervalInd)"
-                    >清除</el-button
-                  >
-                </li>
-              </ul>
-              <el-button type="text" @click="addTimeInterval(2)"
-                >添加休息时间区间</el-button
-              >
-            </el-form-item>
-            <div class="form_item_group">
-              <h3>弹性打卡</h3>
-              <el-form-item label="上班最多可晚到：">
-                <el-input
-                  placeholder="请输入内容"
-                  v-model="specialForm.vacation.lateWork"
-                  type="number"
-                >
-                  <template slot="append">
-                    <div>
-                      <span style="margin-right: 12px">分钟</span>
-                      <el-radio-group
-                        v-model="specialForm.vacation.lateWorkRadio"
-                      >
-                        <el-radio :label="1"
-                          >上班晚到几分钟，下班须晚走几分钟</el-radio
-                        >
-                        <el-radio :label="2"
-                          >晚到{{
-                            specialForm.vacation.lateWork
-                              ? specialForm.vacation.lateWork
-                              : "几"
-                          }}钟内不算迟到</el-radio
-                        >
-                      </el-radio-group>
-                    </div>
-                  </template>
-                </el-input>
-              </el-form-item>
-              <el-form-item label="下班最多可早走：">
-                <el-input
-                  placeholder="请输入内容"
-                  v-model="specialForm.vacation.leaveEarly"
-                  type="number"
-                >
-                  <template slot="append">
-                    <div>
-                      <span style="margin-right: 12px">分钟</span>
-                      <el-radio-group
-                        v-model="specialForm.vacation.leaveEarlyRadio"
-                      >
-                        <el-radio :label="1"
-                          >上班早到几分钟，下班可早走几分钟</el-radio
-                        >
-                        <el-radio :label="2"
-                          >早走{{
-                            specialForm.vacation.leaveEarly
-                              ? specialForm.vacation.leaveEarly
-                              : "几"
-                          }}分钟内不算早退</el-radio
-                        >
-                      </el-radio-group>
-                    </div>
-                  </template>
-                </el-input>
+                  </el-option>
+                </el-select>
               </el-form-item>
             </div>
           </el-form>
@@ -268,36 +205,25 @@ export default {
       type: String,
       default: null,
     },
+    timeZonesOptions: {
+      type: Array,
+      default: null,
+    },
   },
   data() {
     return {
-      timeZoneOptions: [
-        {
-          value: 1,
-          name: "GMT+8",
-        },
-      ], //时区选项
       specialForm: {
-        work: {
-          timeZone: 1, //时区
-          timeInterval: [],
-          startWork: null, //上班
-          endWork: null, //下班
-          lateWork: null, //上班晚到
-          lateWorkRadio: null, //上班晚到条件选择
-          leaveEarly: null, //下班早走
-          leaveEarlyRadio: null, //下班早走条件选择
-        },
-        vacation: {
-          timeZone: 1, //时区
-          timeInterval: [],
-          startWork: null, //上班
-          endWork: null, //下班
-          lateWork: null, //上班晚到
-          lateWorkRadio: null, //上班晚到条件选择
-          leaveEarly: null, //下班早走
-          leaveEarlyRadio: null, //下班早走条件选择
-        },
+        specialType: 1,
+        timeZone: "China Standard Time", //时区
+        timeInterval: [{}],
+        startWork: null, //上班
+        endWork: null, //下班
+        lateWork: null, //上班晚到
+        lateWorkRadio: null, //上班晚到条件选择
+        leaveEarly: null, //下班早走
+        leaveEarlyRadio: null, //下班早走条件选择
+        hourlyWage: null,
+        hourlyWageOver: null,
       },
     };
   },
@@ -305,32 +231,19 @@ export default {
     /**
      * 清除时间区间
      */
-    cancleInterval(type, ind) {
-      if (type == 1) {
-        this.specialForm.work.timeInterval =
-          this.specialForm.work.timeInterval.filter((m, index) => ind != index);
-      } else {
-        this.specialForm.vacation.timeInterval =
-          this.specialForm.vacation.timeInterval.filter(
-            (m, index) => ind != index
-          );
-      }
+    cancleInterval(ind) {
+      this.specialForm.timeInterval = this.specialForm.timeInterval.filter(
+        (m, index) => ind != index
+      );
     },
     /**
      * 添加时间区间
      */
-    addTimeInterval(type) {
-      if (type == 1) {
-        this.specialForm.work.timeInterval.push({
-          start: null,
-          end: null,
-        });
-      } else {
-        this.specialForm.vacation.timeInterval.push({
-          start: null,
-          end: null,
-        });
-      }
+    addTimeInterval() {
+      this.specialForm.timeInterval.push({
+        start: null,
+        end: null,
+      });
     },
   },
 };
@@ -397,6 +310,10 @@ export default {
     }
     .set_form {
       padding: 3px 6px;
+      .row_form_item {
+        display: flex;
+        flex-direction: row;
+      }
       .form_item_group {
         margin-top: -10px;
         width: 80%;

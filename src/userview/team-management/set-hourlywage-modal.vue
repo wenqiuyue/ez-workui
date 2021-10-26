@@ -37,20 +37,6 @@
                 {{ formData.wagetype }}
               </div>
             </el-form-item>
-            <el-form-item label="时薪：" prop="wage" style="width: 100%">
-              <el-input
-                v-model="formData.wage"
-                placeholder="请填写时薪"
-                v-if="editState"
-                type="number"
-                :style="{ width: comWidth }"
-                clearable
-              >
-              </el-input>
-              <div v-else class="state-see">
-                {{ formData.wage }}
-              </div>
-            </el-form-item>
           </el-col>
         </el-row>
       </el-form>
@@ -93,7 +79,6 @@ export default {
       formData: {
         id: "", // 编辑窗口才用ID
         wagetype: "", // 标签名称
-        wage: "",
       },
       Rules: {
         wagetype: [
@@ -108,13 +93,6 @@ export default {
             trigger: "blur",
           },
         ],
-        wage: [
-          {
-            required: true,
-            message: "请输入金额",
-            trigger: "blur",
-          },
-        ],
       },
     };
   },
@@ -125,7 +103,6 @@ export default {
       this.editState = this.indexData.type === "Add" ? true : false;
       if (this.indexData.row) {
         this.formData.wagetype = this.indexData.row.WageType;
-        this.formData.wage = this.indexData.row.Wage;
         this.formData.id = this.indexData.departmentCode;
       }
     },
@@ -146,11 +123,10 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/Teams/MemberWage/SaveMemberWage.ashx", {
-                memberId: this.selUser.UserId,
-                wage: this.formData.wage,
+              .post("/Teams/MemberWage/SaveMemberWageType.ashx", {
                 wagetype: this.formData.wagetype,
                 teamId: this.teamValue,
+                Id: null,
               })
               .then((res) => {
                 if (res.res == 0) {
@@ -167,14 +143,12 @@ export default {
               });
           } else {
             let params = {
-              memberId: this.selUser.UserId,
-              wage: this.formData.wage,
               wagetype: this.formData.wagetype,
               teamId: this.teamValue,
               Id: this.formData.id,
             };
             this.$http
-              .post("/Teams/MemberWage/SaveMemberWage.ashx", params)
+              .post("/Teams/MemberWage/SaveMemberWageType.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
@@ -208,7 +182,6 @@ export default {
       this.formData = {
         id: "", // 编辑窗口才用ID
         wagetype: "",
-        wage: "",
       };
     },
   },

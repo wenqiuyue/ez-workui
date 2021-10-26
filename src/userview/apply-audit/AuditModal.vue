@@ -3,8 +3,8 @@
     isFixed
     name="applyAudit"
     ref="xmodal"
-    :title="readOnly ? '事务详情' : '提交类型'"
-    :confirmBtnText="readOnly ? '' : '审批'"
+    :title="isApply ? '申诉详情' : '申诉审批'"
+    :confirmBtnText="isApply ? '' : '审批'"
     cancelBtnText="取消"
     @onConfirm="submit"
     @closed="closed"
@@ -13,7 +13,7 @@
     <div v-if="auditInfo">
       <div class="audit_header">
         <div>
-          <img v-lazy="$url + auditInfo.ApplyPicture" />
+          <img :src="$url + auditInfo.ApplyPicture" />
           <span>{{ auditInfo.ApplyName }}</span>
         </div>
         <p>申请时间:{{ auditInfo.CreateTime.timeFormat("yyyy-MM-dd") }}</p>
@@ -25,10 +25,7 @@
             : ""
         }}</el-form-item>
         <el-form-item label="申述类型：">
-          <el-checkbox-group
-            v-model="auditInfo.AnomalyType"
-            :disabled="readOnly"
-          >
+          <el-checkbox-group v-model="auditInfo.AnomalyType" disabled>
             <el-checkbox :label="1">上班</el-checkbox>
             <el-checkbox :label="2">下班</el-checkbox>
           </el-checkbox-group>
@@ -37,80 +34,62 @@
           label="上班时间："
           v-if="auditInfo.AnomalyType.includes(1)"
         >
-          <el-date-picker
-            v-model="auditInfo.ClockInTime"
-            type="datetime"
-            placeholder="选择日期时间"
-            style="width: 70%"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            format="yyyy-MM-dd HH:mm:ss"
-            :disabled="readOnly"
-          ></el-date-picker>
+          {{
+            auditInfo.ClockInTime
+              ? auditInfo.ClockInTime.timeFormat("yyyy-MM-dd")
+              : ""
+          }}
         </el-form-item>
         <el-form-item
           label="上班状态："
           v-if="auditInfo.AnomalyType.includes(1)"
         >
-          <el-select
-            v-model="auditInfo.ClockInStatus"
-            style="width: 70%"
-            :disabled="readOnly"
-          >
-            <el-option
-              v-for="item in $D.LIST('at_state')"
-              :key="item.value"
-              :label="item.name"
-              :value="item.value"
-              :disabled="filterOption(item)"
-            ></el-option>
-          </el-select>
+          {{ $D.ITEM("at_state", auditInfo.ClockInStatus).name }}
         </el-form-item>
         <el-form-item
           label="下班时间："
           v-if="auditInfo.AnomalyType.includes(2)"
         >
-          <el-date-picker
-            v-model="auditInfo.ClockOutTime"
-            type="datetime"
-            placeholder="选择日期时间"
-            style="width: 70%"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            format="yyyy-MM-dd HH:mm:ss"
-            :disabled="readOnly"
-          ></el-date-picker>
+          {{
+            auditInfo.ClockOutTime
+              ? auditInfo.ClockOutTime.timeFormat("yyyy-MM-dd")
+              : ""
+          }}
         </el-form-item>
         <el-form-item
           label="下班状态："
           v-if="auditInfo.AnomalyType.includes(2)"
         >
-          <el-select
-            v-model="auditInfo.ClockOutStatus"
-            style="width: 70%"
-            :disabled="readOnly"
-          >
-            <el-option
-              v-for="item in $D.LIST('at_state')"
-              :key="item.value"
-              :label="item.custom"
-              :value="item.value"
-              :disabled="filterOption(item)"
-            ></el-option>
-          </el-select>
+          {{ $D.ITEM("at_state", auditInfo.ClockOutStatus).name }}
         </el-form-item>
         <el-form-item label="申诉原因：" prop="Reason">{{
           auditInfo.Reason
         }}</el-form-item>
+        <el-form-item label="审批结果：" prop="AuditStatus" v-if="isApply">{{
+          auditInfo.AuditStatus | auditResultFilters
+        }}</el-form-item>
+        <el-form-item
+          label="审批备注："
+          prop="AuditRemark"
+          v-if="isApply && auditInfo.AuditStatus != 1"
+          >{{
+            auditInfo.AuditRemark ? auditInfo.AuditRemark : "无"
+          }}</el-form-item
+        >
       </el-form>
       <el-form
-        v-if="!readOnly"
+        v-if="!isApply"
         class="audit_bottom"
         :model="elForm"
         :rules="rules"
         ref="elForm"
         label-width="100px"
       >
-        <el-form-item label="审核结果：" prop="isPass">
-          <el-select v-model="elForm.isPass" @change="elForm.remark = null">
+        <el-form-item label="审核结果：" prop="Status">
+          <el-select
+            v-model="elForm.Status"
+            @change="elForm.AuditRemark = null"
+          >
             <el-option
               v-for="item in optiops"
               :key="item.value"
@@ -120,13 +99,13 @@
           </el-select>
         </el-form-item>
         <el-form-item
-          :label="elForm.isPass ? '我的留言：' : '驳回理由：'"
-          :prop="elForm.isPass ? '' : 'remark'"
+          :label="elForm.Status == 2 ? '我的留言：' : '驳回理由：'"
+          :prop="elForm.Status == 2 ? '' : 'AuditRemark'"
         >
           <el-input
             ref="container"
             type="textarea"
-            v-model="elForm.remark"
+            v-model="elForm.AuditRemark"
             placeholder="请输入"
           ></el-input>
         </el-form-item>
@@ -144,28 +123,33 @@ export default {
       type: Object,
       default: null,
     },
+    //true为考勤申诉进来的页面  false为事务审批进来的页面
+    isApply: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       optiops: [
         {
           label: "通过",
-          value: true,
+          value: 2,
         },
         {
           label: "驳回",
-          value: false,
+          value: 1,
         },
       ],
       rules: {
-        isPass: [
+        Status: [
           {
             required: true,
             message: "必选",
             trigger: "blur",
           },
         ],
-        remark: [
+        AuditRemark: [
           {
             required: true,
             message: "理由必填",
@@ -174,74 +158,49 @@ export default {
         ],
       },
       elForm: {
-        isPass: true,
-        auditID: null,
-        stepID: null, //当下一步出现分支时,必传此项,选择下一步走向哪里
-        remark: "", //审批留言
+        Status: 2,
+        AuditRemark: "", //审批留言
       },
-      elFormData: {
-        Message: "",
-        Rule: null,
-        TotalTimes: null,
-        Pass: true,
-      },
-
-      pageData: {
-        form: [],
-        member: {
-          applicantHead: "",
-          applicantTime: "",
-        },
-        history: [],
-      },
-
-      readOnly: false,
     };
   },
-
+  filters: {
+    auditResultFilters(value) {
+      switch (value) {
+        case 1:
+          return "待审核";
+        case 2:
+          return "通过";
+        case 3:
+          return "驳回";
+        default:
+          break;
+      }
+    },
+  },
   methods: {
-    //时间
-    showDetail(time, index) {
-      if (time) {
-        return time.timeFormat("yyyy-MM-dd HH:mm");
-      } else {
-        if (
-          !this.pageData.history[0].AuditTime ||
-          this.pageData.history[index - 1].AuditTime
-        ) {
-          return "当前";
-        }
-      }
-    },
-    //步骤颜色
-    stepColor(sutaus) {
-      if (sutaus == 4) {
-        return "#67C23A";
-      } else if (sutaus == 3) {
-        return "#F56C6C";
-      } else {
-        return "";
-      }
-    },
-
     submit() {
       this.$refs.elForm.validate(async (vaild) => {
         if (vaild) {
           this.$refs.xmodal.loadBtn(true);
-          let url = "";
-          url = "/Work/TransactionAudit/AuditAttendanceComplaint.ashx";
-          this.elForm.data = this.pageData.form;
-          let resp = await this.$http.post(url, this.elForm);
-          this.$refs.xmodal.loadBtn(false);
-          if (resp.res == 0) {
-            this.$notify({
-              type: "success",
-              message: resp.msg,
-            });
-            this.$modal.hide("applyAudit");
-            this.$emit("upData");
-            this.$emit("successHandle");
-          }
+          this.elForm.Id = this.auditInfo.Id;
+          this.elForm.teamId = this.auditInfo.TeamId;
+          this.$http
+            .post(
+              "/Attendance/AnomalyAppeals/SubmitAnomalyAppeal.ashx",
+              this.elForm
+            )
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$notify({
+                  type: "success",
+                  message: resp.msg,
+                });
+                this.$modal.hide("applyAudit");
+                this.$emit("upData");
+                this.$emit("successHandle");
+              }
+            })
+            .finally(() => this.$refs.xmodal.loadBtn(false));
         } else {
           this.$refs.container.focus();
         }
@@ -250,14 +209,8 @@ export default {
     closed() {
       Object.assign(this.$data.elForm, this.$options.data().elForm);
     },
-
-    filterOption(item) {
-      return item.value == -1 || item.value == 3;
-    },
   },
-  created() {
-    this.getTypeList();
-  },
+  created() {},
 };
 </script>
 <style lang="less" scoped>

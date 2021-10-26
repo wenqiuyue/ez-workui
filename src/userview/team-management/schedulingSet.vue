@@ -27,16 +27,24 @@
           <div>通用排班设置</div>
         </div>
         <div class="save_btn">
-          <el-button type="success" size="small">保 存</el-button>
+          <el-button
+            type="success"
+            size="small"
+            @click="handleSave"
+            :loading="saveBtnLoading"
+            >保 存</el-button
+          >
         </div>
       </div>
       <div class="set_form">
         <el-form ref="form" :model="currencyForm" label-width="140px">
           <el-form-item label="每周工作日：">
             <div>
-              <el-button type="text">全选</el-button>
+              <el-button type="text" @click="handleSelAllWeek">全选</el-button>
               <span style="margin: 0 10px">/</span>
-              <el-button type="text">取消全选</el-button>
+              <el-button type="text" @click="currencyForm.weekDay = []"
+                >取消全选</el-button
+              >
             </div>
             <el-checkbox-group
               v-model="currencyForm.weekDay"
@@ -51,12 +59,16 @@
             </el-checkbox-group>
           </el-form-item>
           <el-form-item label="时区：">
-            <el-select v-model="currencyForm.timeZone" placeholder="请选择时区">
+            <el-select
+              v-model="currencyForm.timeZone"
+              filterable
+              placeholder="请选择时区"
+            >
               <el-option
-                v-for="item in timeZoneOptions"
-                :key="item.value"
-                :label="item.name"
-                :value="item.value"
+                v-for="item in timeZonesOptions"
+                :key="item.Id"
+                :label="item.StandardName"
+                :value="item.Id"
               >
               </el-option>
             </el-select>
@@ -95,6 +107,36 @@
                 placeholder="选择下班时间"
               >
               </el-time-picker>
+            </el-form-item>
+          </div>
+          <div class="row_form_item">
+            <el-form-item label="时薪：">
+              <el-select
+                v-model="currencyForm.hourlyWage"
+                placeholder="请选择时薪"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="加班时薪：">
+              <el-select
+                v-model="currencyForm.hourlyWageOver"
+                placeholder="请选择加班时薪"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
             </el-form-item>
           </div>
           <el-form-item label="休息时间：">
@@ -244,7 +286,10 @@
         >
       </div>
     </div>
-    <SpecialSchedulingSet :selSpecialDay="selSpecialDay"></SpecialSchedulingSet>
+    <SpecialSchedulingSet
+      :selSpecialDay="selSpecialDay"
+      :timeZonesOptions="timeZonesOptions"
+    ></SpecialSchedulingSet>
   </div>
 </template>
 <script>
@@ -254,6 +299,15 @@ export default {
     SpecialSchedulingSet: () => import("./specialSchedulingSet"),
   },
   props: {
+    //成员id
+    generaId: {
+      type: Number,
+      default: null,
+    },
+    timeZonesOptions: {
+      type: Array,
+      default: null,
+    },
     //团队
     teamValue: {
       type: Number,
@@ -264,26 +318,21 @@ export default {
       type: String,
       default: null,
     },
-    //月份
-    screenMonth: {
-      type: Date,
-      default: null,
-    },
   },
   data() {
     return {
+      loading: false,
+      saveBtnLoading: false,
+      screenMonth: new Date(),
       month: null,
       selSpecialDay: null,
       selMem: [], //选择的成员
-      timeZoneOptions: [
-        {
-          value: 1,
-          name: "GMT+8",
-        },
-      ], //时区选项
+      //时区选项
       currencyForm: {
+        hourlyWage: null, //时薪
+        hourlyWageOver: null, //加班时薪
         weekDay: [],
-        timeZone: 1, //时区
+        timeZone: "China Standard Time", //时区
         startWork: null, //上班
         endWork: null, //下班
         lateWork: null, //上班晚到
@@ -305,13 +354,123 @@ export default {
         this.month = this.screenMonth;
       }
     },
+    generaId(val, oval) {
+      if (val != oval) {
+        this.getPlanBCDetail();
+      }
+    },
   },
   mounted() {
     this.$nextTick(() => {
       this.month = this.screenMonth;
+      this.getPlanBCDetail();
     });
   },
   methods: {
+    /**
+     * 获取排班详情
+     */
+    getPlanBCDetail() {
+      this.loading = true;
+      this.$http
+        .post("/Attendance/PlanBC/GetGeneralPlanBCDetail.ashx", {
+          type: this.generaId ? 2 : 1,
+          teamId: this.teamValue,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            const data = resp.data.Data;
+            this.currencyForm.timeZone = data.TimeZone;
+            this.currencyForm.startWork = data.CheckInTime;
+            this.currencyForm.endWork = data.CheckOutTime;
+
+            this.currencyForm.timeInterval = data.FreeTimes.map((m) => {
+              return {
+                start: m.StartTime,
+                end: m.EndTime,
+              };
+            });
+            this.currencyForm.lateWork = data.CheckInDuration;
+            this.currencyForm.leaveEarly = data.CheckOutDuration;
+            if (data.IsSetCheckInElasticity) {
+              this.currencyForm.lateWorkRadio = 1;
+            } else if (data.IsSetCheckInHumanization) {
+              this.currencyForm.lateWorkRadio = 2;
+            }
+            if (data.IsSetCheckOutElasticity) {
+              this.currencyForm.leaveEarlyRadio = 1;
+            } else if (data.IsSetCheckOutHumanization) {
+              this.currencyForm.leaveEarlyRadio = 2;
+            }
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
+    /**
+     * 全选
+     */
+    handleSelAllWeek() {
+      this.$D.LIST("week").forEach((e) => {
+        this.currencyForm.weekDay.push(e.value);
+      });
+    },
+    /**
+     * 通用排班保存
+     */
+    handleSave() {
+      this.saveBtnLoading = true;
+      const data = {
+        PlanType: 1,
+        UserIds: this.selMem.map((m) => m.UsId),
+        TimeZone: this.currencyForm.timeZone,
+        PlanWeekWorkDay: this.currencyForm.weekDay,
+        PlanMonth: "",
+        PlanDay: "",
+        CheckInTime: this.currencyForm.startWork,
+        CheckOutTime: this.currencyForm.endWork,
+        CheckInDuration: this.currencyForm.lateWork,
+        CheckOutDuration: this.currencyForm.leaveEarly,
+        IsSetCheckInElasticity: !this.currencyForm.lateWorkRadio
+          ? null
+          : this.currencyForm.lateWorkRadio == 1
+          ? true
+          : false,
+        IsSetCheckInHumanization: !this.currencyForm.lateWorkRadio
+          ? null
+          : this.currencyForm.lateWorkRadio == 2
+          ? true
+          : false,
+        IsSetCheckOutElasticity: !this.currencyForm.leaveEarlyRadio
+          ? null
+          : this.currencyForm.leaveEarlyRadio == 1
+          ? true
+          : false,
+        IsSetCheckOutHumanization: !this.currencyForm.leaveEarlyRadio
+          ? null
+          : this.currencyForm.leaveEarlyRadio == 2
+          ? true
+          : false,
+        FreeTime: this.currencyForm.timeInterval.map((m) => {
+          return {
+            StartTime: m.start,
+            EndTime: m.end,
+          };
+        }),
+        teamId: this.teamValue,
+      };
+      this.$http
+        .post("/Attendance/PlanBC/SavePlanBC.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              showClose: true,
+              message: "设置成功",
+              type: "success",
+            });
+          }
+        })
+        .finally(() => (this.saveBtnLoading = false));
+    },
     /**
      * 设置某一天特殊的排班
      */

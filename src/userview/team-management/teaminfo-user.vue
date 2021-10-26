@@ -36,6 +36,11 @@
           :class="viewType == 5 ? ' active_span' : ''"
           >排班设置</span
         >
+        <span
+          @click="handleViewChange(6)"
+          :class="viewType == 6 ? ' active_span' : ''"
+          >时薪设置</span
+        >
       </div>
       <div
         class="screen_left"
@@ -84,6 +89,11 @@
     <Apply v-else-if="viewType == 4" :selRow="selRow"></Apply>
     <!-- 排班设置 -->
     <Scheduling v-else-if="viewType == 5" :selRow="selRow"></Scheduling>
+    <!-- 时薪设置 -->
+    <HourlyWage
+      v-else-if="viewType == 6"
+      :teamValue="selRow ? selRow.Id : null"
+    ></HourlyWage>
     <!-- 规则设置 -->
     <RuleSetting
       v-else
@@ -105,6 +115,7 @@ export default {
     Scheduling: () => import("./scheduling"),
     RuleSetting: () => import("@/userview/process-rulesver"),
     CreateUser: () => import("./create-user"),
+    HourlyWage: () => import("./hourlywage-modal.vue"),
   },
   props: {
     //选择的团队
