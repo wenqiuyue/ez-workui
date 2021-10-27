@@ -7,6 +7,8 @@
     width="70%"
     height="95%"
     showCrossBtn
+    @opened="opened"
+    @closed="closed"
   >
     <div class="specialSchedulingSet">
       <div class="set_card">
@@ -17,16 +19,28 @@
             <div>特殊排班设置</div>
           </div>
           <div class="save_btn">
-            <el-button type="success" size="small">保 存</el-button>
-            <el-button type="warning" size="small">清 除</el-button>
+            <el-button
+              type="success"
+              size="small"
+              @click="handleSave"
+              :loading="saveBtnLoading"
+              >保 存</el-button
+            >
+            <el-button
+              type="warning"
+              size="small"
+              @click="handleCancle"
+              :loading="cancleLoading"
+              >清 除</el-button
+            >
           </div>
         </div>
         <div class="set_form">
           <el-form ref="form" :model="specialForm" label-width="140px">
             <el-form-item label="排班类型：">
               <el-radio-group v-model="specialForm.specialType">
-                <el-radio :label="1">上班</el-radio>
-                <el-radio :label="2">假期</el-radio>
+                <el-radio :label="true">上班</el-radio>
+                <el-radio :label="false">假期</el-radio>
               </el-radio-group>
             </el-form-item>
             <div v-if="specialForm.specialType == 1">
@@ -67,10 +81,10 @@
                     placeholder="请选择时薪"
                   >
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in wageOptions"
+                      :key="item.Id"
+                      :label="item.Name"
+                      :value="item.Id"
                     >
                     </el-option>
                   </el-select>
@@ -81,10 +95,10 @@
                     placeholder="请选择加班时薪"
                   >
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in wageOptions"
+                      :key="item.Id"
+                      :label="item.Name"
+                      :value="item.Id"
                     >
                     </el-option>
                   </el-select>
@@ -179,10 +193,10 @@
                   placeholder="请选择时薪"
                 >
                   <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                    v-for="item in wageOptions"
+                    :key="item.Id"
+                    :label="item.Name"
+                    :value="item.Id"
                   >
                   </el-option>
                 </el-select>
@@ -200,6 +214,29 @@ export default {
     XModal: () => import("@/components/XModal"),
   },
   props: {
+    //团队
+    teamValue: {
+      type: Number,
+      default: null,
+    },
+    selMem: {
+      type: Array,
+      default: null,
+    },
+    generaId: {
+      type: Number,
+      default: null,
+    },
+    //特殊的日期数据
+    selSpecialDayData: {
+      type: Object,
+      default: null,
+    },
+    //时薪选项
+    wageOptions: {
+      type: Array,
+      default: null,
+    },
     //要设置的天
     selSpecialDay: {
       type: String,
@@ -212,8 +249,10 @@ export default {
   },
   data() {
     return {
+      saveBtnLoading: false,
+      cancleLoading: false,
       specialForm: {
-        specialType: 1,
+        specialType: true, //假期、上班选项
         timeZone: "China Standard Time", //时区
         timeInterval: [{}],
         startWork: null, //上班
@@ -228,6 +267,171 @@ export default {
     };
   },
   methods: {
+    /**
+     * 清除设置
+     */
+    handleCancle() {
+      this.$confirm("此操作将清除该设置, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.cancleLoading = true;
+          this.$http
+            .post("/Attendance/PlanBC/DelSpecialPlanBC.ashx", {
+              teamId: this.teamValue,
+              UserId:
+                this.selMem && this.selMem.length
+                  ? this.selMem.map((m) => m.UsId)
+                  : this.generaId
+                  ? this.generaId
+                  : null,
+              date: this.selSpecialDay,
+            })
+            .then((resp) => {
+              if (resp.res == 0) {
+                this.$message({
+                  showClose: true,
+                  message: "清除成功",
+                  type: "success",
+                });
+                this.$emit("success");
+                this.$modal.hide("special");
+              }
+            })
+            .finally(() => (this.cancleLoading = false));
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
+    /**
+     * 排班保存
+     */
+    handleSave() {
+      this.saveBtnLoading = true;
+      const data = {
+        PlanType: this.generaId || this.selMem.length ? 2 : 1,
+        UserId:
+          this.selMem && this.selMem.length
+            ? this.selMem.map((m) => m.UsId)
+            : this.generaId
+            ? this.generaId
+            : null,
+        TimeZone: this.specialForm.timeZone,
+        PlanDay: this.selSpecialDay,
+        CheckInTime: this.specialForm.startWork
+          ? this.specialForm.startWork.timeFormat("yyyy-MM-dd HH:mm:ss")
+          : null,
+        CheckOutTime: this.specialForm.endWork
+          ? this.specialForm.endWork.timeFormat("yyyy-MM-dd HH:mm:ss")
+          : null,
+        CheckInDuration: this.specialForm.lateWork,
+        CheckOutDuration: this.specialForm.leaveEarly,
+        IsSetCheckInElasticity: !this.specialForm.lateWorkRadio
+          ? null
+          : this.specialForm.lateWorkRadio == 1
+          ? true
+          : false,
+        IsSetCheckInHumanization: !this.specialForm.lateWorkRadio
+          ? null
+          : this.specialForm.lateWorkRadio == 2
+          ? true
+          : false,
+        IsSetCheckOutElasticity: !this.specialForm.leaveEarlyRadio
+          ? null
+          : this.specialForm.leaveEarlyRadio == 1
+          ? true
+          : false,
+        IsSetCheckOutHumanization: !this.specialForm.leaveEarlyRadio
+          ? null
+          : this.specialForm.leaveEarlyRadio == 2
+          ? true
+          : false,
+        FreeTime: this.specialForm.timeInterval.map((m) => {
+          return {
+            StartTime: m.start
+              ? m.start.timeFormat("yyyy-MM-dd HH:mm:ss")
+              : null,
+            EndTime: m.end ? m.end.timeFormat("yyyy-MM-dd HH:mm:ss") : null,
+          };
+        }),
+        teamId: this.teamValue,
+        WageTypeId: this.specialForm.hourlyWage,
+        WageTypeOverId: this.specialForm.hourlyWageOver,
+        IsWork: this.specialForm.specialType,
+      };
+      this.$http
+        .post("/Attendance/PlanBC/SaveSpecialPlanBC.ashx", data)
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.$message({
+              showClose: true,
+              message: "设置成功",
+              type: "success",
+            });
+            this.$emit("success");
+            this.$modal.hide("special");
+          }
+        })
+        .finally(() => (this.saveBtnLoading = false));
+    },
+    /**
+     * 关闭弹窗
+     */
+    closed() {
+      Object.keys(this.specialForm).forEach((m) => {
+        if (m == "timeZone") {
+          this.specialForm[m] = "China Standard Time";
+        } else if (m == "specialType") {
+          this.specialForm[m] = true;
+        } else {
+          this.specialForm[m] = null;
+        }
+      });
+    },
+    /**
+     * 打开弹窗回调
+     */
+    opened() {
+      this.$nextTick(() => {
+        if (!this.selSpecialDayData.Id) {
+          return;
+        }
+        this.specialForm.hourlyWage = this.selSpecialDayData.WageTypeId;
+        this.specialForm.hourlyWageOver = this.selSpecialDayData.WageTypeOverId;
+        this.specialForm.specialType = this.selSpecialDayData.IsWork;
+        this.specialForm.timeZone = this.selSpecialDayData.TimeZone;
+        this.specialForm.startWork = this.selSpecialDayData.CheckInTime;
+        this.specialForm.endWork = this.selSpecialDayData.CheckOutTime;
+        this.specialForm.timeInterval =
+          this.selSpecialDayData.FreeTimes &&
+          this.selSpecialDayData.FreeTimes.length
+            ? this.selSpecialDayData.FreeTimes.map((m) => {
+                return {
+                  start: m.StartTime,
+                  end: m.EndTime,
+                };
+              })
+            : [];
+        this.specialForm.lateWork = this.selSpecialDayData.CheckInDuration;
+        this.specialForm.leaveEarly = this.selSpecialDayData.CheckOutDuration;
+        if (this.selSpecialDayData.IsSetCheckInElasticity) {
+          this.specialForm.lateWorkRadio = 1;
+        } else if (this.selSpecialDayData.IsSetCheckInHumanization) {
+          this.specialForm.lateWorkRadio = 2;
+        }
+        if (this.selSpecialDayData.IsSetCheckOutElasticity) {
+          this.specialForm.leaveEarlyRadio = 1;
+        } else if (this.selSpecialDayData.IsSetCheckOutHumanization) {
+          this.specialForm.leaveEarlyRadio = 2;
+        }
+      });
+    },
     /**
      * 清除时间区间
      */

@@ -57,6 +57,7 @@ export default {
               type: "success",
             });
             this.$modal.hide("joinTeam");
+            this.$emit("success", resp.data.teamId);
           }
         })
         .finally(() => this.$refs.modal.loadBtn(false));

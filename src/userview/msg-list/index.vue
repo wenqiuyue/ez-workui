@@ -158,6 +158,11 @@ export default {
       activeItem: "未读消息",
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+  },
   mounted() {
     this.getTeams();
   },
@@ -270,6 +275,10 @@ export default {
       this.$http.post("/Teams/GetInformationTeamList.ashx").then((resp) => {
         if (resp.res == 0) {
           this.teamOptions = resp.data;
+          this.teamValue = this.user.DefaultTeamId;
+          if (this.teamValue) {
+            this.handleSearch();
+          }
         }
       });
     },

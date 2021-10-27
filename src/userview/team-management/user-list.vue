@@ -100,6 +100,10 @@
       @success="$emit('loadData')"
       :userMemberMType="userMemberMType"
     ></UserInfo>
+    <UserWage
+      :selUser="selUser"
+      :teamValue="selRow ? selRow.Id : null"
+    ></UserWage>
   </div>
 </template>
 <script>
@@ -107,6 +111,7 @@ import { imgChange } from "@/commons";
 export default {
   components: {
     UserInfo: () => import("./user-info"),
+    UserWage: () => import("./user-wage"),
   },
   props: {
     //团队详情
@@ -149,7 +154,13 @@ export default {
   },
   methods: {
     imgChange,
-
+    /**
+     * 成员设置时薪
+     */
+    handleHourlyWage(val) {
+      this.selUser = val;
+      this.$modal.show("userWageM");
+    },
     /**
      * 删除成员
      */

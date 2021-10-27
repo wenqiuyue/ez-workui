@@ -15,7 +15,7 @@
             <li
               v-for="(obj, index) in memberGroup"
               :key="index"
-              :class="{ activeList: generaId === obj.Id }"
+              :class="{ activeList: generaId === obj.UserId }"
               @click="liClick(obj)"
             >
               <img :src="imgChange(obj.Picture)" />
@@ -39,6 +39,7 @@
             :timeZonesOptions="timeZonesOptions"
             :teamValue="selRow.Id"
             :generaId="generaId"
+            :wageOptions="wageOptions"
           ></SchedulingSet>
         </div>
       </div>
@@ -57,6 +58,7 @@
         :teamValue="selRow.Id"
         :timeZonesOptions="timeZonesOptions"
         :generaId="generaId"
+        :wageOptions="wageOptions"
       ></SchedulingSet>
     </XModal>
   </div>
@@ -83,11 +85,13 @@ export default {
       memberGroup: [], //成员列表
       generaId: null, //人员Index
       timeZonesOptions: [], //时区列表
+      wageOptions: [], //时薪选项
     };
   },
   mounted() {
     this.getMember();
     this.getTimeZones();
+    this.getWages();
   },
   methods: {
     imgChange,
@@ -104,6 +108,20 @@ export default {
         });
     },
     /**
+     * 获取时薪
+     */
+    getWages() {
+      this.$http
+        .post("/Teams/MemberWage/GetMemberWageType.ashx", {
+          teamId: this.selRow.Id,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.wageOptions = resp.data.Data;
+          }
+        });
+    },
+    /**
      * 批量设置
      */
     batchSettings() {
@@ -112,7 +130,7 @@ export default {
     // 左侧li点击事件
     liClick(obj) {
       if (obj) {
-        this.generaId = obj.Id;
+        this.generaId = obj.UserId;
       } else {
         this.generaId = null;
       }

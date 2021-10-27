@@ -72,6 +72,14 @@ export default {
       }
     },
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+  },
+  mounted() {
+    this.teamValue = this.user.DefaultTeamId;
+  },
   methods: {
     imgChange,
     /**

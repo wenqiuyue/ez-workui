@@ -196,6 +196,11 @@ export default {
       },
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+  },
   watch: {
     //成员任务的团队切换
     teamId(val, ovl) {
@@ -216,6 +221,11 @@ export default {
     if (this.$route.query.isInfo && this.$route.query.teamValue) {
       this.teamValue = JSON.parse(this.$route.query.teamValue);
       this.getDataList();
+    } else if (!this.isMember) {
+      this.teamValue = this.user.DefaultTeamId;
+      if (this.teamValue) {
+        this.getDataList();
+      }
     }
   },
   methods: {

@@ -197,6 +197,11 @@ export default {
       ],
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+  },
   mounted() {
     this.getTeams();
   },
@@ -301,6 +306,10 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.teamOptions = resp.data;
+            this.teamValue = this.user.DefaultTeamId;
+            if (this.teamValue) {
+              this.handleGetData();
+            }
           }
         });
     },

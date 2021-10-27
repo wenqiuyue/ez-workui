@@ -439,6 +439,7 @@
 </template>
 <script>
 import { imgChange, getEfficiencyColor, getbehaviorColor } from "@/commons";
+import { mapState } from "vuex";
 export default {
   components: {
     XHeader: () => import("@/components/Header"),
@@ -506,6 +507,9 @@ export default {
       gid: null, //进程组id
     };
   },
+  computed: {
+    ...mapState(["user"]),
+  },
   destroyed() {
     clearInterval(this.timer);
     this.timer = null;
@@ -522,7 +526,9 @@ export default {
     } else {
       this.isShowTeam = true;
     }
-    this.getTeams();
+    this.$nextTick(() => {
+      this.getTeams();
+    });
 
     this.$E.$on("loadpic", (res) => {
       console.log("开始截图");
@@ -708,6 +714,10 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.teamOptions = resp.data;
+            this.teamValue = this.user.DefaultTeamId;
+            if (this.teamValue) {
+              this.handleGetData();
+            }
           }
         });
     },

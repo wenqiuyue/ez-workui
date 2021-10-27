@@ -365,6 +365,7 @@
 
 <script>
 import { imgChange, getEfficiencyColor, getbehaviorColor } from "@/commons";
+import { mapState } from "vuex";
 // import xSocketLink from "@/assets/xSocketLink";
 export default {
   components: {
@@ -437,6 +438,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(["user"]),
     workInfor() {
       return this.$store.state.user;
     },
@@ -561,6 +563,10 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.teamOptions = resp.data;
+            this.teamValue = this.user.DefaultTeamId;
+            if (this.teamValue) {
+              this.getTask();
+            }
           }
         });
     },
@@ -810,11 +816,7 @@ export default {
       this.isShowTeam = true;
     }
     this.$nextTick(() => {
-      if (this.teamValue) {
-        this.getTask();
-      } else {
-        this.getTeams();
-      }
+      this.getTeams();
     });
     this.$E.$on("renewProccess", (res) => {
       this.getTask();

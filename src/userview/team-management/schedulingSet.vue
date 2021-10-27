@@ -36,7 +36,7 @@
           >
         </div>
       </div>
-      <div class="set_form">
+      <div class="set_form" v-loading="loading">
         <el-form ref="form" :model="currencyForm" label-width="140px">
           <el-form-item label="每周工作日：">
             <div>
@@ -116,10 +116,10 @@
                 placeholder="请选择时薪"
               >
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in wageOptions"
+                  :key="item.Id"
+                  :label="item.Name"
+                  :value="item.Id"
                 >
                 </el-option>
               </el-select>
@@ -130,10 +130,10 @@
                 placeholder="请选择加班时薪"
               >
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in wageOptions"
+                  :key="item.Id"
+                  :label="item.Name"
+                  :value="item.Id"
                 >
                 </el-option>
               </el-select>
@@ -166,7 +166,10 @@
             >
           </el-form-item>
           <div class="form_item_group">
-            <h3>弹性打卡</h3>
+            <h3>
+              弹性打卡
+              <el-button type="text" @click="cancleElastic">清除设置</el-button>
+            </h3>
             <el-form-item label="上班最多可晚到：">
               <el-input
                 placeholder="请输入内容"
@@ -260,25 +263,39 @@
           </el-date-picker>
         </div>
       </div>
-      <div class="set_form">
-        <el-calendar v-model="month">
+      <div class="set_form" v-loading="loadingSpecial">
+        <el-calendar v-model="month" v-if="specialData && specialData.length">
           <template slot="dateCell" slot-scope="{ date, data }">
-            <div style="height: 100%" @click="setSpecial(data.day)">
+            <div
+              v-if="
+                data.type === 'current-month' &&
+                specialData[parseInt(data.day.split('-').slice(2)) - 1]
+              "
+              style="height: 100%"
+              @click="
+                setSpecial(
+                  data.day,
+                  specialData[parseInt(data.day.split('-').slice(2)) - 1]
+                )
+              "
+            >
               <div class="day_p">
                 <span>{{ data.day.split("-").slice(1).join("-") }}</span>
-                <div>
+                <div
+                  v-if="
+                    specialData[parseInt(data.day.split('-').slice(2)) - 1].Id
+                  "
+                >
                   <el-tag
                     type="success"
-                    v-if="data.day == '2021-10-07' || data.day == '2021-10-03'"
+                    v-if="
+                      specialData[parseInt(data.day.split('-').slice(2)) - 1]
+                        .IsWork
+                    "
                     size="small"
                     >班</el-tag
                   >
-                  <el-tag
-                    type="warning"
-                    v-if="data.day == '2021-10-10' || data.day == '2021-10-03'"
-                    size="small"
-                    >假</el-tag
-                  >
+                  <el-tag type="warning" v-else size="small">假</el-tag>
                 </div>
               </div>
             </div>
@@ -288,7 +305,13 @@
     </div>
     <SpecialSchedulingSet
       :selSpecialDay="selSpecialDay"
+      :selSpecialDayData="selSpecialDayData"
       :timeZonesOptions="timeZonesOptions"
+      :wageOptions="wageOptions"
+      :generaId="generaId"
+      :selMem="selMem"
+      :teamValue="teamValue"
+      @success="getSpecialData"
     ></SpecialSchedulingSet>
   </div>
 </template>
@@ -299,6 +322,11 @@ export default {
     SpecialSchedulingSet: () => import("./specialSchedulingSet"),
   },
   props: {
+    //时薪选项
+    wageOptions: {
+      type: Array,
+      default: null,
+    },
     //成员id
     generaId: {
       type: Number,
@@ -321,11 +349,14 @@ export default {
   },
   data() {
     return {
+      loadingSpecial: false,
+      specialData: [], //特殊排班日历的数据
       loading: false,
       saveBtnLoading: false,
       screenMonth: new Date(),
       month: null,
-      selSpecialDay: null,
+      selSpecialDay: null, //选择的特殊日期
+      selSpecialDayData: null, //选择的特殊日期的数据
       selMem: [], //选择的成员
       //时区选项
       currencyForm: {
@@ -352,11 +383,13 @@ export default {
     screenMonth(val, oval) {
       if (val != oval) {
         this.month = this.screenMonth;
+        this.getSpecialData();
       }
     },
     generaId(val, oval) {
       if (val != oval) {
         this.getPlanBCDetail();
+        this.getSpecialData();
       }
     },
   },
@@ -364,48 +397,99 @@ export default {
     this.$nextTick(() => {
       this.month = this.screenMonth;
       this.getPlanBCDetail();
+      this.getSpecialData();
     });
   },
   methods: {
     /**
-     * 获取排班详情
+     * 清除弹性打卡
+     */
+    cancleElastic() {
+      this.currencyForm.lateWork = null; //上班晚到
+      this.currencyForm.lateWorkRadio = null; //上班晚到条件选择
+      this.currencyForm.leaveEarly = null; //下班早走
+      this.currencyForm.leaveEarlyRadio = null; //下班早走条件选择
+    },
+    /**
+     * 获取通用排班详情
      */
     getPlanBCDetail() {
       this.loading = true;
       this.$http
         .post("/Attendance/PlanBC/GetGeneralPlanBCDetail.ashx", {
-          type: this.generaId ? 2 : 1,
+          UserId: this.generaId,
           teamId: this.teamValue,
         })
         .then((resp) => {
           if (resp.res == 0) {
             const data = resp.data.Data;
-            this.currencyForm.timeZone = data.TimeZone;
-            this.currencyForm.startWork = data.CheckInTime;
-            this.currencyForm.endWork = data.CheckOutTime;
+            if (data) {
+              this.currencyForm.weekDay = data.PlanWeekWorkDays;
+              this.currencyForm.hourlyWage = data.WageTypeId;
+              this.currencyForm.hourlyWageOver = data.WageTypeOverId;
+              this.currencyForm.timeZone = data.TimeZone;
+              this.currencyForm.startWork = data.CheckInTime;
+              this.currencyForm.endWork = data.CheckOutTime;
 
-            this.currencyForm.timeInterval = data.FreeTimes.map((m) => {
-              return {
-                start: m.StartTime,
-                end: m.EndTime,
-              };
-            });
-            this.currencyForm.lateWork = data.CheckInDuration;
-            this.currencyForm.leaveEarly = data.CheckOutDuration;
-            if (data.IsSetCheckInElasticity) {
-              this.currencyForm.lateWorkRadio = 1;
-            } else if (data.IsSetCheckInHumanization) {
-              this.currencyForm.lateWorkRadio = 2;
-            }
-            if (data.IsSetCheckOutElasticity) {
-              this.currencyForm.leaveEarlyRadio = 1;
-            } else if (data.IsSetCheckOutHumanization) {
-              this.currencyForm.leaveEarlyRadio = 2;
+              this.currencyForm.timeInterval = data.FreeTimes.map((m) => {
+                return {
+                  start: m.StartTime,
+                  end: m.EndTime,
+                };
+              });
+              this.currencyForm.lateWork = data.CheckInDuration;
+              this.currencyForm.leaveEarly = data.CheckOutDuration;
+              if (data.IsSetCheckInElasticity) {
+                this.currencyForm.lateWorkRadio = 1;
+              } else if (data.IsSetCheckInHumanization) {
+                this.currencyForm.lateWorkRadio = 2;
+              }
+              if (data.IsSetCheckOutElasticity) {
+                this.currencyForm.leaveEarlyRadio = 1;
+              } else if (data.IsSetCheckOutHumanization) {
+                this.currencyForm.leaveEarlyRadio = 2;
+              }
+            } else {
+              Object.keys(this.currencyForm).forEach((m) => {
+                if (m == "timeZone") {
+                  this.currencyForm[m] = "China Standard Time";
+                } else if (m == "weekDay") {
+                  this.currencyForm[m] = [];
+                } else if (m == "timeInterval") {
+                  this.currencyForm[m] = [
+                    {
+                      start: null,
+                      end: null,
+                    },
+                  ];
+                } else {
+                  this.currencyForm[m] = null;
+                }
+              });
             }
           }
         })
         .finally(() => (this.loading = false));
     },
+    /**
+     * 特殊排班
+     */
+    getSpecialData() {
+      this.loadingSpecial = true;
+      this.$http
+        .post("/Attendance/PlanBC/GetSpecialPlanBc.ashx", {
+          UserId: this.generaId,
+          teamId: this.teamValue,
+          date: this.screenMonth.timeFormat("yyyy-MM-dd"),
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.specialData = resp.data.Data;
+          }
+        })
+        .finally(() => (this.loadingSpecial = false));
+    },
+
     /**
      * 全选
      */
@@ -420,14 +504,21 @@ export default {
     handleSave() {
       this.saveBtnLoading = true;
       const data = {
-        PlanType: 1,
-        UserIds: this.selMem.map((m) => m.UsId),
+        PlanType: this.generaId || this.selMem.length ? 2 : 1,
+        UserId:
+          this.selMem && this.selMem.length
+            ? this.selMem.map((m) => m.UsId)
+            : this.generaId
+            ? this.generaId
+            : null,
         TimeZone: this.currencyForm.timeZone,
         PlanWeekWorkDay: this.currencyForm.weekDay,
-        PlanMonth: "",
-        PlanDay: "",
-        CheckInTime: this.currencyForm.startWork,
-        CheckOutTime: this.currencyForm.endWork,
+        CheckInTime: this.currencyForm.startWork
+          ? this.currencyForm.startWork.timeFormat("yyyy-MM-dd HH:mm:ss")
+          : null,
+        CheckOutTime: this.currencyForm.endWork
+          ? this.currencyForm.endWork.timeFormat("yyyy-MM-dd HH:mm:ss")
+          : null,
         CheckInDuration: this.currencyForm.lateWork,
         CheckOutDuration: this.currencyForm.leaveEarly,
         IsSetCheckInElasticity: !this.currencyForm.lateWorkRadio
@@ -452,11 +543,15 @@ export default {
           : false,
         FreeTime: this.currencyForm.timeInterval.map((m) => {
           return {
-            StartTime: m.start,
-            EndTime: m.end,
+            StartTime: m.start
+              ? m.start.timeFormat("yyyy-MM-dd HH:mm:ss")
+              : null,
+            EndTime: m.end ? m.end.timeFormat("yyyy-MM-dd HH:mm:ss") : null,
           };
         }),
         teamId: this.teamValue,
+        WageTypeId: this.currencyForm.hourlyWage,
+        WageTypeOverId: this.currencyForm.hourlyWageOver,
       };
       this.$http
         .post("/Attendance/PlanBC/SavePlanBC.ashx", data)
@@ -474,8 +569,9 @@ export default {
     /**
      * 设置某一天特殊的排班
      */
-    setSpecial(day) {
+    setSpecial(day, obj) {
       this.selSpecialDay = day;
+      this.selSpecialDayData = obj;
       this.$modal.show("special");
     },
     /**
@@ -582,7 +678,7 @@ export default {
         margin-top: -10px;
         width: 80%;
         h3 {
-          width: 140px;
+          width: 200px;
           text-align: right;
           padding-right: 18px;
           font-weight: bold;

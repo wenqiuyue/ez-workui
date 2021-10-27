@@ -1,9 +1,10 @@
 <template>
   <XModal
-    name="hourlywageSetM"
+    name="setWage"
     :width="'35%'"
     height="35%"
     @beforeClose="beforeClose"
+    @opened="opened"
   >
     <c-win-tmp
       ref="winTmp"
@@ -24,17 +25,40 @@
         <!-- 必填项 -->
         <el-row>
           <el-col :sm="24" :md="24">
-            <el-form-item label="类型：" prop="wagetype" style="width: 100%">
-              <el-input
-                v-model="formData.wagetype"
-                placeholder="请填写类型"
+            <el-form-item label="类型：" prop="wagetype">
+              <el-select
                 v-if="editState"
-                :style="{ width: comWidth }"
+                v-model="formData.wagetype"
+                placeholder="请选择时薪"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in wageOptions"
+                  :key="item.Id"
+                  :label="item.Name"
+                  :value="item.Id"
+                >
+                </el-option>
+              </el-select>
+              <div
+                v-else-if="wageOptions && wageOptions.length"
+                class="state-see"
+              >
+                {{ wageOptions.find((m) => m.Id == formData.wagetype).Name }}
+              </div>
+            </el-form-item>
+            <el-form-item label="金额：" prop="wage">
+              <el-input
+                style="width: 100%"
+                v-model="formData.wage"
+                placeholder="请填写金额"
+                v-if="editState"
                 clearable
+                type="number"
               >
               </el-input>
               <div v-else class="state-see">
-                {{ formData.wagetype }}
+                {{ formData.wage }}
               </div>
             </el-form-item>
           </el-col>
@@ -73,23 +97,25 @@ export default {
     return {
       loading: false,
       editState: false,
-      comWidth: "95%",
       attend: false,
-
+      wageOptions: [],
       formData: {
         id: "", // 编辑窗口才用ID
-        wagetype: "", // 标签名称
+        wagetype: "", // 时薪类型
+        wage: "",
       },
       Rules: {
         wagetype: [
           {
             required: true,
-            message: "请输入类型",
+            message: "请选择类型",
             trigger: "blur",
           },
+        ],
+        wage: [
           {
-            min: 2,
-            message: "至少2个字符",
+            required: true,
+            message: "请输入金额",
             trigger: "blur",
           },
         ],
@@ -98,11 +124,33 @@ export default {
   },
   created() {},
   methods: {
+    opened() {
+      this.$nextTick(() => {
+        this.getWages();
+      });
+    },
+    /**
+     * 获取时薪
+     */
+    getWages() {
+      this.loading = true;
+      this.$http
+        .post("/Teams/MemberWage/GetMemberWageType.ashx", {
+          teamId: this.teamValue,
+        })
+        .then((resp) => {
+          if (resp.res == 0) {
+            this.wageOptions = resp.data.Data;
+          }
+        })
+        .finally(() => (this.loading = false));
+    },
     // 改变窗口状态的，搭配index页 添加和编辑按钮
     changeEditState() {
       this.editState = this.indexData.type === "Add" ? true : false;
       if (this.indexData.row) {
-        this.formData.wagetype = this.indexData.row.Name;
+        this.formData.wagetype = this.indexData.row.WageType;
+        this.formData.wage = this.indexData.row.Wage;
         this.formData.id = this.indexData.departmentCode;
       }
     },
@@ -123,10 +171,12 @@ export default {
 
           if (!this.formData.id) {
             this.$http
-              .post("/Teams/MemberWage/SaveMemberWageType.ashx", {
+              .post("/Teams/MemberWage/SaveMemberWage.ashx", {
                 wagetype: this.formData.wagetype,
+                wage: this.formData.wage,
                 teamId: this.teamValue,
                 Id: null,
+                memberId: this.selUser.UserId,
               })
               .then((res) => {
                 if (res.res == 0) {
@@ -135,7 +185,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("hourlywageSetM");
+                  this.$modal.hide("setWage");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -144,11 +194,13 @@ export default {
           } else {
             let params = {
               wagetype: this.formData.wagetype,
+              wage: this.formData.wage,
               teamId: this.teamValue,
               Id: this.formData.id,
+              memberId: this.selUser.UserId,
             };
             this.$http
-              .post("/Teams/MemberWage/SaveMemberWageType.ashx", params)
+              .post("/Teams/MemberWage/SaveMemberWage.ashx", params)
               .then((result) => {
                 if (result.res == 0) {
                   this.$message({
@@ -156,7 +208,7 @@ export default {
                     type: "success",
                   });
                   this.submiting();
-                  this.$modal.hide("hourlywageSetM");
+                  this.$modal.hide("setWage");
                   this.$emit("eventComfirm");
                 } else {
                   this.submiting();
@@ -178,10 +230,10 @@ export default {
     // 关闭弹层前，重置数据
     beforeClose() {
       this.attend = false;
-      this.loading = false;
       this.formData = {
         id: "", // 编辑窗口才用ID
         wagetype: "",
+        wage: "",
       };
     },
   },

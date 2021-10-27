@@ -171,7 +171,7 @@
                   <el-switch v-model="IsMonitoringIdleTime" @change="changeSet">
                   </el-switch>
                 </li>
-                <li class="set_row">
+                <li class="set_row" v-if="ClientRunType == 1">
                   <span>是否开启打卡功能</span>
                   <el-switch v-model="IsOpenChick" @change="changeSet">
                   </el-switch>
@@ -239,7 +239,10 @@
                 </li>
                 <li class="set_row">
                   <span>客户端启动类型</span>
-                  <el-radio-group v-model="ClientRunType" @change="changeSet">
+                  <el-radio-group
+                    v-model="ClientRunType"
+                    @change="khdChangeSet"
+                  >
                     <el-radio :label="1">开机自动运行</el-radio>
                     <el-radio :label="2">开机自动运行并隐藏</el-radio>
                   </el-radio-group>
@@ -452,6 +455,15 @@ export default {
     numChange,
     loadingChange(val) {
       this.loading = val;
+    },
+    /**
+     * 客户端启动类型设置
+     */
+    khdChangeSet(val) {
+      if (val == 2) {
+        this.IsOpenChick = false;
+      }
+      this.changeSet();
     },
     /**
      * 转让主审核人

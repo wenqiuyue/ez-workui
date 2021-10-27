@@ -156,6 +156,7 @@
 </template>
 <script>
 import { imgChange } from "@/commons";
+import { mapState } from "vuex";
 export default {
   components: {
     Header: () => import("@/components/Header"),
@@ -197,8 +198,13 @@ export default {
       ],
     };
   },
+  computed: {
+    ...mapState(["user"]),
+  },
   mounted() {
-    this.getTeams();
+    this.$nextTick(() => {
+      this.getTeams();
+    });
   },
   methods: {
     imgChange,
@@ -298,6 +304,10 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.teamOptions = resp.data;
+            this.teamValue = this.user.DefaultTeamId;
+            if (this.teamValue) {
+              this.handleGetData();
+            }
           }
         });
     },

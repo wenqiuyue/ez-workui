@@ -107,6 +107,11 @@ export default {
       taskArray: [],
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+  },
   mounted() {
     this.getTeams();
     this.initPage();
@@ -182,6 +187,7 @@ export default {
         .then((resp) => {
           if (resp.res == 0) {
             this.teamOptions = resp.data;
+            this.teamValue = this.user.DefaultTeamId;
           }
         });
     },

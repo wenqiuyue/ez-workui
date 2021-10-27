@@ -32,13 +32,8 @@
           <el-table-column
             label="类型"
             :show-overflow-tooltip="true"
-            prop="WageType"
+            prop="Name"
           >
-          </el-table-column>
-          <el-table-column label="时薪" prop="Wage">
-            <template slot-scope="scope">
-              {{ scope.row.Wage ? scope.row.Wage : 0 }}元
-            </template>
           </el-table-column>
           <el-table-column label="创建时间" :show-overflow-tooltip="true">
             <template slot-scope="scope">
@@ -152,7 +147,7 @@ export default {
     },
     comDelete(params) {
       this.$http
-        .post("/Teams/MemberWage/SaveMemberWageType.ashx", params)
+        .post("/Teams/MemberWage/DelMemberWageType.ashx", params)
         .then((result) => {
           if (result.res == 0) {
             this.$message({
@@ -199,8 +194,8 @@ export default {
         .post("/Teams/MemberWage/GetMemberWageType.ashx", params)
         .then((result) => {
           if (result.res == 0) {
-            this.tableData = result.data.data;
-            this.pageData.totalNum = result.data.total;
+            this.tableData = result.data.Data;
+            // this.pageData.totalNum = result.data.total;
           }
         })
         .finally(() => (this.loading = false));

@@ -255,7 +255,8 @@
                     :md="20"
                     class="hidden-sm-and-down"
                     v-if="
-                      parseInt(data.day.split('-').slice(2)) == 5 &&
+                      attenceData[parseInt(data.day.split('-').slice(2)) - 1]
+                        .AuditStatus == 1 &&
                       childData.menuType == 'privateAttendance'
                     "
                   >
@@ -263,7 +264,7 @@
                       class="cell-title-right"
                       v-show="Boolean(new Date() > new Date(date))"
                     >
-                      审核中
+                      待审核
                     </p>
                   </el-col>
                   <el-col
@@ -320,36 +321,9 @@
                           v-if="
                             attenceData[
                               parseInt(data.day.split('-').slice(2)) - 1
-                            ].LeaveStartStatus
+                            ].SignInStatus == 1
                           "
-                          >{{
-                            attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].IsStartAdjust
-                              ? "调休"
-                              : "请假"
-                          }}</label
-                        >&nbsp;<label
-                          v-if="
-                            !attenceData[
-                              parseInt(data.day.split('-').slice(2)) - 1
-                            ].LeaveStartStatus
-                          "
-                          >{{
-                            attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].StartStatus &&
-                            attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].StartStatus !== -1
-                              ? $D.ITEM(
-                                  "at_state",
-                                  attenceData[
-                                    parseInt(data.day.split("-").slice(2)) - 1
-                                  ].StartStatus
-                                ).name
-                              : ""
-                          }}</label
+                          >迟到</label
                         ></em
                       >
                     </p>
@@ -382,36 +356,9 @@
                           v-if="
                             attenceData[
                               parseInt(data.day.split('-').slice(2)) - 1
-                            ].LeaveEndStatus
+                            ].SignOutStatus == 1
                           "
-                          >{{
-                            attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].IsEndAdjust
-                              ? "调休"
-                              : "请假"
-                          }}</label
-                        >&nbsp;<label
-                          v-if="
-                            !attenceData[
-                              parseInt(data.day.split('-').slice(2)) - 1
-                            ].LeaveEndStatus
-                          "
-                          >{{
-                            attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].EndStatus &&
-                            attenceData[
-                              parseInt(data.day.split("-").slice(2)) - 1
-                            ].EndStatus !== -1
-                              ? $D.ITEM(
-                                  "at_state",
-                                  attenceData[
-                                    parseInt(data.day.split("-").slice(2)) - 1
-                                  ].EndStatus
-                                ).custom
-                              : ""
-                          }}</label
+                          >早退</label
                         ></em
                       >
                     </p>
@@ -641,6 +588,10 @@ export default {
           .then((resp) => {
             if (resp.res == 0) {
               this.teamOptions = resp.data;
+              this.teamValue = this.user.DefaultTeamId;
+              if (this.teamValue) {
+                this.handleSearchData();
+              }
             }
           });
       }

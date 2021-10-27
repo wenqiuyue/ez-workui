@@ -240,7 +240,7 @@
     <!-- 创建团队 -->
     <AddTeam @success="addTeamSuccess"></AddTeam>
     <!-- 加入团队 -->
-    <JoinTeam></JoinTeam>
+    <JoinTeam @success="addTeamSuccess"></JoinTeam>
     <!-- 邀请成员 -->
     <InvitationUser></InvitationUser>
   </div>
