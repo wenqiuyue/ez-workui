@@ -196,6 +196,8 @@ export default {
                   message: resp.msg,
                   type: "success",
                 });
+                this.$modal.hide("appeal");
+                this.$emit("appealSubmit");
               }
             })
             .finally(() => this.$refs.myXModal.loadBtn(false));

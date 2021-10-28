@@ -140,7 +140,14 @@ export default {
       }
     },
   },
-  mounted() {},
+  mounted() {
+    this.$nextTick(() => {
+      if (this.infoData) {
+        this.tableData = this.infoData.Membersdata;
+        this.userMemberMType = this.infoData.Teamdata.UserMemberMType;
+      }
+    });
+  },
   filters: {
     getShape(val) {
       if (val == 1) {

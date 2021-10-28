@@ -18,22 +18,6 @@
           <div class="tag_item t_i_bg3" style="width: 16rem">
             <div>特殊排班设置</div>
           </div>
-          <div class="save_btn">
-            <el-button
-              type="success"
-              size="small"
-              @click="handleSave"
-              :loading="saveBtnLoading"
-              >保 存</el-button
-            >
-            <el-button
-              type="warning"
-              size="small"
-              @click="handleCancle"
-              :loading="cancleLoading"
-              >清 除</el-button
-            >
-          </div>
         </div>
         <div class="set_form">
           <el-form ref="form" :model="specialForm" label-width="140px">
@@ -187,10 +171,10 @@
               </div>
             </div>
             <div v-else>
-              <el-form-item label="时薪：">
+              <el-form-item label="加班时薪：">
                 <el-select
-                  v-model="specialForm.hourlyWage"
-                  placeholder="请选择时薪"
+                  v-model="specialForm.hourlyWageOver"
+                  placeholder="请选择加班时薪"
                 >
                   <el-option
                     v-for="item in wageOptions"
@@ -204,6 +188,22 @@
             </div>
           </el-form>
         </div>
+      </div>
+      <div class="save_btn">
+        <el-button
+          type="success"
+          size="small"
+          @click="handleSave"
+          :loading="saveBtnLoading"
+          >保 存</el-button
+        >
+        <el-button
+          type="warning"
+          size="small"
+          @click="handleCancle"
+          :loading="cancleLoading"
+          >清 除</el-button
+        >
       </div>
     </div>
   </XModal>
@@ -465,20 +465,15 @@ export default {
   background: #ffffff;
   overflow: auto;
   .set_card {
+    height: calc(100% - 50px);
+    overflow-y: auto;
     position: relative;
 
     // margin-bottom: 6px;
     .tag_item_list {
       border-bottom: 2px dashed rgb(83, 168, 255);
       height: 3.5rem;
-      .save_btn {
-        position: absolute;
-        right: 0;
-        .el-button {
-          padding: 5px 15px;
-          font-size: 20px;
-        }
-      }
+
       .tag_item {
         width: 11rem;
         height: 3.3rem;
@@ -546,6 +541,16 @@ export default {
       .el-form-item:last-child {
         margin-bottom: 10px;
       }
+    }
+  }
+  .save_btn {
+    text-align: center;
+    margin: 5px 0;
+    .el-button {
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 16px;
+      width: 40%;
     }
   }
 }

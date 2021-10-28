@@ -26,15 +26,6 @@
         <div class="tag_item t_i_bg3" style="width: 16rem">
           <div>通用排班设置</div>
         </div>
-        <div class="save_btn">
-          <el-button
-            type="success"
-            size="small"
-            @click="handleSave"
-            :loading="saveBtnLoading"
-            >保 存</el-button
-          >
-        </div>
       </div>
       <div class="set_form" v-loading="loading">
         <el-form ref="form" :model="currencyForm" label-width="140px">
@@ -243,6 +234,11 @@
           </el-form-item> -->
         </el-form>
       </div>
+    </div>
+    <div class="save_btn">
+      <el-button type="success" @click="handleSave" :loading="saveBtnLoading"
+        >保 存 设 置</el-button
+      >
     </div>
     <div class="set_card">
       <div class="tag_item_list">
@@ -612,14 +608,7 @@ export default {
     .tag_item_list {
       border-bottom: 2px dashed rgb(83, 168, 255);
       height: 3.5rem;
-      .save_btn {
-        position: absolute;
-        right: 0;
-        .el-button {
-          padding: 5px 15px;
-          font-size: 20px;
-        }
-      }
+
       .s_item {
         margin-right: 6px;
         position: absolute;
@@ -723,6 +712,16 @@ export default {
           }
         }
       }
+    }
+  }
+  .save_btn {
+    text-align: center;
+    margin-bottom: 18px;
+    .el-button {
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 16px;
+      width: 80%;
     }
   }
 }

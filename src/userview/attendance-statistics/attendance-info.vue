@@ -434,8 +434,7 @@
     <appeal
       :popData="popData"
       ref="myAppeal"
-      @appealSubmit="handleSearch"
-      @appealChange="handleSearch"
+      @appealSubmit="handleSearchData"
       :teamValue="teamValue"
     ></appeal>
   </div>
@@ -594,17 +593,6 @@ export default {
               }
             }
           });
-      }
-    },
-
-    /**
-     * 查询考勤
-     */
-    handleSearch() {
-      if (this.selectType == 1) {
-        this.getAttenceGroupList();
-      } else {
-        this.getuserList();
       }
     },
 

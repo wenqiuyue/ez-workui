@@ -51,9 +51,10 @@
               </li>
               <li class="set_rule">
                 <span class="lable_2"
-                  >主管理员：{{ infoData.Teamdata.UserName }}</span
+                  >主管理员：{{ infoData.Teamdata.Administrator }}</span
                 >
                 <selMember
+                  v-if="infoData.Teamdata.UserMemberMType != 1"
                   size="small"
                   @Confirm="getTransferMember"
                   :arrays="transferMember"
@@ -443,7 +444,7 @@ export default {
         this.CanCancelAutoStart = this.infoData.Teamdata.CanCancelAutoStart;
         this.IsMonitoringIdleTime = this.infoData.Teamdata.IsMonitoringIdleTime;
         this.ClientRunType = this.infoData.Teamdata.ClientRunType;
-        // this.selApplyMem = this.AuditorByTeam;
+        this.selApplyMem = this.infoData.Teamdata.AuditorByTeam;
       }
     },
   },

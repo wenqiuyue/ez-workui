@@ -319,11 +319,17 @@ export default {
               }
             }
           });
-
-        this.selRow = {
-          Id: id,
-        };
-        this.isInfoView = true;
+        if (id) {
+          this.selRow = {
+            Id: id,
+          };
+          this.isInfoView = true;
+        } else {
+          this.$message({
+            type: "warning",
+            message: `等待管理员审核通过`,
+          });
+        }
       }
     },
     /**

@@ -119,7 +119,7 @@
             </el-table-column>
             <el-table-column
               prop="RepairWork"
-              label="补交任务耗时"
+              label="工时"
               show-overflow-tooltip
               align="center"
             >

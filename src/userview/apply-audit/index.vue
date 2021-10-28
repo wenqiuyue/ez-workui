@@ -182,9 +182,9 @@
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            <el-row type="flex" align="middle" justify="center">
-              <span>{{ scope.row.AuditName }}</span>
-            </el-row>
+            <span>{{
+              scope.row.AuditedUser ? scope.row.AuditedUser.Name : "--"
+            }}</span>
           </template>
         </el-table-column>
         <el-table-column
